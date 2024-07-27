@@ -1,4 +1,5 @@
 import re
+from typing import Dict
 from agentforge.utils.functions.Logger import Logger
 
 
@@ -249,3 +250,43 @@ class MessageParser:
         formatted_messages = "\n\n".join(formatted_messages).strip()
         logger.log(f"Formatted Messages:\n{formatted_messages}", 'debug', 'Trinity')
         return formatted_messages
+
+    @staticmethod
+    def parse_markdown(markdown_text: str) -> Dict[str, Dict[str, list]]:
+        """
+        Parses a given Markdown text into a structured dictionary.
+
+        The function identifies titles, sections, and items in the markdown and organizes them into a nested dictionary.
+        Titles are considered top-level keys, sections are nested within titles, and items are listed under sections.
+
+        Args:
+            markdown_text (str): The Markdown text to be parsed.
+
+        Returns:
+            Dict[str, Dict[str, list]]: A dictionary representing the structured content of the Markdown text.
+        """
+        # Initialize the dictionary to hold the entire structure
+        parsed_dict = {}
+        current_section = None
+        current_subsection = None
+
+        # Split the text into lines for processing
+        lines = markdown_text.split('\n')
+
+        for line in lines:
+            if line.startswith('# '):  # Check if the line is a title
+                title = line[2:].strip().split(': ')[-1]
+                # Extract the title name
+                parsed_dict[title] = {}
+                current_section = title
+            elif line.startswith('## '):  # Check if the line is a section name
+                section_name = line[3:].strip()
+                if current_section is not None:  # Make sure there's a title to attach this section to
+                    parsed_dict[current_section][section_name] = []
+                    current_subsection = section_name
+            elif line.startswith('- '):  # Check if the line is an item
+                item = line[2:].strip()
+                if current_subsection is not None:  # Make sure there's a section to attach this item to
+                    parsed_dict[current_section][current_subsection].append(item)
+
+        return parsed_dict
