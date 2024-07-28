@@ -20,7 +20,7 @@ Logging:
     ModelIO: error
     Results: error
     Trinity: error
-    DiscordClient: error
+    DiscordClient: info
 
 # Paths the system (agents) have access to read and write
 Paths:
