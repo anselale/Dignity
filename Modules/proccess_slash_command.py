@@ -54,3 +54,4 @@ class SlashCommands:
             return "This is where the challenge text would go, if I had one"
         else:
             return "This is where the challenge text would go, if I had one"
+

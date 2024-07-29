@@ -1,5 +1,5 @@
 # Persona Settings
-PersonasEnabled: false
+PersonasEnabled: true
 Persona: default
 
 # Storage Settings
@@ -17,10 +17,13 @@ Logging:
   Folder: ./Logs
   Files:
     AgentForge: error
-    ModelIO: error
+    ModelIO: debug
+    Actions: debug
     Results: error
     Trinity: error
     DiscordClient: info
+    Memory: debug
+    Formatting: debug
 
 # Paths the system (agents) have access to read and write
 Paths:

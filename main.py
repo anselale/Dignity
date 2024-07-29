@@ -19,16 +19,17 @@ def process_message(message):
 
 class Run:
     def __init__(self):
-        self.memory = Memory()
-        self.do_command = SlashCommands(self.memory)
-        self.indirect_message = IndirectMessage(self.memory)
-        self.direct_message = DirectMessage(self.memory)
-        self.channel_message = ChannelMessage(self.memory)
+        self.client = DiscordClient()
+        self.client.run()
         with open(".agentforge/personas/default.yaml", "r") as file:
             self.persona = yaml.safe_load(file)
             self.persona_name = self.persona.get("Name")
-        self.client = DiscordClient()
-        self.client.run()
+        self.memory = Memory(self.persona, self.persona_name)
+        self.do_command = SlashCommands(self.memory)
+        self.indirect_message = IndirectMessage(self.memory)
+        self.direct_message = DirectMessage(self.memory)
+        self.channel_message = ChannelMessage(self.memory, self.client)
+
 
     def main(self):
 

@@ -81,23 +81,22 @@ class MessageParser:
         return input_str
 
     @staticmethod
-    def format_messages(messages):
+    def format_messages(message):
         formatted_messages = []
 
-        for message in messages:
-            timestamp = message.get('timestamp', 'N/A')
-            author = message.get('author', 'N/A')
-            channel_name = message['channel'].name if 'channel' in message and hasattr(message['channel'],
-                                                                                       'name') else 'N/A'
-            channel_id = message.get('channel_id', 'N/A')
-            message_text = message.get('message', 'N/A')
+        timestamp = message.get('timestamp', 'N/A')
+        author = message.get('author', 'N/A')
+        channel_name = message['channel'].name if 'channel' in message and hasattr(message['channel'],
+                                                                                   'name') else 'N/A'
+        channel_id = message.get('channel_id', 'N/A')
+        message_text = message.get('message', 'N/A')
 
-            formatted_message = (
-                f"Message: \"{message_text}\"\n"
-                f"User: {author}\n"
-                # f"Timestamp: {timestamp}\n"
-            )
-            formatted_messages.append(formatted_message)
+        formatted_message = (
+            f"Message: \"{message_text}\"\n"
+            f"User: {author}\n"
+            # f"Timestamp: {timestamp}\n"
+        )
+        formatted_messages.append(formatted_message)
 
         return "\n=====\n".join(formatted_messages)
 
