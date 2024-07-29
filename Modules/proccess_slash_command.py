@@ -5,10 +5,12 @@ from typing import List
 
 
 class SlashCommands:
-    def __init__(self):
+    def __init__(self, memory_instance):
+        self.memory = memory_instance
         self.commands = [func for func in dir(self) if callable(getattr(self, func)) and not func.startswith("__")]
 
-    def parse(self, input_string: str) -> str:
+    def parse(self, input):
+        input_string = input.get('arg')
         args = shlex.split(input_string)
         if not args:
             return "No command provided. Type 'help' for a list of commands."
@@ -45,3 +47,10 @@ class SlashCommands:
             return str(float(args[0]) + float(args[1]))
         except ValueError:
             return "Error: Both arguments must be numbers."
+
+    def challenge(self, args: List[str]) -> str:
+        """This is where the challenge would go, if I had one"""
+        if args and args[0] == '-?':
+            return "This is where the challenge text would go, if I had one"
+        else:
+            return "This is where the challenge text would go, if I had one"
