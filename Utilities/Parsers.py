@@ -94,7 +94,7 @@ class MessageParser:
         formatted_message = (
             f"Message: \"{message_text}\"\n"
             f"User: {author}\n"
-            # f"Timestamp: {timestamp}\n"
+            f"Timestamp: {timestamp}\n"
         )
         formatted_messages.append(formatted_message)
 

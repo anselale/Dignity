@@ -27,7 +27,7 @@ class Run:
         self.memory = Memory(self.persona, self.persona_name)
         self.do_command = SlashCommands(self.memory)
         self.indirect_message = IndirectMessage(self.memory)
-        self.direct_message = DirectMessage(self.memory)
+        self.direct_message = DirectMessage(self.memory, self.client)
         self.channel_message = ChannelMessage(self.memory, self.client)
 
 

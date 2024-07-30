@@ -10,6 +10,8 @@ class ChannelMessage:
         pass
 
     def process_message(self, message):
+        # await self.discord.set_typing_indicator(message['channel_id'], True)
         self.trinity.do_chat(message)
+        # await self.discord.set_typing_indicator(message['channel_id'], False)
         # self.memory.save_channel_simple(message)
-        return f"Responded to {message['message']}"
+        # return f"Responded to {message['message']}"

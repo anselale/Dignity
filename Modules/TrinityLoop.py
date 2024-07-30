@@ -43,9 +43,18 @@ class Trinity:
     def do_chat(self, message):
         self.message = message
         self.ui.channel_id_layer_0 = self.message["channel_id"]
-        self.chat_history = self.memory.fetch_history(collection_name=message['channel'])
-        self.user_history = self.memory.fetch_history(collection_name=message['author'])
-        self.dm_history = self.memory.fetch_history(collection_name=message['author'], prefix='dm')
+        if self.message['channel'].startswith('Direct Message'):
+            self.chat_history = self.memory.fetch_history(collection_name=message['author'], prefix='dm')
+        else:
+            self.chat_history = self.memory.fetch_history(collection_name=message['channel'])
+        self.user_history = self.memory.fetch_history(collection_name=message['author'],
+                                                      query=self.message['message'],
+                                                      is_user_specific=True,
+                                                      query_size=3)
+        self.dm_history = self.memory.fetch_history(collection_name=message['author'],
+                                                    query=self.message['message'],
+                                                    is_user_specific=True,
+                                                    query_size=3, prefix='dm')
 
         self.run_agent('thought')
         self.memory.recall_journal_entry(self.message['message'], self.cognition['thought']["Categories"], 3)
@@ -60,7 +69,7 @@ class Trinity:
         # write journal
         journal = self.memory.check_journal()
         if journal:
-            self.ui.send_message(1, journal)
+            self.ui.send_message(1, self.message, journal)
 
     def run_agent(self, agent_name):
         self.logger.log(f"Running {agent_name.capitalize()} Agent... Message:{self.message['message']}", 'info',
@@ -81,7 +90,7 @@ class Trinity:
 
         # Send result to Brain Channel
         result_message = f"{agent_name.capitalize()} Agent:\n```{str(self.cognition[agent_name]['result'])}```"
-        self.ui.send_message(1, result_message)
+        self.ui.send_message(1, self.message, result_message)
 
     def handle_reflect_agent_decision(self):
         max_iterations = 2
@@ -101,13 +110,13 @@ class Trinity:
                 if reflection["Choice"] == "respond":
                     response_log = f"Generated Response:\n{self.response}\n"
                     self.logger.log(response_log, 'debug', 'Trinity')
-                    self.ui.send_message(0, self.response)
+                    self.ui.send_message(0, self.message, self.response)
                     break
 
                 elif reflection["Choice"] == "nothing":
                     self.logger.log(f"Reason for not responding:\n{reflection['Reason']}\n", 'info', 'Trinity')
                     self.response = f"... (Did not respond to {self.message['author']} because {reflection['Reason']})"
-                    self.ui.send_message(0, f"...")
+                    self.ui.send_message(0, self.message, f"...")
                     return
 
                 elif reflection["Choice"] == "change":
@@ -129,11 +138,16 @@ class UI:
     def __init__(self, client):
         self.client = client
         self.channel_id_layer_0 = None
-        self.channel_id_layer_1 = str(os.getenv('BRAIN_CHANNEL'))
+        self.channel_id_layer_1 = int(os.getenv('BRAIN_CHANNEL'))
 
-    def send_message(self, layer, message):
+    def send_message(self, layer, message, response):
         if layer == 0:
-            channel_id = self.channel_id_layer_0
+
+            if message['channel'].startswith('Direct Message'):
+                self.client.send_dm(message['author_id'].id, response)
+            else:
+                channel_id = self.channel_id_layer_0
+
         elif layer == 1:
             channel_id = self.channel_id_layer_1
         else:
@@ -141,6 +155,6 @@ class UI:
             return
 
         if channel_id:
-            self.client.send_message(channel_id, message)
+            self.client.send_message(channel_id, response)
         else:
             print(f"Channel ID not set for layer {layer}")

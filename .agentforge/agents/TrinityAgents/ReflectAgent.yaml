@@ -55,7 +55,7 @@ Prompts:
     <Instructions>
     You must interface with the chat system by completing the following form, inside <form></form> XML tags. Failure to adhere to the format will result in an error.
     
-    To fill out this form, you should first choose if the character will respond, change their response, or nothing. This can also be used to improve the response through feedback. Then, you write a reason for your choice. You must always give a reason for your choice. The author will decide based on your choice and reason. Be sure to follow the form template and do not generate a new response. Your only job is to provide a choice and your reason. Fill in your responses below.
+    To fill out this form, you should first choose if the character will respond, change their response, or nothing. This can also be used to improve the response through feedback, especially when writing is repetitive. Then, you write a reason for your choice. You must always give a reason for your choice. The author will decide based on your choice and reason. Be sure to follow the form template and do not generate a new response. Your only job is to provide a choice and your reason. Fill in your responses below.
     <Instructions>
 
     <form>

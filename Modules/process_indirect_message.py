@@ -31,5 +31,9 @@ class IndirectMessage:
             'mentions': []}
         :return:
         """
-        self.memory.save_channel_simple(message)
+        try:
+            print("Saving...")
+            self.memory.save_channel_simple(message)
+        except Exception as e:
+            print(f"Error saving: {e}")
         return

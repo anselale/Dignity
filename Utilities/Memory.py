@@ -175,12 +175,13 @@ class Memory:
     def save_channel_memory(self):
         collection_name = f"a{self.user_message['channel']}_chat_history"
         collection_name = self.parser.format_string(collection_name)
-        for index, message in enumerate(self.message_batch):
-            metadata_extra = {}
-            bot_response = self.response
-            self.logger.log(f"Saving Channel to: {collection_name}\nMessage:\n{message}", 'debug', 'Memory')
-            self.save_to_collection(collection_name, message, bot_response, metadata_extra)
-            self.save_to_collection('journal_log_table', message, bot_response, metadata_extra)
+        # for index, message in enumerate(self.message_batch):
+        message = self.user_message
+        metadata_extra = {}
+        bot_response = self.response
+        self.logger.log(f"Saving Channel to: {collection_name}\nMessage:\n{message}", 'debug', 'Memory')
+        self.save_to_collection(collection_name, message, bot_response, metadata_extra)
+        self.save_to_collection('journal_log_table', message, bot_response, metadata_extra)
 
     def save_bot_response(self):
         message = self.user_message.copy()
@@ -299,7 +300,7 @@ class Memory:
         self.current_memories = []
         self.current_journals = []
 
-    async def check_journal(self):
+    def check_journal(self):
         count = self.memory.count_collection('journal_log_table')
         print(count)
         if count >= 100:
