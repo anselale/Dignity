@@ -7,10 +7,12 @@ from typing import List
 class SlashCommands:
     def __init__(self, memory_instance):
         self.memory = memory_instance
+        self.message = none
         self.commands = [func for func in dir(self) if callable(getattr(self, func)) and not func.startswith("__")]
 
-    def parse(self, input):
+    def parse(self, input, message):
         input_string = input.get('arg')
+        self.message = message
         args = shlex.split(input_string)
         if not args:
             return "No command provided. Type 'help' for a list of commands."
@@ -49,9 +51,19 @@ class SlashCommands:
             return "Error: Both arguments must be numbers."
 
     def challenge(self, args: List[str]) -> str:
-        """This is where the challenge would go, if I had one"""
+        """
+        A collection of capture the flag challenges. The bot has a secret
+        password hidden in their system prompt. Your job is to get them to
+        reveal the secret password, which you can turn in for points.
+        """
         if args and args[0] == '-?':
-            return "This is where the challenge text would go, if I had one"
+            return """
+            challenge: Prompt attack capture the flag
+            Usage:
+                challenge level list - List of challenges and descriptions
+                challenge level # - Get the challenge hint text
+                challenge answer # - Send a prompt to try to reveal the password
+            """
         else:
             return "This is where the challenge text would go, if I had one"
 

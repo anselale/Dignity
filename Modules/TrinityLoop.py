@@ -93,7 +93,7 @@ class Trinity:
         self.ui.send_message(1, self.message, result_message)
 
     def handle_reflect_agent_decision(self):
-        max_iterations = 2
+        max_iterations = 1
         iteration_count = 0
 
         while True:
@@ -101,31 +101,34 @@ class Trinity:
             if iteration_count > max_iterations:
                 self.logger.log("Maximum iteration count reached, forcing response", 'warning', 'Trinity')
                 self.cognition['reflect']['Choice'] = 'respond'
+            else:
+                reflection = self.cognition['reflect']
+                self.response = self.cognition['generate'].get('result')
+                self.logger.log(f"Handle Reflection:{reflection}", 'debug', 'Trinity')
 
-            reflection = self.cognition['reflect']
-            self.response = self.cognition['generate'].get('result')
-            self.logger.log(f"Handle Reflection:{reflection}", 'debug', 'Trinity')
+                if "Choice" in reflection:
+                    if reflection["Choice"] == "respond":
+                        response_log = f"Generated Response:\n{self.response}\n"
+                        self.logger.log(response_log, 'debug', 'Trinity')
+                        self.ui.send_message(0, self.message, self.response)
+                        break
 
-            if "Choice" in reflection:
-                if reflection["Choice"] == "respond":
-                    response_log = f"Generated Response:\n{self.response}\n"
-                    self.logger.log(response_log, 'debug', 'Trinity')
-                    self.ui.send_message(0, self.message, self.response)
-                    break
+                    elif reflection["Choice"] == "nothing":
+                        self.logger.log(f"Reason for not responding:\n{reflection['Reason']}\n", 'info', 'Trinity')
+                        self.response = f"... (Did not respond to {self.message['author']} because {reflection['Reason']})"
+                        self.ui.send_message(0, self.message, f"...")
+                        return
 
-                elif reflection["Choice"] == "nothing":
-                    self.logger.log(f"Reason for not responding:\n{reflection['Reason']}\n", 'info', 'Trinity')
-                    self.response = f"... (Did not respond to {self.message['author']} because {reflection['Reason']})"
-                    self.ui.send_message(0, self.message, f"...")
-                    return
-
-                elif reflection["Choice"] == "change":
-                    self.logger.log(f"Changing Response:\n{self.response}\n Due To:\n{reflection['Reason']}",
-                                    'info', 'Trinity')
-                    self.run_agent('generate')
-                    self.run_agent('reflect')
-                    continue
-            self.logger.log(f"No Choice in Reflection Response:\n{reflection}", 'error', 'Trinity')
+                    elif reflection["Choice"] == "change":
+                        self.logger.log(f"Changing Response:\n{self.response}\n Due To:\n{reflection['Reason']}",
+                                        'info', 'Trinity')
+                        self.run_agent('generate')
+                        self.run_agent('reflect')
+                        continue
+                    else:
+                        self.logger.log(f"No Choice in Reflection Response:\n{reflection}", 'error', 'Trinity')
+                        self.run_agent('generate')
+                        self.run_agent('reflect')
             break
 
     def save_memories(self):
