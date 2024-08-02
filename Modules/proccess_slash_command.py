@@ -2,30 +2,37 @@
 
 import shlex
 from typing import List
+from Modules.challenges import Challenges
 
 
 class SlashCommands:
     def __init__(self, memory_instance):
         self.memory = memory_instance
-        self.message = none
-        self.commands = [func for func in dir(self) if callable(getattr(self, func)) and not func.startswith("__")]
+        self.message = None
+        self.challenges = Challenges(self.memory)
+        self.commands = [func for func in dir(self) if callable(getattr(self, func)) and not func.startswith("__") and func != "parse"]
 
-    def parse(self, input, message):
-        input_string = input.get('arg')
+    def parse(self, message):
+        input_string = message.get('arg')
         self.message = message
         args = shlex.split(input_string)
         if not args:
             return "No command provided. Type 'help' for a list of commands."
 
         command = args[0].lower()
+        if command == '-?':
+            return self.help([""])
         if command in self.commands:
             return getattr(self, command)(args[1:])
         else:
             return f"Unknown command: {command}. Type 'help' for a list of commands."
 
     def help(self, args: List[str] = None) -> str:
+        """
+        This command.
+        """
         if args and args[0] == '-?':
-            return "help: List all available commands or get help for a specific command."
+            return "help: Lists all available commands or get help for a specific command."
 
         help_text = "Available commands:\n"
         for cmd in self.commands:
@@ -36,13 +43,13 @@ class SlashCommands:
     def echo(self, args: List[str]) -> str:
         """Repeat the given text."""
         if args and args[0] == '-?':
-            return "echo: Repeat the given text. Usage: echo [text]"
+            return "echo: Repeat the given text.\nUsage: echo [text]"
         return " ".join(args)
 
     def add(self, args: List[str]) -> str:
         """Add two numbers."""
         if args and args[0] == '-?':
-            return "add: Add two numbers. Usage: add [number1] [number2]"
+            return "add: Add two numbers.\nUsage: add [number1] [number2]"
         if len(args) != 2:
             return "Error: Add requires exactly two arguments."
         try:
@@ -61,9 +68,12 @@ class SlashCommands:
             challenge: Prompt attack capture the flag
             Usage:
                 challenge level list - List of challenges and descriptions
-                challenge level # - Get the challenge hint text
-                challenge answer # - Send a prompt to try to reveal the password
+                challenge level <LevelName> - Get the challenge hint text
+                challenge level <LevelName> "text" - Send the text to the challenge as part of the prompt attack.
+                challenge answer <LevelName> - Attempt to answer the specified level..
+                challenge reset <LevelName> - Resets the specified level.
             """
         else:
-            return "This is where the challenge text would go, if I had one"
+            result = self.challenges.parse(args, self.message)
+            return result
 
