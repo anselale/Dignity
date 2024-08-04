@@ -104,7 +104,10 @@ class Trinity:
             iteration_count += 1
             if iteration_count > max_iterations:
                 self.logger.log("Maximum iteration count reached, forcing response", 'warning', 'Trinity')
+                self.response = self.cognition['generate'].get('result')
+                self.ui.send_message(0, self.message, self.response)
                 self.cognition['reflect']['Choice'] = 'respond'
+                break
             else:
                 reflection = self.cognition['reflect']
                 self.response = self.cognition['generate'].get('result')
