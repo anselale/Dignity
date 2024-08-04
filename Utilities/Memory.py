@@ -274,12 +274,12 @@ class Memory:
                 if distance >= relevance_threshold:
                     source_id = journal_chunks['metadatas'][i]['Source_ID']
 
-                    filter = {"id": {"$eq": source_id}}
+                    filters = {"id": {"$eq": source_id}}
 
                     # Retrieve the full journal entry based on the source_id
                     full_entry = self.memory.load_collection(
                         collection_name='whole_journal_entries',
-                        where=filter
+                        where=filters
                     )
 
                     if full_entry:
@@ -312,4 +312,90 @@ class Memory:
             return journal_written
         else:
             return None
+
+    def query_kb(self, message, theory):
+        message_kb = self.memory.search_storage_by_threshold(collection_name="docs", query=message, num_results=2)
+        result = []
+        print(f'Message KB results: {message_kb}')
+
+        if message_kb:
+            for i, kb in enumerate(message_kb['metadatas']):
+                position = kb['Position']
+                source = kb['Source']
+                print(f'Collecting context for Position {position} in {source}.')
+
+                # Get the full entry using the id
+                entry_id = message_kb['ids'][i]
+                full_entry = self.memory.load_collection(collection_name="docs", where={"Position": {"$eq": position}})
+                if full_entry:
+                    result.append(full_entry)
+
+                # Query for entries with position-1
+                where_list_prev = {"Position": {"$eq": position - 1}}
+                prev_results = self.memory.load_collection(collection_name="docs", where=where_list_prev)
+                if prev_results:
+                    print('Test Previous Results')
+                    if prev_results['metadatas'][0]['Source'] == source:
+                        result.append(prev_results)
+                        print('Result appended')
+
+                # Query for entries with position+1
+                where_list_next = {"Position": {"$eq": position + 1}}
+                next_results = self.memory.load_collection(collection_name="docs", where=where_list_next)
+                if next_results:
+                    if next_results['metadatas'][0]['Source'] == source:
+                        result.append(next_results)
+
+        theory_kb = self.memory.search_storage_by_threshold(collection_name="docs", query=theory, num_results=2)
+        print(f'Theory KB results: {theory_kb}')
+        if theory_kb:
+            for i, kb in enumerate(theory_kb['metadatas']):
+                position = kb['Position']
+                source = kb['Source']
+
+                # Get the full entry using the id
+                entry_id = theory_kb['ids'][i]
+                full_entry = self.memory.load_collection(collection_name="docs", where={"Position": {"$eq": position}})
+                if full_entry:
+                    result.append(full_entry)
+
+                # Query for entries with position-1
+                where_list_prev = {"Position": {"$eq": position - 1}}
+                prev_results = self.memory.load_collection(collection_name="docs", where=where_list_prev)
+                if prev_results:
+                    if prev_results['metadatas'][0]['Source'] == source:
+                        result.append(prev_results)
+
+                # Query for entries with position+1
+                where_list_next = {"Position": {"$eq": position + 1}}
+                next_results = self.memory.load_collection(collection_name="docs", where=where_list_next)
+                if next_results:
+                    if next_results['metadatas'][0]['Source'] == source:
+                        result.append(next_results)
+
+        print(result)
+        if result:
+            parsed_documents = self.parser.parse_kb(result)
+            print(f'Parsed results {parsed_documents}')
+
+            final_output = ""
+            print('starting final')
+            for source, docs in parsed_documents.items():
+                print('starting first for final')
+                final_output += f'--- {source} ---\n'
+                for position in sorted(docs.keys()):
+                    document = docs[position]
+                    print('starting second for final')
+                    final_output += f'{document}\n'
+
+            print(final_output)
+        else:
+            print("No Results!")
+            final_output = "No documents found."
+
+        return final_output
+
+
+
+
 

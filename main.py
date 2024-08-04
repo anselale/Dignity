@@ -18,6 +18,7 @@ def process_message(message):
 
 
 class Run:
+
     def __init__(self):
         self.client = DiscordClient()
         self.client.run()
@@ -25,7 +26,7 @@ class Run:
             self.persona = yaml.safe_load(file)
             self.persona_name = self.persona.get("Name")
         self.memory = Memory(self.persona, self.persona_name)
-        self.do_command = SlashCommands(self.memory)
+        self.do_command = SlashCommands(self.memory, self.client)
         self.indirect_message = IndirectMessage(self.memory)
         self.direct_message = DirectMessage(self.memory, self.client)
         self.channel_message = ChannelMessage(self.memory, self.client)
@@ -43,7 +44,13 @@ class Run:
                         # Check if this is a /bot command
                         if function_name:
                             response = self.do_command.parse(message)
-                            self.client.send_message(channel_id, response)
+                            # self.client.send_message(channel_id, response)\
+                            self.client.send_embed(
+                                channel_id=channel_id,
+                                title="Command Result",
+                                fields=[("Result", response)],
+                                color='blue',
+                                image_url=None)
 
                         # Check if the message is a DM
                         elif message['channel'].startswith('Direct Message'):

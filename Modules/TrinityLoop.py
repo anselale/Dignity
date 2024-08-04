@@ -37,6 +37,7 @@ class Trinity:
             "theory": {},
             "generate": {},
             "reflect": {},
+            "kb": None
         }
         pass
 
@@ -60,6 +61,8 @@ class Trinity:
         self.memory.recall_journal_entry(self.message['message'], self.cognition['thought']["Categories"], 3)
         self.memory.recall_categories(self.message['message'], self.cognition['thought']["Categories"], 3)
         self.run_agent('theory')
+        # chat with docs RAG
+        self.cognition['kb'] = self.memory.query_kb(message, self.cognition['theory'].get('What'))
         self.run_agent('generate')
         self.run_agent('reflect')
 
@@ -85,6 +88,7 @@ class Trinity:
                       'user_history': self.user_history,  # user_history
                       'memories': memories,  # memories
                       'journals': journals,  # journals
+                      'kb': self.cognition['kb'],  # knowledgebase
                       'cognition': self.cognition}  # cognition
         self.cognition[agent_name] = agent.run(**agent_vars)
 
