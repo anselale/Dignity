@@ -1,6 +1,6 @@
-from agentforge.utils.storage_interface import StorageInterface
-from customagents.JournalAgent import JournalAgent
-from customagents.JournalThoughtAgent import JournalThoughtAgent
+from agentforge.utils.chroma_utils import ChromaUtils
+from CustomAgents.Trinity.JournalAgent import JournalAgent
+from CustomAgents.Trinity.JournalThoughtAgent import JournalThoughtAgent
 from Utilities.Parsers import MessageParser
 import os
 from datetime import datetime
@@ -10,7 +10,7 @@ import agentforge.tools.SemanticChunk as Chunker
 class Journal:
 
     def __init__(self):
-        self.storage = StorageInterface().storage_utils
+        self.storage = ChromaUtils()
         self.parser = MessageParser
         self.journal = JournalAgent()
         self.journalthought = JournalThoughtAgent()

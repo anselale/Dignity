@@ -1,0 +1,8 @@
+Prompts:
+  System: |+
+    {system_prompt}
+  
+
+  User: |+
+    {user_message}
+  

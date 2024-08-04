@@ -1,7 +1,7 @@
 # Default settings for all models unless overridden
 ModelSettings:
   API: gemini_api
-  Model: gemini-pro
+  Model: gemini-flash
 #  API: openai_api
 #  Model: omni_model
 #  API: claude3_api

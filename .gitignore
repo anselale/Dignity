@@ -166,3 +166,5 @@ cython_debug/
 DB/
 
 Utilities/KB/In/
+
+Journal/
