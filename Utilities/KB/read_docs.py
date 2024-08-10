@@ -9,8 +9,13 @@ storage = ChromaUtils()
 
 
 def list_files(directory):
-    with os.scandir(directory) as entries:
-        return [entry.path for entry in entries if entry.is_file()]
+    files = []
+    for entry in os.scandir(directory):
+        if entry.is_file():
+            files.append(entry.path)
+        elif entry.is_dir():
+            files.extend(list_files(entry.path))  # Recurse into subdirectory
+    return files
 
 
 files = list_files(folder)

@@ -39,6 +39,7 @@ class SlashCommands:
         for cmd in self.commands:
             doc = getattr(self, cmd).__doc__
             help_text += f"  {cmd}: {doc.strip() if doc else 'No description available.'}\n"
+            help_text += f"\nType /bot command -? for instructions for specific commands"
         return help_text
 
     def echo(self, args: List[str]) -> str:
@@ -77,6 +78,17 @@ class SlashCommands:
         else:
             result = self.challenges.parse(args, self.message)
             return result
+
+    @staticmethod
+    def about():
+        """
+        About the bot.
+        """
+        return """
+            This project was built using AgentForge, an open-source AI-driven task automation 
+            system created by John Smith and Ansel Anselmi. AgentForge is available at 
+            https://github.com/DataBassGit/AgentForge under the GNU General Public License v3.0.
+            """
 
     # def test_roles(self, args: List[str]) -> str:
     #     """

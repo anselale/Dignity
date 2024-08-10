@@ -292,39 +292,31 @@ class MessageParser:
 
     @staticmethod
     def parse_kb(data):
-        print(f'starting parse kb: {data}')
         grouped_documents = {}
 
         # Iterate over each entry in the response data
         for entry in data:
-            print('Start for loop')
             metadatas = entry.get('metadatas', [])  # Use an empty list as default if 'metadatas' is missing
             documents = entry.get('documents', [])  # Use an empty list as default if 'documents' is missing
 
             for metadata, document in zip(metadatas, documents):
-                print('start second for loop')
                 position = metadata['Position']
                 source = metadata['Source']
                 # Clean the source for display
                 source_clean = source.replace('\\', '/')  # Replace backslashes with forward slashes
                 # Initialize the source group if not already present
-                print('Start second if')
                 if source_clean not in grouped_documents:
                     grouped_documents[source_clean] = {}
                 # Add the document with position if it doesn't already exist
-                print('Start third if')
                 if position not in grouped_documents[source_clean]:
-                    print('Start if isinstance')
                     if isinstance(document, list):
                         grouped_documents[source_clean][position] = document[0]
                     else:
                         grouped_documents[source_clean][position] = document
 
         # Sort documents in each group by position
-        print('start sort')
         for source in grouped_documents:
             grouped_documents[source] = dict(sorted(grouped_documents[source].items()))
 
-        print('returning')
         return grouped_documents
 
