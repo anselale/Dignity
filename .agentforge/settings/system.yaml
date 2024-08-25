@@ -17,12 +17,12 @@ Logging:
   Folder: ./Logs
   Files:
     AgentForge: error
-    ModelIO: debug
+    ModelIO: error
     Actions: error
     Results: error
-    Trinity: debug
-    DiscordClient: debug
-    Memory: debug
+    Trinity: error
+    DiscordClient: error
+    Memory: error
     Formatting: error
 
 # Paths the system (agents) have access to read and write

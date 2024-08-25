@@ -47,9 +47,9 @@ class Trinity:
         self.ui.channel_id_layer_0 = self.message["channel_id"]
         self.ui.current_thread_id = None  # Reset the thread ID for each new chat
 
-        # Send the initial response
-        initial_response = "Processing your message..."
-        self.ui.send_message(0, self.message, initial_response)
+        # Send the initial response for debugging and testing
+        # initial_response = "Processing your message..."
+        # self.ui.send_message(0, self.message, initial_response)
 
         if self.message['channel'].startswith('Direct Message'):
             self.chat_history = self.memory.fetch_history(collection_name=message['author'], prefix='dm')
@@ -170,39 +170,45 @@ class UI:
         self.client = client
         self.channel_id_layer_0 = None
         self.current_thread_id = None
-        self.last_message_id = None
         self.logger = Logger('DiscordClient')
 
     def send_message(self, layer, message, response):
+        self.logger.log(f"send_message called with layer: {layer}", 'debug', 'DiscordClient')
+        self.logger.log(f"Message: {message}", 'debug', 'DiscordClient')
+        self.logger.log(f"Response: {response[:100]}...", 'debug', 'DiscordClient')
+
         if layer == 0:
             try:
                 if message['channel'].startswith('Direct Message'):
                     self.client.send_dm(message['author_id'], response)
                 else:
                     channel_id = self.channel_id_layer_0
-                    self.client.send_message(channel_id, response)
-                
-                self.last_message_id = message['message_id']
-                self.logger.log(f"Message sent successfully. ID: {self.last_message_id}", 'info', 'DiscordClient')
-                return self.last_message_id
+                    self.logger.log(f"Sending message to channel: {channel_id}", 'debug', 'DiscordClient')
+                    sent_message = self.client.send_message(channel_id, response)
+                    if sent_message:
+                        self.logger.log(f"Message sent successfully. ID: {sent_message.id}", 'info', 'DiscordClient')
+                        return sent_message.id
+                    else:
+                        self.logger.log("Failed to send message", 'error', 'DiscordClient')
+                        return None
             except Exception as e:
                 self.logger.log(f"Error in send_message (layer 0): {str(e)}", 'error', 'DiscordClient')
                 return None
 
         elif layer == 1:
             try:
+                self.logger.log(f"Layer 1: Current thread ID: {self.current_thread_id}", 'debug', 'DiscordClient')
                 if not self.current_thread_id:
-                    if not self.last_message_id:
-                        self.logger.log("No message ID available to create thread", 'error', 'DiscordClient')
-                        return
-
                     thread_name = f"Brain - {message['author'][:20]}"
                     self.logger.log(f"Attempting to create new thread: {thread_name}", 'info', 'DiscordClient')
+                    self.logger.log(f"Using channel_id: {self.channel_id_layer_0}, message_id: {message['message_id']}", 'debug', 'DiscordClient')
+                    
                     self.current_thread_id = self.client.create_thread(
                         channel_id=int(self.channel_id_layer_0),
-                        message_id=int(self.last_message_id),
+                        message_id=int(message['message_id']),
                         name=thread_name
                     )
+                    
                     if self.current_thread_id is None:
                         self.logger.log("Failed to create thread: current_thread_id is None", 'error', 'DiscordClient')
                         return

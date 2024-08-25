@@ -89,3 +89,7 @@ Prompts:
     <new_instructions>
     Write a new response below, taking the above additional context into account.
     </new_instructions>
+
+#ModelOverrides:
+#  API: groq_api
+#  Model: llama31
