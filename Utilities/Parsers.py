@@ -320,3 +320,23 @@ class MessageParser:
 
         return grouped_documents
 
+    @staticmethod
+    def extract_updated_scratchpad(scratchpad_result: str) -> str:
+        """
+        Extracts the updated scratchpad content from the ScratchpadAgent's output.
+
+        Parameters:
+        - scratchpad_result (str): The full output from the ScratchpadAgent.
+
+        Returns:
+        - str: The extracted updated scratchpad content.
+        """
+        pattern = r'<updated_scratchpad>(.*?)</updated_scratchpad>'
+        match = re.search(pattern, scratchpad_result, re.DOTALL)
+        
+        if match:
+            return match.group(1).strip()
+        else:
+            logger.log("No updated scratchpad content found in the result.", 'warning', 'Formatting')
+            return ""
+

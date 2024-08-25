@@ -13,6 +13,7 @@ class ChatAgent(Agent):
         self.data['chat_message'] = chat_message['message']
         self.data['username'] = chat_message['author']
         self.data['kb'] = self.data['cognition']['kb']
+        self.data['scratchpad'] = self.data['cognition']['scratchpad']
         # self.data['formatted_mentions'] = chat_message['formatted_mentions']
 
         # self.data['memories'] = memories

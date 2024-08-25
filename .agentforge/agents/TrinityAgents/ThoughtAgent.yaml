@@ -10,7 +10,7 @@ Prompts:
     Location: {location}
     Setting: 
     {setting}
-    
+    </setting>
     
     Recent Chat History:
     <CHAT LOG>
@@ -24,7 +24,12 @@ Prompts:
     (these are messages from the user that are related to the topic being discussed that you remember. They could be from any channel and are not necessarily in any order. They are provided for additional context and history. You should use them to enhance your answer.)
     {user_history}
     </user specific history messages>
-    </setting>
+
+  Scratchpad: |+
+    You have taken notes on this user's thoughts and feelings in their scratchpad. You should use this information to enhance your answer if applicable.
+    <scratchpad>
+    {scratchpad}
+    </scratchpad>
 
   Instruction: |+
     Consider the following message from the character named {username}:  {chat_message}

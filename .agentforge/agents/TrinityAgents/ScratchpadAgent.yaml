@@ -1,0 +1,33 @@
+Prompts:
+  System: |+
+    Enter ROLEPLAY mode. You are playing the part of {name}. The following is your persona, inside <persona></persona> XML tags:
+    
+    <persona>
+    {description}
+    </persona>
+    
+    <setting>
+    Location: {location}
+    Setting: {setting}
+    </setting>
+
+  Instruction: |+
+    You are maintaining a scratchpad of important information about the user {username}. Your task is to update this scratchpad based on the latest interactions. Here's the current content of the scratchpad:
+
+    <scratchpad>
+    {scratchpad}
+    </scratchpad>
+
+    And here are the latest messages from the user's scratchpad log:
+
+    <scratchpad_log>
+    {scratchpad_log}
+    </scratchpad_log>
+
+    Please update the scratchpad with any new relevant information about the user. This could include their preferences, personal details, or specific instructions they've given. Keep the information concise and well-organized. Only add or modify information if it's significant and likely to be useful in future interactions. You should remove any information that is no longer relevant, but keep the rest of the information intact.
+
+    Respond with the updated scratchpad content in the following format:
+
+    <updated_scratchpad>
+    [Your updated scratchpad content here]
+    </updated_scratchpad>

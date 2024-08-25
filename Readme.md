@@ -43,49 +43,40 @@ Bot prompts are stored in the .agentforge/agents folder. The bot uses 4 separate
 
 ```
 Chatbot/
-│
-├── _agentforge/
-│   ├── actions/
-│   └── agents/
-│       ├── ActionPrimingAgent.yaml
-│       ├── ActionSelectionAgent.yaml
-│       ├── GenerateAgent.yaml
-│       ├── ReflectAgent.yaml
-│       ├── TheoryAgent.yaml
-│       └── ThoughtAgent.yaml
-│
-├── personas/
-│   └── default.yaml
-│
-├── settings/
-│   ├── directives.yaml
-│   ├── memories.yaml
-│   ├── models.yaml
-│   ├── paths.yaml
-│   └── storage.yaml
-│
-├── tools/
-│
-├── customagents/
+.
+├── CustomAgents
 │   ├── __init__.py
-│   ├── GenerateAgent.py
-│   ├── ReflectAgent.py
-│   ├── TheoryAgent.py
-│   └── ThoughtAgent.py
-│
-├── DB/
-│
-├── logs/
-│
-├── modules/
+│   └── Trinity
+│       ├── ChatAgent.py
+│       ├── ChooseAgent.py
+│       ├── GenerateAgent.py
+│       ├── JournalAgent.py
+│       ├── JournalThoughtAgent.py
+│       ├── ReflectAgent.py
+│       ├── TheoryAgent.py
+│       └── ThoughtAgent.py
+├── Dockerfile
+├── main.py
+├── Modules
+│   ├── challenges.py
 │   ├── __init__.py
-│   ├── discord_client.py  # How we connect to discord
-│   ├── hotmic.py  # Not used
-│   └──  slidingemotions.py  # Not used
-│
-├── chat.py
-│
-└── Readme.md
+│   ├── proccess_slash_command.py
+│   ├── process_channel_message.py
+│   ├── process_direct_message.py
+│   ├── process_indirect_message.py
+│   └── TrinityLoop.py
+├── Readme.md
+├── Tests
+│   ├── ChromaTest.py
+│   ├── output.txt
+│   └── test.py
+└── Utilities
+    ├── __init__.py
+    ├── Journal.py
+    ├── KB
+    │   └── read_docs.py
+    ├── Memory.py
+    └── Parsers.py
 ```
 
 

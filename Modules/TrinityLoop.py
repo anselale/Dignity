@@ -37,7 +37,8 @@ class Trinity:
             "theory": {},
             "generate": {},
             "reflect": {},
-            "kb": None
+            "kb": None,
+            "scratchpad": None
         }
         pass
 
@@ -60,6 +61,7 @@ class Trinity:
         self.run_agent('thought')
         self.memory.recall_journal_entry(self.message['message'], self.cognition['thought']["Categories"], 3)
         self.memory.recall_categories(self.message['message'], self.cognition['thought']["Categories"], 3)
+        self.cognition['scratchpad'] = self.memory.get_scratchpad(self.message['author'])
         self.run_agent('theory')
         # chat with docs RAG
         self.cognition['kb'] = self.memory.query_kb(message, self.cognition['theory'].get('What'))
@@ -73,6 +75,17 @@ class Trinity:
         journal = self.memory.check_journal()
         if journal:
             self.ui.send_message(1, self.message, journal)
+        
+        # Save message to scratchpad log
+        # self.memory.save_scratchpad_log(message['author'], message['message'])
+
+        # check and update scratchpad if necessary
+        self.logger.log(f"About to check scratchpad for {self.message['author']}", 'debug', 'Trinity')
+        updated_scratchpad = self.memory.check_scratchpad(self.message['author'])
+        self.logger.log(f"check_scratchpad returned: {updated_scratchpad[:100] if updated_scratchpad else None}", 'debug', 'Trinity')
+        if updated_scratchpad:
+            scratchpad_message = f"Updated scratchpad for {self.message['author']}:\n```\n{updated_scratchpad[:500]}...\n```"
+            self.ui.send_message(1, self.message, scratchpad_message)
 
     def run_agent(self, agent_name):
         self.logger.log(f"Running {agent_name.capitalize()} Agent... Message:{self.message['message']}", 'info',
@@ -139,6 +152,9 @@ class Trinity:
             break
 
     def save_memories(self):
+        """
+        Save all memories, including the scratchpad log.
+        """
         self.memory.set_memory_info(self.message, self.cognition, self.response)
         self.memory.save_all_memory()
         self.memory.wipe_current_memories()
