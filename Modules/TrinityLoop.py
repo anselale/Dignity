@@ -45,6 +45,12 @@ class Trinity:
     def do_chat(self, message):
         self.message = message
         self.ui.channel_id_layer_0 = self.message["channel_id"]
+        self.ui.current_thread_id = None  # Reset the thread ID for each new chat
+
+        # Send the initial response
+        initial_response = "Processing your message..."
+        self.ui.send_message(0, self.message, initial_response)
+
         if self.message['channel'].startswith('Direct Message'):
             self.chat_history = self.memory.fetch_history(collection_name=message['author'], prefix='dm')
         else:
@@ -159,28 +165,59 @@ class Trinity:
         self.memory.save_all_memory()
         self.memory.wipe_current_memories()
 
-
 class UI:
     def __init__(self, client):
         self.client = client
         self.channel_id_layer_0 = None
-        self.channel_id_layer_1 = int(os.getenv('BRAIN_CHANNEL'))
+        self.current_thread_id = None
+        self.last_message_id = None
+        self.logger = Logger('DiscordClient')
 
     def send_message(self, layer, message, response):
         if layer == 0:
-
-            if message['channel'].startswith('Direct Message'):
-                self.client.send_dm(message['author_id'].id, response)
-            else:
-                channel_id = self.channel_id_layer_0
+            try:
+                if message['channel'].startswith('Direct Message'):
+                    self.client.send_dm(message['author_id'], response)
+                else:
+                    channel_id = self.channel_id_layer_0
+                    self.client.send_message(channel_id, response)
+                
+                self.last_message_id = message['message_id']
+                self.logger.log(f"Message sent successfully. ID: {self.last_message_id}", 'info', 'DiscordClient')
+                return self.last_message_id
+            except Exception as e:
+                self.logger.log(f"Error in send_message (layer 0): {str(e)}", 'error', 'DiscordClient')
+                return None
 
         elif layer == 1:
-            channel_id = self.channel_id_layer_1
-        else:
-            print(f"Invalid layer: {layer}")
-            return
+            try:
+                if not self.current_thread_id:
+                    if not self.last_message_id:
+                        self.logger.log("No message ID available to create thread", 'error', 'DiscordClient')
+                        return
 
-        if channel_id:
-            self.client.send_message(channel_id, response)
+                    thread_name = f"Brain - {message['author'][:20]}"
+                    self.logger.log(f"Attempting to create new thread: {thread_name}", 'info', 'DiscordClient')
+                    self.current_thread_id = self.client.create_thread(
+                        channel_id=int(self.channel_id_layer_0),
+                        message_id=int(self.last_message_id),
+                        name=thread_name
+                    )
+                    if self.current_thread_id is None:
+                        self.logger.log("Failed to create thread: current_thread_id is None", 'error', 'DiscordClient')
+                        return
+                    self.logger.log(f"Thread created with ID: {self.current_thread_id}", 'info', 'DiscordClient')
+                
+                if self.current_thread_id:
+                    self.logger.log(f"Replying to thread: {self.current_thread_id}", 'info', 'DiscordClient')
+                    success = self.client.reply_to_thread(int(self.current_thread_id), response)
+                    if success:
+                        self.logger.log("Reply sent successfully", 'info', 'DiscordClient')
+                    else:
+                        self.logger.log("Failed to send reply to thread", 'error', 'DiscordClient')
+                else:
+                    self.logger.log("Failed to create or find thread for layer 1 message", 'error', 'DiscordClient')
+            except Exception as e:
+                self.logger.log(f"Error in send_message for layer 1: {str(e)}", 'error', 'DiscordClient')
         else:
-            print(f"Channel ID not set for layer {layer}")
+            self.logger.log(f"Invalid layer: {layer}", 'error', 'DiscordClient')

@@ -21,7 +21,7 @@ Logging:
     Actions: error
     Results: error
     Trinity: debug
-    DiscordClient: error
+    DiscordClient: debug
     Memory: debug
     Formatting: error
 
