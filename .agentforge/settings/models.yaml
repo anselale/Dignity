@@ -1,12 +1,15 @@
 # Default settings for all models unless overridden
 ModelSettings:
-  API: gemini_api
-  Model: gemini-flash
+#  API: gemini_api
+#  Model: gemini-flash
+  API: groq_api
+  Model: llama31
 #  API: openai_api
 #  Model: omni_model
 #  API: claude3_api
 #  Model: claude-3
-#  API: oobabooga_api
+#  API: oobabooga_api/
+
 #  Model: oobabooga
 #  API: ollama_api
 #  Model: DolphinMistral
@@ -65,6 +68,8 @@ ModelLibrary:
     models:
       llama31:
         name: llama-3.1-70b-versatile
+        params:
+          max_new_tokens: 3500
   claude_old:
     module: "claude_old"
     class: "Claude"

@@ -43,6 +43,7 @@ class Trinity:
         pass
 
     def do_chat(self, message):
+        print("Starting do_chat...")
         self.message = message
         self.ui.channel_id_layer_0 = self.message["channel_id"]
         self.ui.current_thread_id = None  # Reset the thread ID for each new chat
@@ -54,11 +55,14 @@ class Trinity:
         if self.message['channel'].startswith('Direct Message'):
             self.chat_history = self.memory.fetch_history(collection_name=message['author'], prefix='dm')
         else:
+            print("Fetch Channel History")
             self.chat_history = self.memory.fetch_history(collection_name=message['channel'])
+        print("Fetch User History")
         self.user_history = self.memory.fetch_history(collection_name=message['author'],
                                                       query=self.message['message'],
                                                       is_user_specific=True,
                                                       query_size=3)
+        print("Fetch DM History")
         self.dm_history = self.memory.fetch_history(collection_name=message['author'],
                                                     query=self.message['message'],
                                                     is_user_specific=True,

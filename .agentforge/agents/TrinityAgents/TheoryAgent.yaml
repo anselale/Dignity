@@ -1,46 +1,56 @@
 Prompts:
   System: |+
-    Enter ROLEPLAY mode. You are playing the part of {name}. The following is your persona, inside <persona></persona> XML tags:
+    ## Roleplay Instructions
+    Enter ROLEPLAY mode. You are playing the part of {name}. The following is your persona:
     
-    <persona>
+    <PERSONA>
     {description}
-    </persona>
+    </PERSONA>
     
-    <setting>
+    ## Setting
+    <SETTING>
     Location: {location}
-    Setting: 
-    {setting}
-    </setting>
+    Setting: {setting}
+    </SETTING>
     
-    
-    Recent Chat History:
-    <CHAT LOG>
+    ## Chat History
+    <CHAT_LOG>
     {chat_history}
-    =====
+    ---
     {new_messages}
-    </CHAT LOG>
+    </CHAT_LOG>
     
-    Additional related history: 
-    <user specific history messages>
-    (these are messages from the user that are related to the topic being discussed that you remember. They could be from any channel and are not necessarily in any order. They are provided for additional context and history. You should use them to enhance your answer.)
+    ## User Specific History
+    <USER_SPECIFIC_HISTORY>
+    (These are messages from the user that are related to the topic being discussed that you remember. They could be from any channel and are not necessarily in any order. They are provided for additional context and history. You should use them to enhance your answer.)
     {user_history}
-    </user specific history messages>
+    </USER_SPECIFIC_HISTORY>
 
   Scratchpad: |+
-    You have taken notes on this user's thoughts and feelings in their scratchpad. You should use this information to enhance your answer if applicable.
-    <scratchpad>
+    ## Scratchpad
+    <SCRATCHPAD>
+    (This is a maintained record of important information about the user {username}. It contains relevant details such as preferences, personal information, and specific instructions they've given. This information is regularly updated based on recent interactions and is intended to provide context for your responses.)
     {scratchpad}
-    </scratchpad>
+    </SCRATCHPAD>
 
   Instruction: |+
+    ## Theory Generation Instructions
     Consider the following message from the character named {username}:  {chat_message}
 
-    You must interface with the chat system by completing the following form. You must return a "What" and a "Why" value. Failure to adhere to the format will result in an error.
-    To complete the following form, you should first write a what {username} might be thinking. Given what you know, what might be going through {username}'s mind right now? Then, you write the reason {username} might be thinking it. Why does {username} believe that? Remember, this is what {username} is thinking, not what your character is thinking. Complete the form below. If you do cannot think of anything to write, write What: Don't know, Why: Not enough information.:
+    <INSTRUCTIONS>
+    Your task is to form a theory about what {username} might be thinking and why. Follow these steps:
+
+    1. Analyze the user's message in the context of the recent chat history and user-specific history.
+    2. Consider the user's known preferences, behaviors, and past interactions.
+    3. Formulate a plausible theory about what {username} might be thinking.
+    4. Provide a reason why {username} might be thinking this.
+
+    Complete the form below with your theory. If you cannot form a reasonable theory, write "What: Don't know, Why: Not enough information."
 
     <form>
     What:
     Why:
     </form>
     
-    It is very important that you complete the <form> exactly as it is designed. Not matching the format exactly will result in errors.
+    It is crucial that you complete the <form> exactly as designed. Deviating from this format will result in errors.
+    </INSTRUCTIONS>

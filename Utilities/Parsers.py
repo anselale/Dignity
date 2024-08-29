@@ -92,8 +92,8 @@ class MessageParser:
         message_text = message.get('message', 'N/A')
 
         formatted_message = (
-            f"Message: \"{message_text}\"\n"
             f"User: {author}\n"
+            f"Message: \"{message_text}\"\n"
             f"Timestamp: {timestamp}\n"
         )
         formatted_messages.append(formatted_message)
@@ -102,96 +102,89 @@ class MessageParser:
 
     @staticmethod
     def format_user_specific_history_entries(history):
-        """
-        Formats user-specific history entries for display with a dynamic format
-        based on the available attributes in each entry.
-
-        Args:
-            history (dict): The history dictionary containing 'documents', 'ids', and 'metadatas'.
-
-        Returns:
-            str: Formatted user-specific history entries.
-        """
         formatted_entries = []
-        # Assuming metadatas is a nested list structure; adjust if it's different.
-        # min_id = min(entry.get('id', 0) for entry in history.get('metadatas', []))
-
-        for i, entry in enumerate(history.get('metadatas', []), start=1):
-            entry_id = entry.get('id', 0)
-            document_id = i - 1
-            document = ""
-            if 'documents' in history and 0 <= document_id < len(history['documents']):
-                document = history['documents'][document_id]
-
+        for i, metadata in enumerate(history.get('metadatas', [])):
             entry_details = []
-            if document:
-                entry_details.append(f"Message: {document}")
+            # Start with User and Message
+            entry_details.append(f"User: {metadata.get('User', 'N/A')}")
+            entry_details.append(f"Message: {history['documents'][i] if i < len(history.get('documents', [])) else 'N/A'}")
 
-            for key, value in entry.items():
-                if key.lower() not in ["id", "isotimestamp", "reason", "unixtimestamp", "mentions"]:  # Optionally skip 'id'
-                    if key.lower() != "inner thought":
-                        entry_details.append(f"{key.capitalize()}: {value}")
-                        continue
-                    entry_details.append(f"{key.capitalize()}: {value}")
+            # Add Inner Thought and Response if available
+            if 'InnerThought' in metadata:
+                entry_details.append(f"Inner Thought: {metadata['InnerThought']}")
+            if 'Response' in metadata:
+                entry_details.append(f"Response: {metadata['Response']}")
 
-            formatted_entry = "\n".join(entry_details)
-            formatted_entries.append(formatted_entry + "\n")
+            # Add other fields
+            for key, value in metadata.items():
+                if key not in ["User", "id", "isotimestamp", "unixtimestamp", "InnerThought", "Response"]:
+                    entry_details.append(f"{key}: {value}")
+
+            formatted_entries.append("\n".join(entry_details) + "\n")
 
         return "=====\n".join(formatted_entries).strip()
 
     @staticmethod
     def format_general_history_entries(history):
-        """
-        Formats general history entries for display with a dynamic format based on the
-        available attributes in each entry.
-
-        Args:
-            history (dict): The history dictionary containing 'documents', 'ids', and 'metadatas'.
-
-        Returns:
-            str: Formatted general history entries.
-        """
         formatted_entries = []
         channel = ''
-        # Assuming metadatas is directly a list of dicts; adjust based on actual structure.
-        for i, entry in enumerate(history.get('metadatas', []), start=1):
-            document_id = i - 1  # Assuming 'id' starts from 1
-            document = ""
-            if 'documents' in history and 0 <= document_id < len(history['documents']):
-                document = history['documents'][document_id]
-
+        for i, metadata in enumerate(history.get('metadatas', [])):
             entry_details = []
-
-            if document:
-                entry_details.append(f"Message: {document}")
+            # Start with User and Message
+            entry_details.append(f"User: {metadata.get('User', 'N/A')}")
+            entry_details.append(f"Message: {history['documents'][i] if i < len(history.get('documents', [])) else 'N/A'}")
 
             excluded_metadata = [
-                "id",
-                "response",
-                "reason",
-                "emotion",
-                "inner thought",
-                "channel",
-                "formatted_mentions",
-                "unixtimestamp",
-                "mentions",
-                "innerthought",
-                "isotimestamp",
-                "categories"]
+                "User", "id", "Response", "Reason", "Emotion", "InnerThought",
+                "Channel", "isotimestamp", "unixtimestamp", "Categories"
+            ]
 
-            for key, value in entry.items():
-                if key.lower() not in excluded_metadata:
-                    entry_details.append(f"{key.capitalize()}: {value}")
+            for key, value in metadata.items():
+                if key not in excluded_metadata:
+                    entry_details.append(f"{key}: {value}")
 
-                if key.lower() == "channel":
+                if key == "Channel":
                     channel = value
 
-            formatted_entry = "\n".join(entry_details)
-            formatted_entries.append(formatted_entry + "\n")
+            formatted_entries.append("\n".join(entry_details) + "\n")
 
         formatted_string = "=====\n".join(formatted_entries).strip()
         return f"Channel: {channel}\n=====\n{formatted_string}"
 
+    @staticmethod
+    def parse_kb(data):
+        grouped_documents = {}
+
+        for entry in data:
+            metadatas = entry.get('metadatas', [])
+            documents = entry.get('documents', [])
+
+            for metadata, document in zip(metadatas, documents):
+                position = metadata['Position']
+                source = metadata['Source']
+                source_clean = source.replace('\\', '/')
+                if source_clean not in grouped_documents:
+                    grouped_documents[source_clean] = {}
+                if position not in grouped_documents[source_clean]:
+                    if isinstance(document, list):
+                        grouped_documents[source_clean][position] = document[0]
+                    else:
+                        grouped_documents[source_clean][position] = document
+
+        for source in grouped_documents:
+            grouped_documents[source] = dict(sorted(grouped_documents[source].items()))
+
+        return grouped_documents
+
+    @staticmethod
+    def extract_updated_scratchpad(scratchpad_result: str) -> str:
+        pattern = r'<updated_scratchpad>(.*?)</updated_scratchpad>'
+        match = re.search(pattern, scratchpad_result, re.DOTALL)
+        
+        if match:
+            return match.group(1).strip()
+        else:
+            return ""
     @staticmethod
     def format_journal_entries(history):
         """

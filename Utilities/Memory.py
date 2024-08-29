@@ -112,11 +112,15 @@ class Memory:
         Returns:
             str: Formatted history string.
         """
+        print("fetch history started")
         collection_name = f"{prefix}{collection_name}_chat_history"
         collection_name = self.parser.format_string(collection_name)
+        print(f"collection name: {collection_name}")
         self.logger.log(f"Fetch History from: {collection_name}\n", 'debug', 'Memory')
 
+        print("checking collection size")
         collection_size = self.memory.count_collection(collection_name)
+        print(f"Collection size {collection_size}")
 
         if collection_size == 0:
             return "No Results!"
@@ -127,6 +131,7 @@ class Memory:
         if is_user_specific and query:
             if qsize == 0:
                 qsize = 1
+            print("querying memory")
             history = self.memory.query_memory(collection_name=collection_name, query=query, num_results=qsize)
             formatted_history = self.parser.format_user_specific_history_entries(history)
         else:
@@ -556,10 +561,10 @@ class Memory:
         """
         collection_name = f"scratchpad_{username}"
         collection_name = self.parser.format_string(collection_name)
-        
+
         if not content.strip():  # If content is empty or just whitespace
             content = "No information available yet. This scratchpad will be updated as we learn more about the user."
-        
+
         self.memory.save_memory(collection_name=collection_name, data=[content], ids=["1"])
 
     def save_scratchpad_log(self, username, content):
@@ -581,10 +586,10 @@ class Memory:
     def save_to_scratchpad_log(self, username, message):
         scratchpad_log_name = f"scratchpad_log_{username}"
         scratchpad_log_name = self.parser.format_string(scratchpad_log_name)
-        
+
         current_log = self.get_scratchpad_log(username)
         updated_log = f"{current_log}\n{message}" if current_log else message
-        
+
         self.save_scratchpad_log(scratchpad_log_name, updated_log)
         self.logger.log(f"Saved message to scratchpad log for user: {username}", 'debug', 'Memory')
 
@@ -599,26 +604,26 @@ class Memory:
             str or None: Updated scratchpad content if updated, None otherwise.
         """
         self.logger.log(f"Checking scratchpad for user: {username}", 'debug', 'Memory')
-        
+
         scratchpad_log = self.get_scratchpad_log(username)
         self.logger.log(f"Scratchpad log entries: {len(scratchpad_log)}", 'debug', 'Memory')
         for entry in scratchpad_log:
             self.logger.log(f"Scratchpad log entry: {entry}", 'debug', 'Memory')
         count = len(scratchpad_log)
-        
+
         self.logger.log(f"Number of entries in scratchpad log: {count}", 'debug', 'Memory')
-        
+
         if count >= 10:
             self.logger.log(f"Scratchpad log count >= 10, updating scratchpad", 'debug', 'Memory')
             from CustomAgents.Trinity.ScratchpadAgent import ScratchpadAgent
             scratchpad_agent = ScratchpadAgent()
-            
+
             current_scratchpad = self.get_scratchpad(username)
             self.logger.log(f"Current scratchpad content: {current_scratchpad[:100]}...", 'debug', 'Memory')
-            
+
             scratchpad_log_content = "\n".join(scratchpad_log)
             self.logger.log(f"Scratchpad log content: {scratchpad_log_content[:100]}...", 'debug', 'Memory')
-            
+
             agent_vars = {
                 "username": username,
                 "scratchpad_log": scratchpad_log_content,
@@ -626,20 +631,21 @@ class Memory:
             }
             scratchpad_result = scratchpad_agent.run(**agent_vars)
             self.logger.log(f"Scratchpad agent result: {scratchpad_result[:100]}...\nVars: {agent_vars}", 'debug', 'Memory')
-            
+
             updated_scratchpad = self.parser.extract_updated_scratchpad(scratchpad_result)
             self.logger.log(f"Updated scratchpad content: {updated_scratchpad[:100]}...", 'debug', 'Memory')
-            
+
             self.save_scratchpad(username, updated_scratchpad)
             self.logger.log(f"Saved updated scratchpad for user: {username}", 'debug', 'Memory')
-            
+
             # Clear the scratchpad log after processing
             collection_name = f"scratchpad_log_{username}"
             collection_name = self.parser.format_string(collection_name)
             self.memory.delete_collection(collection_name)
             self.logger.log(f"Cleared scratchpad log for user: {username}", 'debug', 'Memory')
-            
+
             return updated_scratchpad
-        
+
         self.logger.log(f"Scratchpad log count < 10, no update needed", 'debug', 'Memory')
         return None
+
