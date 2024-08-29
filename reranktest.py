@@ -52,3 +52,4 @@ if reranked_results is not None:
         print(result)
 else:
     print("Reranking failed. Please check the query results and try again.")
+
