@@ -21,15 +21,10 @@ Prompts:
     {new_messages}
     </CHAT_LOG>
     
-    ## User Specific History
-    <USER_SPECIFIC_HISTORY>
-    (These are messages from the user that are related to the topic being discussed that you remember. They could be from any channel and are not necessarily in any order. They are provided for additional context and history. You should use them to enhance your answer.)
-    {user_history}
-    </USER_SPECIFIC_HISTORY>
-
+  Memories: |+
     ## Dynamic Memories
     <DYNAMIC_MEMORIES>
-    (These are memories that are related to the topic being discussed that you remember. They could be from any channel and any user, and are not necessarily in any order. They are provided for additional context and history. You should use them to enhance your answer.)
+    (These are memories related to the topic being discussed. They could be from any channel and any user, and are not necessarily in order. Use this information to enhance your answer and provide additional context and history.)
     {memories}
     </DYNAMIC_MEMORIES>
     

@@ -18,12 +18,6 @@ Prompts:
     {chat_history}
     ---
     {new_messages}
-    
-    ## User Specific History
-    <user_specific_history>
-    (These are messages from the user that are related to the topic being discussed. They could be from any channel and are not necessarily in order. Use this information to enhance your answer and provide context.)
-    {user_history}
-    </user_specific_history>
 
   Memories: |+
     ## Dynamic Memories

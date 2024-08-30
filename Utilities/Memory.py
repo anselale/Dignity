@@ -123,7 +123,7 @@ class Memory:
         print(f"Collection size {collection_size}")
 
         if collection_size == 0:
-            return "No Results!"
+            return "No Results!", None
 
         qsize = max(collection_size - query_size, 0)
 
@@ -140,7 +140,7 @@ class Memory:
             formatted_history = self.parser.format_general_history_entries(history)
 
         self.logger.log(f"Fetched History:\n{history}\n", 'debug', 'Memory')
-        return formatted_history
+        return formatted_history, history
 
     def get_persona(self):
         """
@@ -649,3 +649,45 @@ class Memory:
         self.logger.log(f"Scratchpad log count < 10, no update needed", 'debug', 'Memory')
         return None
 
+    def combine_and_rerank(self,query_results, rerank_query, num_results=5):
+        """
+        Combine multiple query results, rerank them based on a new query, and return the top results.
+
+        This function takes multiple query results, combines them, and then reranks the combined
+        results based on a new query. It's useful for refining search results across multiple
+        collections or queries.
+
+        Args:
+            query_results (list): A list of query result dictionaries, each containing 'ids',
+                                'embeddings', 'documents', and 'metadatas'.
+            rerank_query (str): The query string used for reranking the combined results.
+            num_results (int, optional): The number of top results to return after reranking.
+                                        Defaults to 5.
+
+        Returns:
+            dict: A dictionary containing the reranked results, including 'ids', 'embeddings',
+                'documents', and 'metadatas' for the top results.
+
+        Raises:
+            ValueError: If query_results is empty or if reranking fails.
+
+        Example:
+            query_results = [results1, results2, results3]
+            rerank_query = "specific topic"
+            reranked = query_and_rerank(query_results, rerank_query, num_results=3)
+        """
+        
+        # Combine all query results
+        combined_query_results = self.memory.combine_query_results(*query_results)
+
+        reranked_results = self.memory.rerank_results(
+            query_results=combined_query_results,
+            query=rerank_query,
+            temp_collection_name="temp_reranking_collection",
+            num_results=num_results
+        )
+
+        formatted_results = self.parser.format_user_specific_history_entries(reranked_results)
+
+        return formatted_results
+        

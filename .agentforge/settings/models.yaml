@@ -1,35 +1,34 @@
 # Default settings for all models unless overridden
 ModelSettings:
+#  API: groq_api
+#  Model: llama31
 #  API: gemini_api
 #  Model: gemini-flash
-  API: groq_api
-  Model: llama31
+  API: openrouter_api
+  Model: hermes
 #  API: openai_api
 #  Model: omni_model
 #  API: claude3_api
 #  Model: claude-3
-#  API: oobabooga_api/
-
-#  Model: oobabooga
 #  API: ollama_api
 #  Model: DolphinMistral
 #  API: lm_studio_api
 #  Model: LMStudio
-  Params:
+  Params: # Default parameter values
     max_new_tokens: 3000
-    temperature: 0.7
-    top_p: 0.9
+    temperature: 0.8
+    top_p: 0.1
     n: 1
     stop: null
     do_sample: true
     return_prompt: false
     return_metadata: false
     typical_p: 0.95
-    repetition_penalty: 1.1
+    repetition_penalty: 1.05
     encoder_repetition_penalty: 1.0
-    top_k: 50
-    min_length: 1
-    no_repeat_ngram_size: 3
+    top_k: 40
+    min_length: 10
+    no_repeat_ngram_size: 0
     num_beams: 1
     penalty_alpha: 0
     length_penalty: 1
@@ -41,6 +40,7 @@ ModelSettings:
     bad_words_ids: null
     seed: -1
 
+# Library of Models and Parameter Defaults Override
 ModelLibrary:
   openai_api:
     module: "openai"
@@ -68,8 +68,12 @@ ModelLibrary:
     models:
       llama31:
         name: llama-3.1-70b-versatile
-        params:
-          max_new_tokens: 3500
+  openrouter_api:
+    module: "openrouter"
+    class: "OpenRouter"
+    models:
+      hermes:
+        name: nousresearch/hermes-3-llama-3.1-405b
   claude_old:
     module: "claude_old"
     class: "Claude"

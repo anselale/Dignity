@@ -4,7 +4,6 @@ from CustomAgents.Trinity.GenerateAgent import GenerateAgent
 from CustomAgents.Trinity.ReflectAgent import ReflectAgent
 from agentforge.utils.functions.Logger import Logger
 from Utilities.Parsers import MessageParser
-import os
 
 
 class Trinity:
@@ -20,6 +19,9 @@ class Trinity:
         self.user_history = None
         self.dm_history = None
         self.message = None
+        self.unformatted_history = None
+        self.unformatted_user_history = None
+        self.unformatted_dm_history = None
         self.parser = MessageParser
         self.ui = UI(discord_client)
         self.response: str = ''
@@ -38,12 +40,12 @@ class Trinity:
             "generate": {},
             "reflect": {},
             "kb": None,
-            "scratchpad": None
+            "scratchpad": None,
+            "reranked_memories": None
         }
         pass
 
     def do_chat(self, message):
-        print("Starting do_chat...")
         self.message = message
         self.ui.channel_id_layer_0 = self.message["channel_id"]
         self.ui.current_thread_id = None  # Reset the thread ID for each new chat
@@ -53,17 +55,17 @@ class Trinity:
         # self.ui.send_message(0, self.message, initial_response)
 
         if self.message['channel'].startswith('Direct Message'):
-            self.chat_history = self.memory.fetch_history(collection_name=message['author'], prefix='dm')
+            self.chat_history, self.unformatted_history = self.memory.fetch_history(collection_name=message['author'], prefix='dm')
         else:
             print("Fetch Channel History")
-            self.chat_history = self.memory.fetch_history(collection_name=message['channel'])
+            self.chat_history, self.unformatted_history = self.memory.fetch_history(collection_name=message['channel'])
         print("Fetch User History")
-        self.user_history = self.memory.fetch_history(collection_name=message['author'],
+        self.user_history, self.unformatted_user_history = self.memory.fetch_history(collection_name=message['author'],
                                                       query=self.message['message'],
                                                       is_user_specific=True,
                                                       query_size=3)
         print("Fetch DM History")
-        self.dm_history = self.memory.fetch_history(collection_name=message['author'],
+        self.dm_history, self.unformatted_dm_history = self.memory.fetch_history(collection_name=message['author'],
                                                     query=self.message['message'],
                                                     is_user_specific=True,
                                                     query_size=3, prefix='dm')
@@ -73,6 +75,7 @@ class Trinity:
         self.memory.recall_categories(self.message['message'], self.cognition['thought']["Categories"], 3)
         self.cognition['scratchpad'] = self.memory.get_scratchpad(self.message['author'])
         self.run_agent('theory')
+
         # chat with docs RAG
         self.cognition['kb'] = self.memory.query_kb(message, self.cognition['theory'].get('What'))
         self.run_agent('generate')
@@ -104,12 +107,24 @@ class Trinity:
         memories = self.memory.get_current_memories()
         journals = self.memory.get_current_journals()
         agent = self.agents[agent_name]
+
+        # Rerank implementation
+        queries_list = [self.unformatted_user_history, self.unformatted_history, self.unformatted_dm_history]
+        queries = []
+        for i in queries_list:
+            if i is not None:
+                queries.append(i)
+        if self.cognition['thought']:
+            query = self.cognition['thought']
+        else:
+            query = self.message['message']
+        self.cognition['reranked_memories'] = self.memory.combine_and_rerank(queries, query, 5)
+
         # agent.load_additional_data(self.messages, self.chosen_msg_index, self.chat_history,
         #                            self.user_history, memories, self.cognition)
         agent_vars = {'messages': self.message,  # batch_messages
                       'chat_history': self.chat_history,  # chat_history
-                      'user_history': self.user_history,  # user_history
-                      'memories': memories,  # memories
+                      'memories': self.cognition['reranked_memories'],  # reranked memories
                       'journals': journals,  # journals
                       'kb': self.cognition['kb'],  # knowledgebase
                       'cognition': self.cognition}  # cognition
@@ -168,6 +183,10 @@ class Trinity:
         self.memory.set_memory_info(self.message, self.cognition, self.response)
         self.memory.save_all_memory()
         self.memory.wipe_current_memories()
+        self.unformatted_dm_history = None
+        self.unformatted_user_history = None
+        self.unformatted_history = None
+
 
 class UI:
     def __init__(self, client):

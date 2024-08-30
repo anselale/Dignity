@@ -15,7 +15,7 @@ Prompts:
 
   Instruction: |+
     ## Scratchpad Update Instructions
-    You are maintaining a scratchpad of important information about the user {username}. Your task is to update this scratchpad based on the latest interactions. 
+    You are maintaining a scratchpad of important information about the user {username}. Your task is to update this scratchpad based on the latest interactions. This scratchpad should be about {username}, not {name}
 
     <CURRENT_SCRATCHPAD>
     (This is the current content of the scratchpad. It contains relevant details about the user such as preferences, personal information, and specific instructions they've given.)
@@ -28,7 +28,7 @@ Prompts:
     </SCRATCHPAD_LOG>
 
     <INSTRUCTIONS>
-    Please update the scratchpad with any new relevant information about the user. Follow these guidelines:
+    Please update the scratchpad with any new relevant information about {username}. Follow these guidelines:
     1. Include preferences, personal details, or specific instructions given by the user.
     2. Keep the information concise and well-organized.
     3. Only add or modify information if it's significant and likely to be useful in future interactions.
