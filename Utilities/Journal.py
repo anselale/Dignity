@@ -16,6 +16,7 @@ class Journal:
         """
         Initialize the Journal with necessary components for storage, parsing, and agent interactions.
         """
+        print("Journal initializing")
         self.storage = ChromaUtils()
         self.parser = MessageParser
         self.journal = JournalAgent()
@@ -31,8 +32,11 @@ class Journal:
         Returns:
             str: The generated journal entry.
         """
+        print("Do Journal")
         self.write_entry()
+        print("Write Entry")
         self.journal_reflect()
+        print("Journal Reflect")
         try:
             path = self.save_journal()
             print(f"File created: {path}")
@@ -49,7 +53,9 @@ class Journal:
             str: The generated journal entry.
         """
         collection = 'journal_log_table'
+        print("Write Entry Collection")
         log = self.storage.load_collection(collection_name=collection)
+        print("Write Entry Log")
         messages = self.parser.format_journal_entries(log)
         self.results = self.journal.run(chat_log=messages)
         return self.results

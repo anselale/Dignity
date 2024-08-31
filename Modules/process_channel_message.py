@@ -4,11 +4,9 @@ from Modules.TrinityLoop import Trinity
 class ChannelMessage:
 
     def __init__(self, memory_instance, discord_client):
-        print("Initializing ChannelMessage...")
         self.memory = memory_instance
         self.discord = discord_client
         self.trinity = Trinity(self.memory, self.discord)
-        print("ChannelMessage initialized.")
         pass
 
     def process_message(self, message):

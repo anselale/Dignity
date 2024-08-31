@@ -1,6 +1,6 @@
 # Persona Settings
 PersonasEnabled: true
-Persona: default
+Persona: helpful
 
 # Storage Settings
 StorageEnable: true

@@ -1,6 +1,7 @@
 from agentforge.utils.chroma_utils import ChromaUtils
 from agentforge.utils.functions.Logger import Logger
 from Utilities.Parsers import MessageParser
+from Utilities.Journal import Journal
 
 
 class Memory:
@@ -417,10 +418,11 @@ class Memory:
         count = self.memory.count_collection('journal_log_table')
         print(count)
         if count >= 100:
-            from Utilities.Journal import Journal
             journal_function = Journal()
+            print("Journal initialized")
             journal_written = journal_function.do_journal()
             if journal_written:
+                print("Deleting Journal collection")
                 self.memory.delete_collection('journal_log_table')
             return journal_written
         else:

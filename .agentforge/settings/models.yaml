@@ -1,11 +1,11 @@
 # Default settings for all models unless overridden
 ModelSettings:
-#  API: groq_api
-#  Model: llama31
+  API: groq_api
+  Model: llama31
 #  API: gemini_api
 #  Model: gemini-flash
-  API: openrouter_api
-  Model: hermes
+#  API: openrouter_api
+#  Model: hermes
 #  API: openai_api
 #  Model: omni_model
 #  API: claude3_api
@@ -72,6 +72,8 @@ ModelLibrary:
     module: "openrouter"
     class: "OpenRouter"
     models:
+      phi3med:
+        name: microsoft/phi-3-medium-128k-instruct:free
       hermes:
         name: nousresearch/hermes-3-llama-3.1-405b
   claude_old:

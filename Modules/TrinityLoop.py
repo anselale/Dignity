@@ -85,6 +85,7 @@ class Trinity:
 
         self.save_memories()
         # write journal
+        print("Check Journal")
         journal = self.memory.check_journal()
         if journal:
             self.ui.send_message(1, self.message, journal)
@@ -143,8 +144,15 @@ class Trinity:
             if iteration_count > max_iterations:
                 self.logger.log("Maximum iteration count reached, forcing response", 'warning', 'Trinity')
                 self.response = self.cognition['generate'].get('result')
-                self.ui.send_message(0, self.message, self.response)
+                if reflection["Choice"] == "change":
+                    self.run_agent('generate')
+                    reflection = self.cognition['reflect']
+                    self.response = self.cognition['generate'].get('result')
+                    self.logger.log(f"Handle Reflection:{reflection}", 'debug', 'Trinity')
                 self.cognition['reflect']['Choice'] = 'respond'
+                response_log = f"Generated Response:\n{self.response}\n"
+                self.logger.log(response_log, 'debug', 'Trinity')
+                self.ui.send_message(0, self.message, self.response)
                 break
             else:
                 reflection = self.cognition['reflect']

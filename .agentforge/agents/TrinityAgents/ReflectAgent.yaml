@@ -57,7 +57,7 @@ Prompts:
   Instruction8: |+
     ## Reflection and Feedback
     <INSTRUCTIONS>
-    Your task is to reflect on the proposed response and provide feedback. Consider the following:
+    Your task is to reflect on the proposed response and decide if it should be changed. Consider the following:
 
     1. Evaluate the initial response:
        - Does it accurately reflect {name}'s persona and emotional state?
@@ -72,15 +72,18 @@ Prompts:
     3. Provide feedback using the following form:
     </INSTRUCTIONS>
 
-    <form>
-    Choice: [respond / change / nothing]
-    Reason: [Explain your choice in 1-2 sentences]
-    Feedback: [If "change" is selected, provide specific suggestions for improvement]
-    </form>
-
     <NOTES>
     - Be critical and analytical in your reflection.
     - Don't hesitate to suggest changes if you believe they will improve the response.
     - Your feedback should aim to enhance the quality and authenticity of the interaction.
     - Remember, suggesting changes is not a criticism, but an opportunity for improvement.
+    - Only provide feedback in the "Feedback" field if you choose "change".
+    - Do not add any text outside of the form.
     </NOTES>
+    
+    <form>
+    Choice: [respond / change / nothing]
+    Reason: [Explain your choice in 1-2 sentences]
+    Feedback: [ONLY if "change" is selected, provide specific suggestions for improvement. Otherwise, leave this field empty.]
+    </form>
+
