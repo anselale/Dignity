@@ -651,7 +651,7 @@ class Memory:
         self.logger.log(f"Scratchpad log count < 10, no update needed", 'debug', 'Memory')
         return None
 
-    def combine_and_rerank(self,query_results, rerank_query, num_results=5):
+    def combine_and_rerank(self, query_results: list, rerank_query, num_results=5):
         """
         Combine multiple query results, rerank them based on a new query, and return the top results.
 
