@@ -128,11 +128,16 @@ class MessageParser:
     def format_general_history_entries(history):
         formatted_entries = []
         channel = ''
-        for i, metadata in enumerate(history.get('metadatas', [])):
+
+        # Create a list of tuples (index, id) and sort it by id
+        sorted_indices = sorted(enumerate(history.get('ids', [])), key=lambda x: x[1])
+
+        for index, _ in sorted_indices:
+            metadata = history['metadatas'][index]
             entry_details = []
             # Start with User and Message
             entry_details.append(f"User: {metadata.get('User', 'N/A')}")
-            entry_details.append(f"Message: {history['documents'][i] if i < len(history.get('documents', [])) else 'N/A'}")
+            entry_details.append(f"Message: {history['documents'][index] if index < len(history.get('documents', [])) else 'N/A'}")
 
             excluded_metadata = [
                 "User", "id", "Response", "Reason", "Emotion", "InnerThought",
@@ -185,6 +190,7 @@ class MessageParser:
             return match.group(1).strip()
         else:
             return ""
+    
     @staticmethod
     def format_journal_entries(history):
         """
