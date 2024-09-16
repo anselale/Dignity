@@ -14,13 +14,16 @@ o7 is an advanced problem-solving chatbot designed to provide expert-level assis
 
 o7 is built on the AgentForge framework, which enables advanced capabilities such as:
 
-- Active retrieval augmented generation
-- Reflection
-- Multi-prompt chain-of-thought
-- Theory of mind capabilities
-- Single branch tree-of-thought
+- [active retrieval augmented generation](https://arxiv.org/abs/2305.06983)
+- [reflextion](https://arxiv.org/abs/2303.11366)
+- multi-prompt [chain-of-thought](https://arxiv.org/abs/2201.11903)
+- [theory of mind capabilities](https://arxiv.org/abs/2303.12712)
+- Journal/Diary - Episodic Memory
+- ***NEW*** - Personalized user notepad
+- ***NEW*** - Reranking search results to reduce token costs
+- *Beta* - KB implementation
 
-These features allow o7 to generate lucid and liminal conversational interactions that are enhanced by emotional stimuli.
+These features allow o7 to generate lucid and liminal conversational interactions that are [enhanced by emotional stimuli](https://arxiv.org/abs/2307.11760). [(see also)](https://arxiv.org/abs/2312.11111v1)
 
 ## Configuration
 

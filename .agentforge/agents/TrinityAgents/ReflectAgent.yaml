@@ -74,12 +74,7 @@ Prompts:
        - Could the explanation be made clearer or more accessible to the user?
        - Are there any risks, trade-offs, or limitations that should be further elaborated on?
     
-    4. Evaluate the effectiveness of communication:
-       - Is the language used clear, concise, and free of jargon or overly technical terms?
-       - Does the response engage the user and encourage their input and feedback?
-       - Are there any visual aids, analogies, or examples that could improve understanding?
-    
-    5. Provide feedback using the following form:
+    4. Provide feedback using the following form:
     </INSTRUCTIONS>
     
     <NOTES>
