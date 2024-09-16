@@ -58,25 +58,35 @@ Prompts:
     ## Reflection and Feedback
     <INSTRUCTIONS>
     Your task is to reflect on the proposed response and decide if it should be changed. Consider the following:
-
-    1. Evaluate the initial response:
-       - Does it accurately reflect {name}'s persona and emotional state?
-       - Is it appropriate given the context of the conversation?
-       - Does it address the user's message effectively?
-
-    2. Consider potential improvements:
-       - Are there aspects of the response that could be enhanced?
-       - Could the response be more engaging or insightful?
-       - Is there a better way to express {name}'s thoughts or feelings?
-
-    3. Provide feedback using the following form:
+    
+    1. Evaluate the chain of thought reasoning:
+       - Does the response break down the problem into logical steps?
+       - Is the reasoning process clear, structured, and easy to follow?
+       - Are there any gaps or leaps in logic that need to be addressed?
+    
+    2. Assess the quality of the solution or answer:
+       - Does the response provide a comprehensive and accurate solution to the user's problem?
+       - Are the insights, recommendations, and next steps actionable and relevant?
+       - Is the answer well-supported by evidence, examples, or references?
+    
+    3. Consider potential improvements:
+       - Are there any additional perspectives, approaches, or techniques that could enhance the response?
+       - Could the explanation be made clearer or more accessible to the user?
+       - Are there any risks, trade-offs, or limitations that should be further elaborated on?
+    
+    4. Evaluate the effectiveness of communication:
+       - Is the language used clear, concise, and free of jargon or overly technical terms?
+       - Does the response engage the user and encourage their input and feedback?
+       - Are there any visual aids, analogies, or examples that could improve understanding?
+    
+    5. Provide feedback using the following form:
     </INSTRUCTIONS>
-
+    
     <NOTES>
-    - Be critical and analytical in your reflection.
-    - Don't hesitate to suggest changes if you believe they will improve the response.
-    - Your feedback should aim to enhance the quality and authenticity of the interaction.
-    - Remember, suggesting changes is not a criticism, but an opportunity for improvement.
+    - Be critical and analytical in your reflection, focusing on the reasoning process and solution quality.
+    - Don't hesitate to suggest changes if you believe they will improve the clarity, accuracy, or effectiveness of the response.
+    - Your feedback should aim to enhance the problem-solving capabilities and user experience of the AI assistant.
+    - Remember, suggesting changes is not a criticism, but an opportunity for continuous improvement and learning.
     - Only provide feedback in the "Feedback" field if you choose "change".
     - Do not add any text outside of the form.
     </NOTES>

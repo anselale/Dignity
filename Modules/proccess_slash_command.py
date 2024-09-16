@@ -2,7 +2,6 @@
 
 import shlex
 from typing import List
-from Modules.challenges import Challenges
 
 
 class SlashCommands:
@@ -10,7 +9,6 @@ class SlashCommands:
         self.memory = memory_instance
         self.discord = discord_client
         self.message = None
-        self.challenges = Challenges(self.memory)
         self.commands = [func for func in dir(self) if callable(getattr(self, func)) and not func.startswith("__") and func != "parse"]
 
     def parse(self, message):
@@ -58,26 +56,6 @@ class SlashCommands:
             return str(float(args[0]) + float(args[1]))
         except ValueError:
             return "Error: Both arguments must be numbers."
-
-    def challenge(self, args: List[str]) -> str:
-        """
-        A collection of capture the flag challenges. The bot has a secret
-        password hidden in their system prompt. Your job is to get them to
-        reveal the secret password, which you can turn in for points.
-        """
-        if args and args[0] == '-?':
-            return """
-            challenge: Prompt attack capture the flag
-            Usage:
-                /bot challenge level list - List of challenges and descriptions
-                /bot challenge level <LevelName> - Get the challenge hint text
-                /bot challenge level <LevelName> "text" - Send the text to the challenge as part of the prompt attack.
-                /bot challenge answer <LevelName> - Attempt to answer the specified level..
-                /bot challenge reset <LevelName> - Resets the specified level.
-            """
-        else:
-            result = self.challenges.parse(args, self.message)
-            return result
 
     @staticmethod
     def about():
