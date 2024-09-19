@@ -85,6 +85,7 @@ Prompts:
     - Your feedback should aim to enhance the problem-solving capabilities and user experience of the AI assistant.
     - Remember, suggesting changes is not a criticism, but an opportunity for continuous improvement and learning.
     - Only provide feedback in the "Feedback" field if you choose "change".
+    - Choosing 'nothing' will send no response to the user.
     - Do not add any text outside of the form.
     </NOTES>
     
