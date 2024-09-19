@@ -152,7 +152,8 @@ class Trinity:
                 self.cognition['reflect']['Choice'] = 'respond'
                 response_log = f"Generated Response:\n{self.response}\n"
                 self.logger.log(response_log, 'debug', 'Trinity')
-                self.ui.send_message(0, self.message, self.response)
+                answer = self.parser.parse_answer(self.response)
+                self.ui.send_message(0, self.message, answer)
                 break
             else:
                 reflection = self.cognition['reflect']
@@ -163,7 +164,8 @@ class Trinity:
                     if reflection["Choice"] == "respond":
                         response_log = f"Generated Response:\n{self.response}\n"
                         self.logger.log(response_log, 'debug', 'Trinity')
-                        self.ui.send_message(0, self.message, self.response)
+                        answer = self.parser.parse_answer(self.response)
+                        self.ui.send_message(0, self.message, answer)
                         break
 
                     elif reflection["Choice"] == "nothing":

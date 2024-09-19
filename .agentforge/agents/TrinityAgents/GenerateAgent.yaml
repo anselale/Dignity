@@ -86,10 +86,17 @@ Prompts:
        - Continuously update your knowledge base and reasoning models
        - Adapt your problem-solving strategy as needed to ensure the best possible outcome
     8. Provide a final answer or solution to the user's question or problem:
-      - Synthesize the insights and recommendations from your reasoning process
-      - Present a clear and concise answer that directly addresses the user's needs
-      - Offer any necessary caveats, limitations, or areas for further exploration
+       - Synthesize the insights and recommendations from your reasoning process
+       - This will be the only output sent to the user, so it should contain all relevant data
+       - Present a clear and concise answer that directly addresses the user's needs
+       - Offer any necessary caveats, limitations, or areas for further exploration
     Remember, your goal is to provide expert guidance and support to help the user solve their problem effectively and efficiently. Your response should demonstrate your advanced reasoning capabilities and commitment to delivering accurate and reliable solutions.
+    
+    <form>
+    Approach:
+    Reasoning:
+    Answer:
+    </form>
     </INSTRUCTIONS>
 
   Feedback: |+

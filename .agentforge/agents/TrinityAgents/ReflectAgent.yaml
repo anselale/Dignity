@@ -63,6 +63,7 @@ Prompts:
        - Does the response break down the problem into logical steps?
        - Is the reasoning process clear, structured, and easy to follow?
        - Are there any gaps or leaps in logic that need to be addressed?
+       - Is any specific step incorrect?
     
     2. Assess the quality of the solution or answer:
        - Does the response provide a comprehensive and accurate solution to the user's problem?
@@ -79,6 +80,7 @@ Prompts:
     
     <NOTES>
     - Be critical and analytical in your reflection, focusing on the reasoning process and solution quality.
+    - DO NOT assess the tone or personality of the response, or otherwise criticize the writing style.
     - Don't hesitate to suggest changes if you believe they will improve the clarity, accuracy, or effectiveness of the response.
     - Your feedback should aim to enhance the problem-solving capabilities and user experience of the AI assistant.
     - Remember, suggesting changes is not a criticism, but an opportunity for continuous improvement and learning.

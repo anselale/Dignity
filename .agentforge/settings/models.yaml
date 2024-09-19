@@ -2,14 +2,14 @@
 ModelSettings:
 #  API: groq_api
 #  Model: llama31
-#  API: gemini_api
-#  Model: gemini-flash
+  API: gemini_api
+  Model: gemini-flash
 #  API: openrouter_api
 #  Model: hermes
 #  API: openai_api
 #  Model: omni_model
-  API: claude3_api
-  Model: claude-3
+#  API: claude3_api
+#  Model: claude-3
 #  API: ollama_api
 #  Model: DolphinMistral
 #  API: lm_studio_api

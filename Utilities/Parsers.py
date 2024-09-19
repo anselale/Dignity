@@ -339,3 +339,14 @@ class MessageParser:
             logger.log("No updated scratchpad content found in the result.", 'warning', 'Formatting')
             return ""
 
+    @staticmethod
+    def parse_answer(text):
+        start = text.find('Answer:')
+        if start != -1:
+            start += len('Answer:')
+            end = text.find('</form>', start)
+            if end != -1:
+                return text[start:end].strip()
+            else:
+                return text[start:].strip()
+        return None
