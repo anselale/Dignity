@@ -1,6 +1,6 @@
 # TrinityAF
 
- This is a discord chatbot implementation of AssistAF using the [AgentForge](https://github.com/AgentForge/agentforge) framework. It has advanced [active retrieval augmented generation](https://arxiv.org/abs/2305.06983),  and leverages [reflextion](https://arxiv.org/abs/2303.11366), multi-prompt [chain-of-thought](https://arxiv.org/abs/2201.11903), uses [theory of mind capabilities](https://arxiv.org/abs/2303.12712), and even has a single branch [tree-of-thought](https://arxiv.org/abs/2305.10601). All of this to generate lucid and liminal conversational character bots that are [enhanced by emotional stimuli](https://arxiv.org/abs/2307.11760). [(see also)](https://arxiv.org/abs/2312.11111v1)
+ This is a discord chatbot implementation of AssistAF using the [AgentForge](https://github.com/AgentForge/agentforge) framework. It has advanced [active retrieval augmented generation](https://arxiv.org/abs/2305.06983),  and leverages [reflextion](https://arxiv.org/abs/2303.11366), multi-prompt [chain-of-thought](https://arxiv.org/abs/2201.11903), and uses [theory of mind capabilities](https://arxiv.org/abs/2303.12712). All of this to generate lucid and liminal conversational character bots that are [enhanced by emotional stimuli](https://arxiv.org/abs/2307.11760). [(see also)](https://arxiv.org/abs/2312.11111v1)
 
 This version features a new discord implementation, complete with DMs, slash commands, and embeds. Threads coming soon.
 
@@ -14,7 +14,10 @@ This version features a new discord implementation, complete with DMs, slash com
 - Single branch tree-of-thought
 - Multi-user interaction
 - Multi-channel response
-- ***NEW*** - Journal/Diary
+- Journal/Diary - Episodic Memory
+- ***NEW*** - Personalized user notepad
+- ***NEW*** - Reranking search results to reduce token costs
+- *Beta* - KB implementation
 
 ## Configure your Environment Variables:
 

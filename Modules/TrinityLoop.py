@@ -130,6 +130,7 @@ class Trinity:
                       'kb': self.cognition['kb'],  # knowledgebase
                       'cognition': self.cognition}  # cognition
         self.cognition[agent_name] = agent.run(**agent_vars)
+        TheoryAgent.run(username='user name')
 
         # Send result to Brain Channel
         result_message = f"{agent_name.capitalize()} Agent:\n```{str(self.cognition[agent_name]['result'])}```"
