@@ -1,4 +1,5 @@
 from CustomAgents.Trinity.ThoughtAgent import ThoughtAgent
+from CustomAgents.Trinity.ThoughtChainAgent import ThoughtChainAgent
 from CustomAgents.Trinity.TheoryAgent import TheoryAgent
 from CustomAgents.Trinity.GenerateAgent import GenerateAgent
 from CustomAgents.Trinity.ReflectAgent import ReflectAgent
@@ -10,10 +11,10 @@ class Trinity:
     def __init__(self, memory_instance, discord_client):
         self.memory = memory_instance
         self.persona = self.memory.get_persona()
-        self.thought = ThoughtAgent()
-        self.theory = TheoryAgent()
-        self.generate = GenerateAgent()
-        self.reflect = ReflectAgent()
+        # self.thought = ThoughtAgent()
+        # self.theory = TheoryAgent()
+        # self.generate = GenerateAgent()
+        # self.reflect = ReflectAgent()
         self.logger = Logger(self.__class__.__name__)
         self.chat_history = None
         self.user_history = None
@@ -25,10 +26,12 @@ class Trinity:
         self.parser = MessageParser
         self.ui = UI(discord_client)
         self.response: str = ''
+
         # Grouping agent-related instances into a dictionary
         self.agents = {
             "thought": ThoughtAgent(),
             "theory": TheoryAgent(),
+            "cot": ThoughtChainAgent(),
             "generate": GenerateAgent(),
             "reflect": ReflectAgent(),
         }
@@ -37,8 +40,9 @@ class Trinity:
             "choose": {},
             "thought": {},
             "theory": {},
-            "generate": {},
+            "cot": {},
             "reflect": {},
+            "generate": {},
             "kb": None,
             "scratchpad": None,
             "reranked_memories": None
@@ -70,18 +74,27 @@ class Trinity:
                                                     is_user_specific=True,
                                                     query_size=3, prefix='dm')
 
+        # Run Thought Agent
         self.run_agent('thought')
         self.memory.recall_journal_entry(self.message['message'], self.cognition['thought']["Categories"], 3)
         self.memory.recall_categories(self.message['message'], self.cognition['thought']["Categories"], 3)
         self.cognition['scratchpad'] = self.memory.get_scratchpad(self.message['author'])
+
+        # Run Theory Agent
         self.run_agent('theory')
 
         # chat with docs RAG
         self.cognition['kb'] = self.memory.query_kb(message, self.cognition['theory'].get('What'))
-        self.run_agent('generate')
-        self.run_agent('reflect')
 
+        # Run Reflection Agent
+        self.run_agent('cot')
+        self.run_agent('reflect')
         self.handle_reflect_agent_decision()
+
+        # Run Generate Agent
+        self.run_agent('generate')
+        response = self.cognition['generate'].get('Response')
+        self.ui.send_message(0, self.message, response)
 
         self.save_memories()
         # write journal
@@ -132,57 +145,40 @@ class Trinity:
         self.cognition[agent_name] = agent.run(**agent_vars)
 
         # Send result to Brain Channel
-        result_message = f"{agent_name.capitalize()} Agent:\n```{str(self.cognition[agent_name]['result'])}```"
+        result_message = f"{agent_name.capitalize()} Agent:\n{str(self.cognition[agent_name]['result'])}"
         self.ui.send_message(1, self.message, result_message)
 
     def handle_reflect_agent_decision(self):
-        max_iterations = 1
+        max_iterations = 2
         iteration_count = 0
 
         while True:
             iteration_count += 1
             if iteration_count > max_iterations:
                 self.logger.log("Maximum iteration count reached, forcing response", 'warning', 'Trinity')
-                self.response = self.cognition['generate'].get('result')
-                if reflection["Choice"] == "change":
-                    self.run_agent('generate')
-                    reflection = self.cognition['reflect']
-                    self.response = self.cognition['generate'].get('result')
-                    self.logger.log(f"Handle Reflection:{reflection}", 'debug', 'Trinity')
-                self.cognition['reflect']['Choice'] = 'respond'
-                response_log = f"Generated Response:\n{self.response}\n"
-                self.logger.log(response_log, 'debug', 'Trinity')
-                answer = self.parser.parse_answer(self.response)
-                self.ui.send_message(0, self.message, answer)
                 break
+
             else:
                 reflection = self.cognition['reflect']
-                self.response = self.cognition['generate'].get('result')
                 self.logger.log(f"Handle Reflection:{reflection}", 'debug', 'Trinity')
 
                 if "Choice" in reflection:
-                    if reflection["Choice"] == "respond":
-                        response_log = f"Generated Response:\n{self.response}\n"
-                        self.logger.log(response_log, 'debug', 'Trinity')
-                        answer = self.parser.parse_answer(self.response)
-                        self.ui.send_message(0, self.message, answer)
+                    if reflection["Choice"] == "approve":
+                        self.logger.log("Approved CoT", 'debug', 'Trinity')
                         break
 
-                    elif reflection["Choice"] == "nothing":
-                        self.logger.log(f"Reason for not responding:\n{reflection['Reason']}\n", 'info', 'Trinity')
-                        self.response = f"... (Did not respond to {self.message['author']} because {reflection['Reason']})"
-                        self.ui.send_message(0, self.message, f"...")
-                        return
-
-                    elif reflection["Choice"] == "change":
-                        self.logger.log(f"Changing Response:\n{self.response}\n Due To:\n{reflection['Reason']}",
-                                        'info', 'Trinity')
-                        self.run_agent('generate')
+                    elif reflection["Choice"] == "revise":
+                        self.logger.log(f"Reason for not revision:\n{reflection['Reason']}\n", 'info', 'Trinity')
+                        self.run_agent('cot')
                         self.run_agent('reflect')
                         continue
+
+                    elif reflection["Choice"] == "confused":
+                        self.logger.log(f"Changing Response:\n{self.response}\n Due To:\n{reflection['Reason']}",
+                                        'info', 'Trinity')
+                        break
                     else:
                         self.logger.log(f"No Choice in Reflection Response:\n{reflection}", 'error', 'Trinity')
-                        self.run_agent('generate')
                         self.run_agent('reflect')
             break
 

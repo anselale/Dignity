@@ -18,23 +18,34 @@ class ChatAgent(Agent):
 
         # self.data['memories'] = memories
 
+        # Thought Agent
         self.data['emotion'] = self.data['cognition']['thought'].get('Emotion')
         self.data['reason'] = self.data['cognition']['thought'].get('Reason')
         self.data['thought'] = self.data['cognition']['thought'].get('Inner Thought')
+
+        # Theory Agent
         self.data['what'] = self.data['cognition']['theory'].get("What", "Unknown.")
         self.data['why'] = self.data['cognition']['theory'].get("Why", "Not enough information.")
-        self.data['response'] = self.data['cognition']['generate'].get('result')
-        self.data['response_commentary'] = self.data['cognition']['generate'].get('OptionalReflection')
+
+        # CoT agent
+        self.data['chain_of_thought'] = self.data['cognition']['cot'].get("result")
+
+        # Reflection Agent
         self.data['choice'] = self.data['cognition']['reflect'].get("Choice")
         self.data['reflection_reason'] = self.data['cognition']['reflect'].get("Reason")
         self.data['feedback'] = self.data['cognition']['reflect'].get("Feedback")
+
+        # Generate Agent
+        self.data['response_reasoning'] = self.data['cognition']['generate'].get('Reasoning')
+        self.data['response'] = self.data['cognition']['generate'].get('Response')
 
     def parse_result(self):
         self.logger.log(f"{self.agent_name} Results:\n{self.result}", 'debug', 'Trinity')
         try:
             result = str(self.result)
-            self.result = self.parser.parse_lines(result)
-            self.result['result'] = result
+            # self.result = self.parser.parse_lines(result)
+            self.result = self.functions.parsing_utils.parse_yaml_content(result)
+            self.result['result'] = self.functions.parsing_utils.extract_yaml_block(result)
         except Exception as e:
             self.logger.parsing_error(self.result, e)
 

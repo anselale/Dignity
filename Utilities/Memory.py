@@ -163,7 +163,7 @@ class Memory:
         self.save_scratchpad_log(self.user_message['author'], self.user_message['message'])
         self.logger.log(f"Saved all memories.", 'debug', 'Trinity')
 
-    def set_memory_info(self,   message_batch: dict, cognition: dict, response: str):
+    def set_memory_info(self, message_batch: dict, cognition: dict, response: str):
         """
         Set the current memory information for processing.
 
@@ -178,7 +178,7 @@ class Memory:
         self.response = response
 
     def save_to_collection(self, collection_name: str, chat_message: dict, response_message: str,
-                                 metadata_extra=None):
+                           metadata_extra=None):
         """
         Save a message to a specific collection in memory.
 
@@ -317,8 +317,8 @@ class Memory:
             category_collection = self.parser.format_string(collection_name)
             self.logger.log(f"Fetching Category: {category_collection}", 'debug', 'Memory')
             recalled_memories = self.memory.query_memory(collection_name=category_collection,
-                                                          query=message,
-                                                          num_results=num_memories_per_category)
+                                                         query=message,
+                                                         num_results=num_memories_per_category)
             if recalled_memories:
                 self.logger.log(f"Recalled Memories:\n{recalled_memories}", 'debug', 'Memory')
                 memories = self.parser.format_user_specific_history_entries(recalled_memories)
@@ -391,7 +391,9 @@ class Memory:
                         print(f"Full Entry: {full_entry}")
                         # Add the relevant fields to the recalled_memories dictionary
                         recalled_memories['ids'].append(full_entry['ids'][0])
-                        recalled_memories['metadatas'].append({key: value for key, value in full_entry['metadatas'][0].items() if key.lower() not in ['source', 'isotimestamp', 'unixtimestamp']})
+                        recalled_memories['metadatas'].append(
+                            {key: value for key, value in full_entry['metadatas'][0].items() if
+                             key.lower() not in ['source', 'isotimestamp', 'unixtimestamp']})
                         recalled_memories['documents'].append(full_entry['documents'][0])
 
             print(f"Full Entries Appended: {recalled_memories}")
@@ -450,7 +452,8 @@ class Memory:
 
                     # Get the full entry using the id
                     entry_id = message_kb['ids'][i]
-                    full_entry = self.memory.load_collection(collection_name="docs", where={"Position": {"$eq": position}})
+                    full_entry = self.memory.load_collection(collection_name="docs",
+                                                             where={"Position": {"$eq": position}})
                     if full_entry:
                         result.append(full_entry)
 
@@ -481,7 +484,8 @@ class Memory:
 
                     # Get the full entry using the id
                     entry_id = theory_kb['ids'][i]
-                    full_entry = self.memory.load_collection(collection_name="docs", where={"Position": {"$eq": position}})
+                    full_entry = self.memory.load_collection(collection_name="docs",
+                                                             where={"Position": {"$eq": position}})
                     if full_entry:
                         result.append(full_entry)
 
@@ -582,7 +586,8 @@ class Memory:
 
         collection_size = self.memory.count_collection(collection_name)
         memory_id = [str(collection_size + 1)]
-        self.logger.log(f"Saving Scratchpad Log to: {collection_name}\nMessage:\n{content}\nID: {memory_id}", 'debug', 'Memory')
+        self.logger.log(f"Saving Scratchpad Log to: {collection_name}\nMessage:\n{content}\nID: {memory_id}", 'debug',
+                        'Memory')
         self.memory.save_memory(collection_name=collection_name, data=[content], ids=memory_id)
 
     def save_to_scratchpad_log(self, username, message):
@@ -632,7 +637,8 @@ class Memory:
                 "scratchpad": current_scratchpad
             }
             scratchpad_result = scratchpad_agent.run(**agent_vars)
-            self.logger.log(f"Scratchpad agent result: {scratchpad_result[:100]}...\nVars: {agent_vars}", 'debug', 'Memory')
+            self.logger.log(f"Scratchpad agent result: {scratchpad_result[:100]}...\nVars: {agent_vars}", 'debug',
+                            'Memory')
 
             updated_scratchpad = self.parser.extract_updated_scratchpad(scratchpad_result)
             self.logger.log(f"Updated scratchpad content: {updated_scratchpad[:100]}...", 'debug', 'Memory')
@@ -678,7 +684,7 @@ class Memory:
             rerank_query = "specific topic"
             reranked = query_and_rerank(query_results, rerank_query, num_results=3)
         """
-        
+
         # Combine all query results
         combined_query_results = self.memory.combine_query_results(*query_results)
 
@@ -692,4 +698,3 @@ class Memory:
         formatted_results = self.parser.format_user_specific_history_entries(reranked_results)
 
         return formatted_results
-        

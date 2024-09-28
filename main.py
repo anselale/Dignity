@@ -31,9 +31,7 @@ class Run:
         self.direct_message = DirectMessage(self.memory, self.client)
         self.channel_message = ChannelMessage(self.memory, self.client)
 
-
     def main(self):
-
         while True:
             try:
                 for channel_id, messages in self.client.process_channel_messages():
