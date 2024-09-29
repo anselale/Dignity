@@ -12,11 +12,6 @@ class ChatAgent(Agent):
         # self.data['user_history'] = user_history
         self.data['chat_message'] = chat_message['message']
         self.data['username'] = chat_message['author']
-        self.data['kb'] = self.data['cognition']['kb']
-        self.data['scratchpad'] = self.data['cognition']['scratchpad']
-        # self.data['formatted_mentions'] = chat_message['formatted_mentions']
-
-        # self.data['memories'] = memories
 
         # Thought Agent
         self.data['emotion'] = self.data['cognition']['thought'].get('Emotion')
@@ -41,13 +36,30 @@ class ChatAgent(Agent):
 
     def parse_result(self):
         self.logger.log(f"{self.agent_name} Results:\n{self.result}", 'debug', 'Trinity')
+        result = str(self.result)
         try:
-            result = str(self.result)
-            # self.result = self.parser.parse_lines(result)
-            self.result = self.functions.parsing_utils.parse_yaml_content(result)
+            parsed_result = self.functions.parsing_utils.parse_yaml_content(result)
+
+            if parsed_result is None or not isinstance(parsed_result, dict):
+                self.result = {'error': 'Parsing Error'}
+                return
+
+            self.result = parsed_result
             self.result['result'] = self.functions.parsing_utils.extract_yaml_block(result)
         except Exception as e:
-            self.logger.parsing_error(self.result, e)
+            self.logger.parsing_error(result, e)
+
+        # try:
+        #     result = str(self.result)
+        #     # self.result = self.parser.parse_lines(result)
+        #     self.result = self.functions.parsing_utils.parse_yaml_content(result)
+        #     if self.result is None:
+        #         self.result = {'error': 'Parsing Error'}
+        #         return
+        #
+        #     self.result['result'] = self.functions.parsing_utils.extract_yaml_block(result)
+        # except Exception as e:
+        #     self.logger.parsing_error(self.result, e)
 
     def save_result(self):
         pass

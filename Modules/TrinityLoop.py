@@ -58,33 +58,33 @@ class Trinity:
         # initial_response = "Processing your message..."
         # self.ui.send_message(0, self.message, initial_response)
 
-        if self.message['channel'].startswith('Direct Message'):
-            self.chat_history, self.unformatted_history = self.memory.fetch_history(collection_name=message['author'], prefix='dm')
-        else:
-            print("Fetch Channel History")
-            self.chat_history, self.unformatted_history = self.memory.fetch_history(collection_name=message['channel'])
-        print("Fetch User History")
-        self.user_history, self.unformatted_user_history = self.memory.fetch_history(collection_name=message['author'],
-                                                      query=self.message['message'],
-                                                      is_user_specific=True,
-                                                      query_size=3)
-        print("Fetch DM History")
-        self.dm_history, self.unformatted_dm_history = self.memory.fetch_history(collection_name=message['author'],
-                                                    query=self.message['message'],
-                                                    is_user_specific=True,
-                                                    query_size=3, prefix='dm')
+        # if self.message['channel'].startswith('Direct Message'):
+        #     self.chat_history, self.unformatted_history = self.memory.fetch_history(collection_name=message['author'], prefix='dm')
+        # else:
+        #     print("Fetch Channel History")
+        #     self.chat_history, self.unformatted_history = self.memory.fetch_history(collection_name=message['channel'])
+        # print("Fetch User History")
+        # self.user_history, self.unformatted_user_history = self.memory.fetch_history(collection_name=message['author'],
+        #                                               query=self.message['message'],
+        #                                               is_user_specific=True,
+        #                                               query_size=3)
+        # print("Fetch DM History")
+        # self.dm_history, self.unformatted_dm_history = self.memory.fetch_history(collection_name=message['author'],
+        #                                             query=self.message['message'],
+        #                                             is_user_specific=True,
+        #                                             query_size=3, prefix='dm')
 
         # Run Thought Agent
         self.run_agent('thought')
-        self.memory.recall_journal_entry(self.message['message'], self.cognition['thought']["Categories"], 3)
-        self.memory.recall_categories(self.message['message'], self.cognition['thought']["Categories"], 3)
-        self.cognition['scratchpad'] = self.memory.get_scratchpad(self.message['author'])
+        # self.memory.recall_journal_entry(self.message['message'], self.cognition['thought']["Categories"], 3)
+        # self.memory.recall_categories(self.message['message'], self.cognition['thought']["Categories"], 3)
+        # self.cognition['scratchpad'] = self.memory.get_scratchpad(self.message['author'])
 
         # Run Theory Agent
         self.run_agent('theory')
 
         # chat with docs RAG
-        self.cognition['kb'] = self.memory.query_kb(message, self.cognition['theory'].get('What'))
+        # self.cognition['kb'] = self.memory.query_kb(message, self.cognition['theory'].get('What'))
 
         # Run Reflection Agent
         self.run_agent('cot')
@@ -96,52 +96,69 @@ class Trinity:
         response = self.cognition['generate'].get('Response')
         self.ui.send_message(0, self.message, response)
 
-        self.save_memories()
+        # self.save_memories()
         # write journal
-        print("Check Journal")
-        journal = self.memory.check_journal()
-        if journal:
-            self.ui.send_message(1, self.message, journal)
+        # print("Check Journal")
+        # journal = self.memory.check_journal()
+        # if journal:
+        #     self.ui.send_message(1, self.message, journal)
         
         # Save message to scratchpad log
         # self.memory.save_scratchpad_log(message['author'], message['message'])
 
         # check and update scratchpad if necessary
-        self.logger.log(f"About to check scratchpad for {self.message['author']}", 'debug', 'Trinity')
-        updated_scratchpad = self.memory.check_scratchpad(self.message['author'])
-        self.logger.log(f"check_scratchpad returned: {updated_scratchpad[:100] if updated_scratchpad else None}", 'debug', 'Trinity')
-        if updated_scratchpad:
-            scratchpad_message = f"Updated scratchpad for {self.message['author']}:\n```\n{updated_scratchpad[:500]}...\n```"
-            self.ui.send_message(1, self.message, scratchpad_message)
+        # self.logger.log(f"About to check scratchpad for {self.message['author']}", 'debug', 'Trinity')
+        # updated_scratchpad = self.memory.check_scratchpad(self.message['author'])
+        # self.logger.log(f"check_scratchpad returned: {updated_scratchpad[:100] if updated_scratchpad else None}", 'debug', 'Trinity')
+        # if updated_scratchpad:
+        #     scratchpad_message = f"Updated scratchpad for {self.message['author']}:\n```\n{updated_scratchpad[:500]}...\n```"
+        #     self.ui.send_message(1, self.message, scratchpad_message)
 
     def run_agent(self, agent_name):
+        max_reruns = 3
         self.logger.log(f"Running {agent_name.capitalize()} Agent... Message:{self.message['message']}", 'info',
                         'Trinity')
 
-        memories = self.memory.get_current_memories()
-        journals = self.memory.get_current_journals()
+        # memories = self.memory.get_current_memories()
+        # journals = self.memory.get_current_journals()
         agent = self.agents[agent_name]
 
         # Rerank implementation
-        queries_list = [self.unformatted_user_history, self.unformatted_history, self.unformatted_dm_history]
-        queries = []
-        for i in queries_list:
-            if i is not None:
-                queries.append(i)
-        if self.cognition['thought']:
-            query = self.cognition['thought']
-        else:
-            query = self.message['message']
-        self.cognition['reranked_memories'] = self.memory.combine_and_rerank(queries, query, 5)
+        # queries_list = [self.unformatted_user_history, self.unformatted_history, self.unformatted_dm_history]
+        # queries = []
+        # for i in queries_list:
+        #     if i is not None:
+        #         queries.append(i)
+        # if self.cognition['thought']:
+        #     query = self.cognition['thought']
+        # else:
+        #     query = self.message['message']
+        # self.cognition['reranked_memories'] = self.memory.combine_and_rerank(queries, query, 5)
 
         # agent.load_additional_data(self.messages, self.chosen_msg_index, self.chat_history,
         #                            self.user_history, memories, self.cognition)
         agent_vars = {'messages': self.message,  # batch_messages
-                      'chat_history': self.chat_history,  # chat_history
-                      'memories': self.cognition['reranked_memories'],  # reranked memories
-                      'journals': journals,  # journals
-                      'kb': self.cognition['kb'],  # knowledgebase
+                      # 'chat_history': self.chat_history,  # chat_history
                       'cognition': self.cognition}  # cognition
+        result = agent.run(**agent_vars)
+
+        # Rerun if we get a parsing error
+        has_run = 1
+        while 'error' in result:
+            result_message = f"{agent_name.capitalize()} Agent: Parsing Error! Retrying..."
+            self.logger.log(result_message, 'error', 'Trinity')
+            self.ui.send_message(1, self.message, result_message)
+            if has_run < max_reruns:
+                result = agent.run(**agent_vars)
+                has_run += 1
+                continue
+
+            result_message = f"{agent_name.capitalize()} Agent Parsing Error. EXITING!!!\n"
+            self.logger.log(result_message, 'error', 'Trinity')
+            self.ui.send_message(1, self.message, result_message)
+
+            quit()
+
         self.cognition[agent_name] = agent.run(**agent_vars)
 
         # Send result to Brain Channel
@@ -178,7 +195,8 @@ class Trinity:
                                         'info', 'Trinity')
                         break
                     else:
-                        self.logger.log(f"No Choice in Reflection Response:\n{reflection}", 'error', 'Trinity')
+                        self.logger.log(f"Parsing Error in Reflection Response:\n{reflection}\n\nRerunning "
+                                        f"reflection...\n", 'error', 'Trinity')
                         self.run_agent('reflect')
             break
 

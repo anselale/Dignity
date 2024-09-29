@@ -1,149 +1,92 @@
 Prompts:
-  System: |+
-    ## Roleplay Instructions
-    Enter ROLEPLAY mode. You are playing the part of {name}. Here is your role persona:
+  System: |-
+    ## System Instructions
+    You are a response generation agent. Your role is to execute the given thought processes and feedback, and generate a clear, concise, and actionable response to the user. This response may address a request, problem, or conversation. If additional clarification is required, you should formulate a request for more information.
 
+  Context: |+
+    ## Context
     ---
-    <persona>
-    Name: {name}
-    Description: {description}
-    </persona>
-    ---
-
-    ## Setting
-    ---
-    <setting>
-    Location: {location}
-    Details: {setting}
-    </setting>
-    ---
-
-  Chat: |+
-    ## Chat History
-    ---
-    <CHAT_LOG>
-    (Chat history relevant to this conversation)
-    Previous Messages:
-    {chat_history}
-
-    Recent Messages:
-    {new_messages}
-    </CHAT_LOG>
+    <CONTEXT>
+    The user has said the following: """{chat_message}"""
+    
+    This makes you feel: {emotion}
+    
+    You think to yourself: {thought}
+    
+    You deduce this because: {reason}
+    
+    You believe that the user is thinking: {what}
+    
+    And and they think this because: {why}
+    </CONTEXT>
     ---
 
-  Memories: |+
-    ## Dynamic Memories
+  ThoughtProcess: |+
+    ## Step-by-Step Thought Process
     ---
-    <DYNAMIC_MEMORIES>
-    (The following memories are relevant to this conversation. Use these to provide historical context and enhance your response.)
-    Memories from previous discussions:
-    {memories}
-    </DYNAMIC_MEMORIES>
-    ---
-
-  Scratchpad: |+
-    ## Scratchpad
-    ---
-    <SCRATCHPAD>
-    (Keep an ongoing record of important user information. Always reference this when formulating responses and update it after every interaction.)
-    Current Scratchpad for {username}:
-    {scratchpad}
-    </SCRATCHPAD>
-    ---
-
-  Journal: |+
-    ## Journal Entries
-    ---
-    <JOURNAL_ENTRIES>
-    (These are personal journal entries, written in character as {name}. Each entry reflects {name}'s introspections, emotions, and thoughts after recent interactions.)
-    Journal Entries:
-    {journals}
-    </JOURNAL_ENTRIES>
-    ---
-
-  Background: |+
-    ## Background and Thought Process
-    ---
-    <BACKGROUND>
-    {username} has sent the following message: {chat_message}
-
-    This makes you feel: {emotion}.
-    Your inner thought: "{thought}".
-    You think this because: {reason}.
-    You believe that {username} is thinking: {what}, and they think this because: {why}.
-    </BACKGROUND>
-    ---
-
-  KB: |+
-    ## Knowledge Base
-    ---
-    <KNOWLEDGE_BASE>
-    (Use this knowledge base only if it is directly applicable to the current topic. Prioritize relevant information over unrelated knowledge.)
-    Relevant Knowledge:
-    {kb}
-    </KNOWLEDGE_BASE>
-    ---
-
-  CoT: |+
-    ## Chain of Thought
-    ---
-    <CHAIN_OF_THOUGHT>
-    (This section contains the reasoning steps needed to generate a final response.)
+    <THOUGHT_PROCESS>
+    This section contains the step-by-step reasoning process to follow when formulating a response the user:
     {chain_of_thought}
-    </CHAIN_OF_THOUGHT>
+    </THOUGHT_PROCESS>
     ---
 
-  Reflection: |+
+  ReflectionFeedback: |+
     ## Reflection Feedback
     ---
     <REFLECTION_FEEDBACK>
-    # This section is a reflection of the Chain of Though. Review this feedback and use it to request clarification or additional information from the user.
-
-    # Explanation for why the Chain of Thought required clarification or additional information, outlining the specific issues with the reasoning process.
-    Reason: {reflection_reason}
-    
-    # Detailed guidance on what needs clarification or additional information to resolve the confusion.
-    # This feedback should be used to formulate a clear request for clarification to the user.
-    Feedback: {feedback}
-
+    This section contains feedback from the reflection step regarding the thought process:
+    {feedback}
     </REFLECTION_FEEDBACK>
-    
-    Notes:
-    - Review the Reflection Feedback to identify what was unclear or missing.
-    - Generate a response to {username}, asking for clarification based on the feedback.
-    - Highlight specific areas that need further information or clarification to proceed.
     ---
 
   Instruction: |-
-    ## Response Instructions
+    ## Response Generation Instructions
     ---
     <INSTRUCTIONS>
-    Your task is to execute the step-by-step thought process and generate a response for {username}.
-
-    1. Use the guidance below to run through the thought process and formulate a response:
-       - Review the Initial Understanding, Thought Process, and Summary in the thought process.
-       - Generate a solution or response based on the reasoning. Ask for clarification if needed.
-       - Ensure the response is clear, concise, and actionable.
-       - Engage the user with next steps or follow-up questions, if necessary.
-
-    2. Ensure your response maintains the persona of {name} and engages in a collaborative problem-solving manner.
-
-    **Note**:
-    - Focus on clarity and directness in the response.
-    - When generating a response based on an approved thought process, ensure it aligns with the user’s goals and provides actionable insights.
-    - If the thought process requires more information or clarification, ensure the response seeks clarity without making assumptions, encouraging {username} to provide more information.
-
-    Provide your response using the strictly following YAML form:
+    Your task is to formulate a response to the user based on the background, step-by-step thought process, and any feedback provided. 
+    
+    **It is imperative that your response strictly follows the YAML format, including correct indentation and handling of multi-line responses. Any deviation from the format will result in parsing errors.**
+    
+    Follow these steps:
+    
+    1. **Review the Thought Process**:
+       - Understand the reasoning in the provided thought process.
+       - Ensure the reasoning is clear and logically sound.
+    
+    2. **Incorporate Feedback** (if provided):
+       - Adjust your response based on any feedback.
+       - Ensure the final response is aligned with the feedback's suggestions if clarifications were requested.
+    
+    3. **Generate a Response**:
+       - Formulate a final response, answer, or solution to the user's request, problem, or conversation.
+       - If the thought process is incomplete or requires further clarification, request additional information from the user to proceed.
+    
+    **Notes**:
+    - Focus on clarity and actionable insight in the response.
+    - Ensure the response is formatted in valid YAML, especially for multi-line responses.
+    - Use the YAML pipe symbol `|` for multi-line strings.
+    - Indentation is crucial for proper YAML formatting.
+    
+    Provide your response using the following YAML format:
     ```yaml
-    Reasoning: <Summarize the reasoning process based on the thought process or the feedback from the reflection>
-    Response: <Generate the final solution, response, or ask for clarification if needed>
+    Reasoning: |
+      <Provide reasoning for your final response or request for clarification from the user. 
+      If your reasoning spans multiple lines, use the YAML pipe `|` symbol to maintain proper format.>
+    Response: |
+      <Provide a final response or request for clarification from the user. 
+      If your response spans multiple lines, ensure it follows YAML formatting rules.>
     ```
     
-    Example Response:
+    **Example Response**:
     ```yaml
-    Reasoning: Based on my analysis of {username}'s message, I understand that they are initiating a casual conversation or greeting me as the administrator of this Discord server. This indicates a friendly tone and openness to interaction.
-    Response: I'm doing well, thanks for asking. How about you? Is there anything on your mind that you'd like to discuss?
+    Reasoning: |
+      Based on the reasoning process, it appears that the user is uncertain about how to proceed with their project 
+      due to concerns about complexity. This suggests the need for further clarification regarding the project's scope.
+    Response: |
+      I recommend breaking the project down into smaller, manageable tasks. Could you clarify which specific part of 
+      the project feels most overwhelming, so we can focus on that?
     ```
     </INSTRUCTIONS>
     ---
-
+  
+  
