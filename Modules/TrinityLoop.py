@@ -74,6 +74,8 @@ class Trinity:
         #                                             is_user_specific=True,
         #                                             query_size=3, prefix='dm')
 
+        self.chat_history, self.unformatted_history = self.memory.fetch_history(collection_name=message['channel'])
+
         # Run Thought Agent
         self.run_agent('thought')
         # self.memory.recall_journal_entry(self.message['message'], self.cognition['thought']["Categories"], 3)
@@ -95,6 +97,10 @@ class Trinity:
         self.run_agent('generate')
         response = self.cognition['generate'].get('Response')
         self.ui.send_message(0, self.message, response)
+
+        # Save chat history
+        self.memory.save_channel_memory()
+        self.memory.save_bot_response()
 
         # self.save_memories()
         # write journal
@@ -138,7 +144,7 @@ class Trinity:
         # agent.load_additional_data(self.messages, self.chosen_msg_index, self.chat_history,
         #                            self.user_history, memories, self.cognition)
         agent_vars = {'messages': self.message,  # batch_messages
-                      # 'chat_history': self.chat_history,  # chat_history
+                      'chat_history': self.chat_history,  # chat_history
                       'cognition': self.cognition}  # cognition
         result = agent.run(**agent_vars)
 

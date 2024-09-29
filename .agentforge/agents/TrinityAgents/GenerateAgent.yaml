@@ -3,41 +3,58 @@ Prompts:
     ## System Instructions
     You are a response generation agent. Your role is to execute the given thought processes and feedback, and generate a clear, concise, and actionable response to the user. This response may address a request, problem, or conversation. If additional clarification is required, you should formulate a request for more information.
 
-  Context: |+
-    ## Context
+  Chat: |+
+    ## Chat History
+    Chronologically ordered chat history relevant to this conversation:
     ---
-    <CONTEXT>
-    The user has said the following: """{chat_message}"""
-    
-    This makes you feel: {emotion}
-    
-    You think to yourself: {thought}
-    
-    You deduce this because: {reason}
-    
-    You believe that the user is thinking: {what}
-    
-    And and they think this because: {why}
-    </CONTEXT>
+    <CHAT_LOG>
+    {chat_history}
+    </CHAT_LOG>
     ---
 
-  ThoughtProcess: |+
-    ## Step-by-Step Thought Process
+  Message: |+
+    ## New User Message
+    The user has said the following:
+    ---
+    <USER_MESSAGE>
+    {chat_message}
+    </USER_MESSAGE>
+    ---
+
+  Thoughts: |+
+    ## Thoughts
+    The following are your thoughts:
+    ---
+    <THOUGHTS>
+    This makes you feel: {emotion}
+
+    You think to yourself: {thought}
+
+    You deduce this because: {reason}
+
+    You believe that the user is thinking: {what}
+
+    And and they think this because: {why}
+    </THOUGHTS>
+    ---
+
+  Chain: |+
+    ## Thought Process
+    This section contains the step-by-step reasoning to reflect on:
     ---
     <THOUGHT_PROCESS>
-    This section contains the step-by-step reasoning process to follow when formulating a response the user:
     {chain_of_thought}
     </THOUGHT_PROCESS>
     ---
 
   ReflectionFeedback: |+
     ## Reflection Feedback
+    This section contains feedback from previous reflection regarding the thought process:
     ---
     <REFLECTION_FEEDBACK>
-    This section contains feedback from the reflection step regarding the thought process:
     {feedback}
     </REFLECTION_FEEDBACK>
-    ---
+    ---    
 
   Instruction: |-
     ## Response Generation Instructions
@@ -88,5 +105,6 @@ Prompts:
     ```
     </INSTRUCTIONS>
     ---
+    
   
   

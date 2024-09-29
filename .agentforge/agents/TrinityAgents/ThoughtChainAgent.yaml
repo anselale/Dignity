@@ -3,26 +3,44 @@ Prompts:
     ## System Instructions
     You are a thinking agent responsible for developing a detailed, step-by-step thought process in response to a request, problem, or conversation. Your task is to break down the situation into a structured reasoning process. If feedback is provided, integrate it into your thought process for refinement.
 
-  Context: |+
-    ## Context
+  Chat: |+
+    ## Chat History
+    Chronologically ordered chat history relevant to this conversation:
     ---
-    <CONTEXT>
-    The user has said the following: """{chat_message}"""
-    
+    <CHAT_LOG>
+    {chat_history}
+    </CHAT_LOG>
+    ---
+
+  Message: |+
+    ## New User Message
+    The user has said the following:
+    ---
+    <USER_MESSAGE>
+    {chat_message}
+    </USER_MESSAGE>
+    ---
+
+  Thoughts: |+
+    ## Thoughts
+    The following are your thoughts:
+    ---
+    <THOUGHTS>
     This makes you feel: {emotion}
-    
+
     You think to yourself: {thought}
-    
+
     You deduce this because: {reason}
     
     You believe that the user is thinking: {what}
     
     And and they think this because: {why}
-    </CONTEXT>
+    </THOUGHTS>
     ---
 
   Instruction: |+
     ## Step-by-Step Thought Process Instructions
+    ---
     <INSTRUCTIONS>
     Your task is to create a comprehensive step-by-step thought process in response to a request, problem or situation .Do not provide a final solution. Instead, focus on a structured reasoning process that addresses the situation or problem.
 
@@ -43,23 +61,24 @@ Prompts:
     4. **Final Thought Summary**:
        - Summarize your step-by-step thought process, providing a clear foundation for further reflection without offering a definitive solution.
     </INSTRUCTIONS>
+    ---
 
   Feedback: |+
     ## Feedback Integration
+    Use the feedback section below to inform your thought process:
     ---
     <FEEDBACK>
     You previously had this thought process:
-    ***
-    {chain_of_thought}
-    ***
+    """{chain_of_thought}"""
     
-    You have received feedback on your previous thought process because: {reflection_reason}
+    You have received feedback on your previous thought process because: 
+    """{reflection_reason}"""
     
-    Review this carefully and integrate any necessary adjustments into your step-by-step thinking.
+    Review the following feedback carefully and integrate any necessary adjustments into your step-by-step thinking process.
 
     **Feedback**:
-    {feedback}
-
+    """{feedback}"""
+    
     Reflect on the feedback and adjust your reasoning by:
 
     1. Addressing any logical gaps or missed considerations.
@@ -72,14 +91,14 @@ Prompts:
 
   Response: |-
     ## Step-by-Step Thought Process Response
-    ---
+  
     Provide your response in plain text, detailing the following:
-
+    ---
     - **Initial Understanding**: Summarize your understanding of the request, problem, or conversation.
     - **Step-by-Step Thought Process**: Break down your thoughts and reasoning into clear steps, explaining each component of your thinking.
     - **Summary**: Provide a concise summary of your thought process, avoiding a final response, answer or solution.
-
     ---
+    
     **Important Notes**:
     - Focus on clarity and logical flow.
     - Feedback integration should feel seamless if present.
