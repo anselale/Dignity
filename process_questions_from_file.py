@@ -6,9 +6,23 @@ import time
 
 
 class Gen_From_File:
+    """
+    A class to process questions from a file and send them to a Discord channel.
 
-    def __init__(self, file_path):
+    This class reads questions from a specified file, sends each question to a
+    Discord channel, and processes the responses using a Trinity instance.
+    """
+
+    def __init__(self, file_path, output_channel_id):
+        """
+        Initialize the Gen_From_File instance.
+
+        Args:
+            file_path (str): The path to the file containing questions.
+            output_channel_id (int): The ID of the Discord channel to send messages to.
+        """
         self.path = file_path
+        self.output_channel_id = output_channel_id
         with open(".agentforge/personas/default.yaml", "r") as file:
             self.persona = yaml.safe_load(file)
             self.persona_name = self.persona.get("Name")
@@ -19,6 +33,16 @@ class Gen_From_File:
         self.trinity = Trinity(self.memory, self.discord)
 
     def run_file(self):
+        """
+        Process the file and send each line as a question to the Discord channel.
+
+        This method reads the file, prints each line to the console, sends it to
+        the specified Discord channel, and processes the response using Trinity.
+
+        Raises:
+            FileNotFoundError: If the specified file is not found.
+            IOError: If there's an issue reading the file.
+        """
         try:
             with open(self.path, 'r') as file:
                 lines = file.readlines()
@@ -27,15 +51,15 @@ class Gen_From_File:
                 for index, line in enumerate(lines, start=1):
                     print(f"{index}. {line.strip()}")
                     response = f'Sending question: {line}'
-                    sent_message = self.discord.send_message(self.channel_id_layer_0, response)
+                    sent_message = self.discord.send_message(self.output_channel_id, response)
                     message = {
                         'channel': 'general',
-                        'channel_id': 1287528589251711098,
+                        'channel_id': self.output_channel_id,
                         'message': line,
                         'message_id': 1290104562493161527,
                         'author': 'Ansel',
-                        'timestamp': '2024-09-30 00:14:56',
-                        }
+                        'timestamp': sent_message.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                    }
                     self.trinity.do_chat(message)
         
         except FileNotFoundError:
@@ -47,8 +71,9 @@ class Gen_From_File:
 # Example usage
 if __name__ == "__main__":
     file_path = "text.txt"  # Replace with the actual path to your file
+    output_channel_id = 1281876226671378455  # Replace with the desired output channel ID
     print('init gen')
-    generator = Gen_From_File(file_path)
+    generator = Gen_From_File(file_path, output_channel_id)
     print('run gen')
     generator.run_file()
     print('gen finished')
