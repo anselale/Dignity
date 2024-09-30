@@ -87,21 +87,17 @@ Prompts:
     Provide your response using the following YAML format:
     ```yaml
     Reasoning: |
-      <Provide reasoning for your final response or request for clarification from the user. 
-      If your reasoning spans multiple lines, use the YAML pipe `|` symbol to maintain proper format.>
+      <Provide reasoning for your final response or request for clarification from the user. If your reasoning spans multiple lines, use the YAML pipe `|` symbol to maintain proper format.>
     Response: |
-      <Provide a final response or request for clarification from the user. 
-      If your response spans multiple lines, ensure it follows YAML formatting rules.>
+      <Provide a final response or request for clarification from the user. If your response spans multiple lines, ensure it follows YAML formatting rules.>
     ```
     
     **Example Response**:
     ```yaml
     Reasoning: |
-      Based on the reasoning process, it appears that the user is uncertain about how to proceed with their project 
-      due to concerns about complexity. This suggests the need for further clarification regarding the project's scope.
+      Based on the reasoning process, it appears that the user is uncertain about how to proceed with their project due to concerns about complexity. This suggests the need for further clarification regarding the project's scope.
     Response: |
-      I recommend breaking the project down into smaller, manageable tasks. Could you clarify which specific part of 
-      the project feels most overwhelming, so we can focus on that?
+      I recommend breaking the project down into smaller, manageable tasks. Could you clarify which specific part of the project feels most overwhelming, so we can focus on that?
     ```
     </INSTRUCTIONS>
     ---

@@ -89,22 +89,18 @@ Prompts:
     ```yaml
     Choice: [approve / revise / confused]
     Reason: |
-      <Explain your choice in 1-2 sentences. 
-      If the reasoning spans multiple lines, use the YAML pipe `|` symbol for multi-line formatting.>
+      <Explain your choice in 1-2 sentences. If the reasoning spans multiple lines, use the YAML pipe `|` symbol for multi-line formatting.>
     Feedback: |
-      <Provide feedback for revision or clarification. If it spans multiple lines, ensure proper YAML formatting. 
-      Leave blank if approved.>
+      <If you have chosen 'revise' or 'confused', provide feedback for revision or clarification. If you have chosen 'approve', leave this field blank. If it spans multiple lines, ensure proper YAML formatting.>
     ```
     
     **Example Response**:
     ```yaml
     Choice: revise
     Reason: |
-      The thought process is logical but missing a key step regarding the user’s emotional state. 
-      This gap needs to be addressed for a complete understanding.
+      The thought process is logical but missing a key step regarding the user’s emotional state. This gap needs to be addressed for a complete understanding.
     Feedback: |
-      Consider addressing the emotional aspect of the message, as it may influence the user’s thought process. 
-      This would make the reasoning more comprehensive and aligned with the user's perspective.
+      Consider addressing the emotional aspect of the message, as it may influence the user’s thought process. This would make the reasoning more comprehensive and aligned with the user's perspective
     ```
     </INSTRUCTIONS>
     ---

@@ -121,22 +121,21 @@ class Memory:
 
         print("checking collection size")
         collection_size = self.memory.count_collection(collection_name)
-        print(f"Collection size {collection_size}")
+        print(f"Collection size: {collection_size}")
 
         if collection_size == 0:
-            return "No Results!", None
-
-        qsize = max(collection_size - query_size, 0)
+            return "No Chat History Yet! This is the start of a new conversation.", None
 
         # Adjust the method of fetching history based on whether it's user-specific
         if is_user_specific and query:
-            if qsize == 0:
-                qsize = 1
             print("querying memory")
-            history = self.memory.query_memory(collection_name=collection_name, query=query, num_results=qsize)
+            history = self.memory.query_memory(collection_name=collection_name, query=query, num_results=query_size)
             formatted_history = self.parser.format_user_specific_history_entries(history)
         else:
-            filters = {"id": {"$gte": qsize}}
+            qsize = min(collection_size, query_size)  # Determine the number of messages to retrieve
+            start_id = collection_size - qsize + 1  # Calculate the starting 'id' to get the last 'qsize' messages
+            filters = {"id": {"$gte": start_id}}  # Retrieve messages with 'id' greater than or equal to 'start_id'
+
             history = self.memory.load_collection(collection_name=collection_name, where=filters)
             formatted_history = self.parser.format_general_history_entries(history)
 
@@ -156,11 +155,11 @@ class Memory:
         """
         Save all types of memories, including category, channel, bot response, user history, and scratchpad log.
         """
-        self.save_category_memory()
+        # self.save_category_memory()
         self.save_channel_memory()
         self.save_bot_response()
-        self.save_user_history()
-        self.save_scratchpad_log(self.user_message['author'], self.user_message['message'])
+        # self.save_user_history()
+        # self.save_scratchpad_log(self.user_message['author'], self.user_message['message'])
         self.logger.log(f"Saved all memories.", 'debug', 'Trinity')
 
     def set_memory_info(self, message_batch: dict, cognition: dict, response: str):
@@ -203,9 +202,9 @@ class Memory:
             "InnerThought": self.cognition["thought"].get("Inner Thought"),
             "Reason": self.cognition["reflect"].get("Reason"),
             "User": chat_message["author"],
-            # "Mentions": chat_message["mentions"],
             "Channel": str(chat_message["channel"]),
-            "Categories": str(self.cognition["thought"]["Categories"])
+            # "Mentions": chat_message["mentions"],
+            # "Categories": str(self.cognition["thought"]["Categories"])
         }
         # Need to implement a last accessed metadata
 
@@ -244,7 +243,7 @@ class Memory:
         bot_response = self.response
         self.logger.log(f"Saving Channel to: {collection_name}\nMessage:\n{message}", 'debug', 'Memory')
         self.save_to_collection(collection_name, message, bot_response, metadata_extra)
-        self.save_to_collection('journal_log_table', message, bot_response, metadata_extra)
+        # self.save_to_collection('journal_log_table', message, bot_response, metadata_extra)
 
     def save_bot_response(self):
         """
@@ -258,7 +257,7 @@ class Memory:
         collection_name = self.parser.format_string(collection_name)
         self.logger.log(f"Saving Bot Response to: {collection_name}\nMessage:\n{message}", 'debug', 'Memory')
         self.save_to_collection(collection_name, message, self.user_message['message'])
-        self.save_to_collection('journal_log_table', message, self.user_message['message'])
+        # self.save_to_collection('journal_log_table', message, self.user_message['message'])
 
     def save_user_history(self):
         """

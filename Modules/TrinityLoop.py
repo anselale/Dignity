@@ -95,14 +95,12 @@ class Trinity:
 
         # Run Generate Agent
         self.run_agent('generate')
-        response = self.cognition['generate'].get('Response')
-        self.ui.send_message(0, self.message, response)
+        self.response = self.cognition['generate'].get('Response')
+        self.ui.send_message(0, self.message, self.response)
 
         # Save chat history
-        self.memory.save_channel_memory()
-        self.memory.save_bot_response()
+        self.save_memories()
 
-        # self.save_memories()
         # write journal
         # print("Check Journal")
         # journal = self.memory.check_journal()
@@ -165,7 +163,7 @@ class Trinity:
 
             quit()
 
-        self.cognition[agent_name] = agent.run(**agent_vars)
+        self.cognition[agent_name] = result
 
         # Send result to Brain Channel
         result_message = f"{agent_name.capitalize()} Agent:\n{str(self.cognition[agent_name]['result'])}"
@@ -187,6 +185,7 @@ class Trinity:
 
                 if "Choice" in reflection:
                     if reflection["Choice"] == "approve":
+                        self.cognition['reflect']['Feedback'] = None
                         self.logger.log("Approved CoT", 'debug', 'Trinity')
                         break
 
@@ -212,9 +211,9 @@ class Trinity:
         """
         self.memory.set_memory_info(self.message, self.cognition, self.response)
         self.memory.save_all_memory()
-        self.memory.wipe_current_memories()
-        self.unformatted_dm_history = None
-        self.unformatted_user_history = None
+        # self.memory.wipe_current_memories()
+        # self.unformatted_dm_history = None
+        # self.unformatted_user_history = None
         self.unformatted_history = None
 
 

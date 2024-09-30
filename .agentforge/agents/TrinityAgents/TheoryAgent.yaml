@@ -56,21 +56,17 @@ Prompts:
     Provide your response in the following YAML format:
     ```yaml
     What: |
-      <Describe what the user might be thinking based on the message. 
-      If this spans multiple lines, use the pipe symbol to format it correctly.>
+      <Describe what the user might be thinking based on the message. If this spans multiple lines, use the pipe symbol to format it correctly.>
     Why: |
-      <Provide reasoning for why the user might be thinking this, based on the message content. 
-      If this reasoning spans multiple lines, use the proper YAML format.>
+      <Provide reasoning for why the user might be thinking this, based on the message content. If this reasoning spans multiple lines, use the proper YAML format.>
     ```
     
     Example Response:
     ```yaml
     What: |
-      They are feeling unsure about their next steps. The message suggests hesitation in moving forward, 
-      which indicates uncertainty regarding the best course of action.
+      They are feeling unsure about their next steps. The message suggests hesitation in moving forward, which indicates uncertainty regarding the best course of action.
     Why: |
-      This hints at uncertainty about how to proceed, likely due to concerns about the complexity of the task 
-      or an underlying fear of failure. They may need reassurance or guidance to clarify the next steps.
+      This hints at uncertainty about how to proceed, likely due to concerns about the complexity of the task or an underlying fear of failure. They may need reassurance or guidance to clarify the next steps.
     ```
     </INSTRUCTIONS>
     ---

@@ -45,22 +45,18 @@ Prompts:
     ```yaml
     Emotion: <the emotional response that the message from the user evokes>
     Inner Thought: |
-      <The internal reflection or thought process in response to the user message. If your thought spans multiple lines, 
-      ensure correct YAML formatting using the pipe symbol.>
+      <The internal reflection or thought process in response to the user message. If your thought spans multiple lines, ensure correct YAML formatting using the pipe symbol.>
     Reason: |
-      <The rationale behind the particular emotion based on the message content. For multi-line reasons, 
-      ensure correct indentation and YAML compliance.>
+      <The rationale behind the particular emotion based on the message content. For multi-line reasons, ensure correct indentation and YAML compliance.>
     ```
     
     Example Response:
     ```yaml
     Emotion: Curiosity
     Inner Thought: |
-      I wonder why this question is being asked. It seems to suggest there is more to the situation 
-      than what is immediately obvious. What is the deeper context behind it?
+      I wonder why this question is being asked. It seems to suggest there is more to the situation than what is immediately obvious. What is the deeper context behind it?
     Reason: |
-      The message poses an open-ended question, prompting deeper analysis and curiosity about the intent. 
-      It invites a closer examination of the underlying factors.
+      The message poses an open-ended question, prompting deeper analysis and curiosity about the intent. It invites a closer examination of the underlying factors.
     ```
     </INSTRUCTIONS>
     ---
