@@ -276,6 +276,7 @@ class UI:
                 else:
                     self.logger.log("Failed to create or find thread for layer 1 message", 'error', 'DiscordClient')
             except Exception as e:
+                sent_message = self.client.send_message(self.channel_id_layer_0, response)
                 self.logger.log(f"Error in send_message for layer 1: {str(e)}", 'error', 'DiscordClient')
         else:
             self.logger.log(f"Invalid layer: {layer}", 'error', 'DiscordClient')

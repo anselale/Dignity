@@ -2,6 +2,7 @@ from Modules.TrinityLoop import Trinity
 from Utilities.Memory import Memory
 from agentforge.utils.guiutils.discord_client import DiscordClient
 import yaml
+import time
 
 
 class Gen_From_File:
@@ -13,6 +14,8 @@ class Gen_From_File:
             self.persona_name = self.persona.get("Name")
         self.memory = Memory(self.persona, self.persona_name)
         self.discord = DiscordClient()
+        self.discord.run()
+        time.sleep(30)
         self.trinity = Trinity(self.memory, self.discord)
 
     def run_file(self):
@@ -23,6 +26,8 @@ class Gen_From_File:
             
                 for index, line in enumerate(lines, start=1):
                     print(f"{index}. {line.strip()}")
+                    response = f'Sending question: {line}'
+                    sent_message = self.discord.send_message(self.channel_id_layer_0, response)
                     message = {
                         'channel': 'general',
                         'channel_id': 1287528589251711098,
