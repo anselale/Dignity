@@ -54,6 +54,7 @@ class Gen_From_File:
                     sent_message = self.discord.send_message(self.output_channel_id, response)
                     message = {
                         'channel': 'general',
+                        'system_message': 'blah'
                         'channel_id': self.output_channel_id,
                         'message': line,
                         'message_id': 1290104562493161527,

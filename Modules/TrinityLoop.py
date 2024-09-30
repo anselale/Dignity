@@ -26,6 +26,7 @@ class Trinity:
         self.parser = MessageParser
         self.ui = UI(discord_client)
         self.response: str = ''
+        self.assistant_string = []
 
         # Grouping agent-related instances into a dictionary
         self.agents = {
@@ -166,6 +167,7 @@ class Trinity:
         self.cognition[agent_name] = result
 
         # Send result to Brain Channel
+        self.assistant_string.append(self.cognition[agent_name]['result'])
         result_message = f"{agent_name.capitalize()} Agent:\n{str(self.cognition[agent_name]['result'])}"
         self.ui.send_message(1, self.message, result_message)
 
@@ -215,6 +217,54 @@ class Trinity:
         # self.unformatted_dm_history = None
         # self.unformatted_user_history = None
         self.unformatted_history = None
+        synth_result = self.build_json()
+        self.append_json_to_file(synth_result)
+
+    def append_json_to_file(self, json_object, file_path='Logs/Test.json'):
+        """
+        Append the JSON object to a file, maintaining proper JSON structure.
+        """
+        import json
+        import os
+
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+        try:
+            # Read existing content
+            if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+                with open(file_path, 'r+') as file:
+                    # Load existing data
+                    data = json.load(file)
+                    if not isinstance(data, list):
+                        data = [data]  # Convert to list if it's not already
+                    
+                    # Append new object
+                    data.append(json_object)
+                    
+                    # Move file pointer to beginning and write updated data
+                    file.seek(0)
+                    json.dump(data, file, indent=4)
+                    file.truncate()
+            else:
+                # If file doesn't exist or is empty, create it with the new object
+                with open(file_path, 'w') as file:
+                    json.dump([json_object], file, indent=4)
+            
+            self.logger.log(f"JSON object appended to {file_path}", 'info', 'Trinity')
+        except Exception as e:
+            self.logger.log(f"Error appending JSON to file: {str(e)}", 'error', 'Trinity')
+
+    def build_json(self):
+        """
+        Build a JSON-compatible dictionary containing the system message, user message, and assistant response.
+        """
+        json_object = [
+                {"system": self.message.get('system_message', '')},
+                {"user": self.message.get('message', '')},
+                {"assistant": '\n'.join(self.assistant_string)}
+            ]
+        return json_object
 
 
 class UI:
