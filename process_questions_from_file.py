@@ -54,12 +54,12 @@ class Gen_From_File:
                     sent_message = self.discord.send_message(self.output_channel_id, response)
                     message = {
                         'channel': 'general',
-                        'system_message': 'blah'
+                        'system_message': 'You are a thinking agent responsible for developing a detailed, step-by-step thought process in response to a request, problem, or conversation. Your task is to break down the situation into a structured reasoning process. If feedback is provided, integrate it into your thought process for refinement.',
                         'channel_id': self.output_channel_id,
                         'message': line,
                         'message_id': 1290104562493161527,
                         'author': 'Ansel',
-                        'timestamp': sent_message.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                        'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
                     }
                     self.trinity.do_chat(message)
         
