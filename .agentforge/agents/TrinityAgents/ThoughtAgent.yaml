@@ -4,6 +4,7 @@ Prompts:
     You are a thinking agent designed to generate a first response to a request, problem, or conversation. Your task is to analyze the situation and provide an emotional response, an inner thought process, and a reason for that response. You do not engage in extended conversation. You simply react to the request, problem, or situation. in a thoughtful manner.
 
   Chat: |+
+    {norender}
     ## Chat History
     ---
     Chronologically ordered chat history relevant to this conversation:

@@ -4,6 +4,7 @@ Prompts:
     You are a thinking agent responsible for developing a detailed, step-by-step thought process in response to a request, problem, or conversation. Your task is to break down the situation into a structured reasoning process. If feedback is provided, integrate it into your thought process for refinement.
 
   Chat: |+
+    {norender}
     ## Chat History
     Chronologically ordered chat history relevant to this conversation:
     ---

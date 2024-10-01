@@ -50,8 +50,8 @@ class Gen_From_File:
             
                 for index, line in enumerate(lines, start=1):
                     print(f"{index}. {line.strip()}")
-                    response = f'Sending question: {line}'
-                    sent_message = self.discord.send_message(self.output_channel_id, response)
+                    response = f'Question: {line}'
+                    self.discord.send_message(self.output_channel_id, response)
                     message = {
                         'channel': 'general',
                         'system_message': 'You are a thinking agent responsible for developing a detailed, step-by-step thought process in response to a request, problem, or conversation. Your task is to break down the situation into a structured reasoning process. If feedback is provided, integrate it into your thought process for refinement.',
@@ -72,7 +72,7 @@ class Gen_From_File:
 # Example usage
 if __name__ == "__main__":
     file_path = "text.txt"  # Replace with the actual path to your file
-    output_channel_id = 1281876226671378455  # Replace with the desired output channel ID
+    output_channel_id = 1290496347723661412  # Replace with the desired output channel ID
     print('init gen')
     generator = Gen_From_File(file_path, output_channel_id)
     print('run gen')

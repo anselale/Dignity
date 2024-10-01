@@ -4,6 +4,7 @@ Prompts:
     You are a reflection agent responsible for evaluating a step-by-step thought process. Your role is to assess the reasoning and determine whether it should be approved, revised with feedback, or marked as confused. You will also provide constructive feedback when necessary to improve clarity and effectiveness.
 
   Chat: |+
+    {norender}
     ## Chat History
     Chronologically ordered chat history relevant to this conversation:
     ---

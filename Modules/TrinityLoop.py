@@ -54,7 +54,7 @@ class Trinity:
         self.message = message
         self.ui.channel_id_layer_0 = self.message["channel_id"]
         self.ui.current_thread_id = None  # Reset the thread ID for each new chat
-
+        self.assistant_string = []
         # Send the initial response for debugging and testing
         # initial_response = "Processing your message..."
         # self.ui.send_message(0, self.message, initial_response)
@@ -220,7 +220,7 @@ class Trinity:
         synth_result = self.build_json()
         self.append_json_to_file(synth_result)
 
-    def append_json_to_file(self, json_object, file_path='Logs/Test.json'):
+    def append_json_to_file(self, json_object, file_path='Logs/DS_POC.json'):
         """
         Append the JSON object to a file, maintaining proper JSON structure.
         """

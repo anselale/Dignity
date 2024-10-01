@@ -4,6 +4,7 @@ Prompts:
     You are a response generation agent. Your role is to execute the given thought processes and feedback, and generate a clear, concise, and actionable response to the user. This response may address a request, problem, or conversation. If additional clarification is required, you should formulate a request for more information.
 
   Chat: |+
+    {norender}
     ## Chat History
     Chronologically ordered chat history relevant to this conversation:
     ---
