@@ -126,7 +126,7 @@ class Memory:
         if collection_size == 0:
             return "No Results!", None
 
-        qsize = max(collection_size - query_size, 0)
+        qsize = min(collection_size, query_size)
 
         # Adjust the method of fetching history based on whether it's user-specific
         if is_user_specific and query:
@@ -324,7 +324,7 @@ class Memory:
                 memories = self.parser.format_user_specific_history_entries(recalled_memories)
                 # Add recalled memories to current memories
                 self.current_memories.append(memories)
-                return
+                return recalled_memories
 
             self.logger.log(f"No Memories Recalled For Category: {category}", 'debug', 'Memory')
 

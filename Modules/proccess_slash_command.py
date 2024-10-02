@@ -77,6 +77,7 @@ class SlashCommands:
             """
         else:
             result = self.challenges.parse(args, self.message)
+            print(f"Result in process command: {result}")
             return result
 
     @staticmethod

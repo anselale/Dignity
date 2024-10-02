@@ -18,6 +18,7 @@ class Trinity:
         self.chat_history = None
         self.user_history = None
         self.dm_history = None
+        self.category_memory = None
         self.message = None
         self.unformatted_history = None
         self.unformatted_user_history = None
@@ -72,7 +73,7 @@ class Trinity:
 
         self.run_agent('thought')
         self.memory.recall_journal_entry(self.message['message'], self.cognition['thought']["Categories"], 3)
-        self.memory.recall_categories(self.message['message'], self.cognition['thought']["Categories"], 3)
+        self.category_memory = self.memory.recall_categories(self.message['message'], self.cognition['thought']["Categories"], 3)
         self.cognition['scratchpad'] = self.memory.get_scratchpad(self.message['author'])
         self.run_agent('theory')
 
@@ -115,6 +116,9 @@ class Trinity:
         for i in queries_list:
             if i is not None:
                 queries.append(i)
+        for i in self.category_memory:
+            if i is not None:
+                queries.append(i)
         if self.cognition['thought']:
             query = self.cognition['thought']
         else:
@@ -130,7 +134,6 @@ class Trinity:
                       'kb': self.cognition['kb'],  # knowledgebase
                       'cognition': self.cognition}  # cognition
         self.cognition[agent_name] = agent.run(**agent_vars)
-        TheoryAgent.run(username='user name')
 
         # Send result to Brain Channel
         result_message = f"{agent_name.capitalize()} Agent:\n```{str(self.cognition[agent_name]['result'])}```"

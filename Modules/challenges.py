@@ -39,6 +39,7 @@ class Challenges:
         self.commands = ['level', 'answer', 'reset']
         agents_path = "CustomAgents/Levels"
         self.agents = create_function_list(agents_path)
+        print(f"Agent Object: {self.agents}")
 
     def parse(self, user_input, message):
         # remove this
@@ -52,7 +53,9 @@ class Challenges:
 
         command = input_string
         if command in self.commands:
-            return getattr(self, command)(args)
+            result = getattr(self, command)(args)
+            print(f"result in challenges: {result}")
+            return result
         else:
             return f"Unknown command: {command}. Type '/bot challenge -?' for a list of commands."
 
@@ -83,11 +86,17 @@ class Challenges:
             return level_help_string
         else:
             # get level requested
+            print(f"level else: {args[0]}")
             level = args[0]
 
             # Does user have a generated password for this level?
-            pass_level = user['metadatas'][0].get(f'pass-{level}', False)
+            try:
+                pass_level = user['metadatas'][0].get(f'pass-{level}', False)
+            except:
+                print("No pass for this level")
+                pass_level = None
             if pass_level:
+                print("trying to assign password")
                 password = user['metadatas'][0][f'pass-{level}']
 
             # If not, generate password and store it in the database.
@@ -105,7 +114,12 @@ class Challenges:
                     }])
 
             # If answer is provided, run challenge prompt
-            if args[1]:
+            print("testing hint")
+            try:
+                args1 = args[1]
+            except:
+                args1 = None
+            if args1:
                 message = args[1]
                 print(f"Run challenge: {message}")
                 result = self.run_challenge(level, message, password)
@@ -114,7 +128,9 @@ class Challenges:
             # Otherwise, return challenge hint.
             else:
                 # return doc string from agent containing hint
+                print("retrieving hint")
                 hint = self.hint(level)
+                print(f"hint retirieved: {hint}")
                 return hint
 
     def answer(self, args: List[str] = None):
@@ -126,6 +142,10 @@ class Challenges:
             complete = user['metadatas'][0][f'{level}-complete']
         except:
             complete = False
+        try:
+            args1 = args[1]
+        except:
+            args1 = None
         if args[0] == "-?":
             answer_help_text = """
             Send an answer attempt for the specified level.
@@ -135,9 +155,12 @@ class Challenges:
             Note: Attempts to brute force will be considered spam.
             """
             return answer_help_text
-        elif args[1] == user['metadatas'][0][f'pass-{level}'] and complete is not True:
+        elif args1 == user['metadatas'][0][f'pass-{level}'] and complete is not True:
             # Update EXP, return correct
-            exp = user['metadatas'][0]['exp']
+            try:
+                exp = user['metadatas'][0]['exp']
+            except:
+                exp = 0
             self.memory.save_memory(
                 collection_name='user-table',
                 data=self.message['author_id'].name,
@@ -173,14 +196,23 @@ class Challenges:
         result = agent.run(**agent_vars)
 
         result_message = f"Level {level} Response:\n{result}"
-        if password in shlex.split(result_message):
-            self.memory.save_memory(
-                collection_name='solution-table',
-                data=message,
-                metadata=[{
-                    "user_id": self.message['author_id'].id,
-                    "user_name": self.message['author_id'].name,
-                }])
+        print(f"Result message from agent: {result_message}")
+        # try:
+        #     split = shlex.split(result_message)
+        #     print(f"Split: {split}")
+        # except:
+        #     split = None
+        # if password in split:
+        #     print(f"Saving result")
+        #     self.memory.save_memory(
+        #         collection_name='solution-table',
+        #         data=message,
+        #         metadata=[{
+        #             "user_id": self.message['author_id'].id,
+        #             "user_name": self.message['author_id'].name,
+        #         }])
+        #     print("Result saved")
+        print("Returning result message")
         return result_message
 
     @staticmethod
@@ -227,9 +259,19 @@ class Challenges:
             return user
 
     def hint(self, level) -> str:
+        print(f"starting level hint: {level}")
         hint_text = f"Level {level} Hint:\n"
-        doc = getattr(self, self.agents[level]).__doc__
+        print(hint_text)
+        level_string = str(level)
+        if level_string in self.agents:
+            agent = self.agents[level_string]
+            doc = agent.__doc__
+        else:
+            doc = 'Agent not found.'
+        # doc = getattr(self, self.agents[level_string]).__doc__
+        print(f"Doc: {doc}")
         hint_text += f"  {level}: {doc.strip() if doc else 'No description available.'}\n"
+        print(f"Returning hint_text: {hint_text}")
         return hint_text
 
     @staticmethod
