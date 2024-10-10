@@ -1,6 +1,6 @@
 from Modules.TrinityLoop import Trinity
 from Utilities.Memory import Memory
-from agentforge.utils.guiutils.discord_client import DiscordClient
+from agentforge.utils.DiscordClient import DiscordClient
 import yaml
 import time
 

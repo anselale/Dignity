@@ -3,7 +3,7 @@ from CustomAgents.Trinity.ThoughtChainAgent import ThoughtChainAgent
 from CustomAgents.Trinity.TheoryAgent import TheoryAgent
 from CustomAgents.Trinity.GenerateAgent import GenerateAgent
 from CustomAgents.Trinity.ReflectAgent import ReflectAgent
-from agentforge.utils.functions.Logger import Logger
+from agentforge.utils.Logger import Logger
 from Utilities.Parsers import MessageParser
 
 
@@ -106,7 +106,9 @@ class Trinity:
 
         # Send result to Brain Channel
         self.assistant_string.append(self.cognition[agent_name]['result'])
-        result_message = f"{agent_name.capitalize()} Agent:\n{str(self.cognition[agent_name]['result'])}"
+        result_message = str(self.cognition[agent_name]['result'])
+
+        self.ui.send_message(1, self.message, f"{agent_name.capitalize()} Agent:\n")
         self.ui.send_message(1, self.message, result_message)
 
     def handle_reflect_agent_decision(self):
@@ -151,9 +153,6 @@ class Trinity:
         """
         self.memory.set_memory_info(self.message, self.cognition, self.response)
         self.memory.save_all_memory()
-        # self.memory.wipe_current_memories()
-        # self.unformatted_dm_history = None
-        # self.unformatted_user_history = None
         self.unformatted_history = None
         synth_result = self.build_json()
         self.append_json_to_file(synth_result)

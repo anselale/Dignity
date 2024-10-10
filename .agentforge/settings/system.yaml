@@ -3,10 +3,13 @@ PersonasEnabled: true
 Persona: default
 
 # Storage Settings
-StorageEnable: true
-SaveMemory: true # Saving Memory won't work if Storage is disabled
+StorageEnabled: true
+SaveMemory: true  # Saving Memory won't work if Storage is disabled
 ISOTimeStampMemory: true
 UnixTimeStampMemory: true
+PersistDirectory: ./DB/ChromaDB  # Relative path for persistent storage
+DBFreshStart: false # Will wipe storage everytime the system is initialized
+Embedding: all-distilroberta-v1
 
 # Misc. Settings
 OnTheFly: true
@@ -21,8 +24,8 @@ Logging:
     Actions: error
     Results: error
     Trinity: debug
-    DiscordClient: debug
-    Memory: debug
+    DiscordClient: info
+    Memory: error
     Formatting: error
 
 # Paths the system (agents) have access to read and write

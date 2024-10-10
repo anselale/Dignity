@@ -1,11 +1,13 @@
 from agentforge.agent import Agent
+from agentforge.utils.ParsingUtils import ParsingUtils
 from Utilities.Parsers import MessageParser
 
 
 class ChatAgent(Agent):
     parser = MessageParser
+    parsing_utils = ParsingUtils()
 
-    def load_additional_data(self):
+    def process_data(self):
         chat_message = self.data['messages']
         self.data['new_messages'] = self.parser.format_messages(self.data['messages'])
         # self.data['chat_history'] = chat_history
@@ -38,14 +40,14 @@ class ChatAgent(Agent):
         self.logger.log(f"{self.agent_name} Results:\n{self.result}", 'debug', 'Trinity')
         result = str(self.result)
         try:
-            parsed_result = self.functions.parsing_utils.parse_yaml_content(result)
+            parsed_result = self.parsing_utils.parse_yaml_content(result)
 
             if parsed_result is None or not isinstance(parsed_result, dict):
                 self.result = {'error': 'Parsing Error'}
                 return
 
             self.result = parsed_result
-            self.result['result'] = self.functions.parsing_utils.extract_yaml_block(result)
+            self.result['result'] = self.parsing_utils.extract_yaml_block(result)
         except Exception as e:
             self.logger.parsing_error(result, e)
 
