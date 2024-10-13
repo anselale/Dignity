@@ -160,7 +160,7 @@ class Memory:
         self.save_bot_response()
         # self.save_user_history()
         # self.save_scratchpad_log(self.user_message['author'], self.user_message['message'])
-        self.logger.log(f"Saved all memories.", 'debug', 'Trinity')
+        self.logger.log(f"Saved all memories.", 'debug', 'o7')
 
     def set_memory_info(self, message_batch: dict, cognition: dict, response: str):
         """
@@ -203,8 +203,6 @@ class Memory:
             "Reason": self.cognition["reflect"].get("Reason"),
             "User": chat_message["author"],
             "Channel": str(chat_message["channel"]),
-            # "Mentions": chat_message["mentions"],
-            # "Categories": str(self.cognition["thought"]["Categories"])
         }
         # Need to implement a last accessed metadata
 
@@ -217,7 +215,7 @@ class Memory:
                         f"Data (Message)={message}\n"
                         f"ID={memory_id}\n"
                         f"Metadata={metadata}",
-                        'debug', 'Trinity')
+                        'debug', 'o7')
 
     def save_category_memory(self):
         """
@@ -621,7 +619,7 @@ class Memory:
     #
     #     if count >= 10:
     #         self.logger.log(f"Scratchpad log count >= 10, updating scratchpad", 'debug', 'Memory')
-    #         from CustomAgents.Trinity.ScratchpadAgent import ScratchpadAgent
+    #         from CustomAgents.o7.ScratchpadAgent import ScratchpadAgent
     #         scratchpad_agent = ScratchpadAgent()
     #
     #         current_scratchpad = self.get_scratchpad(username)

@@ -9,7 +9,7 @@ ModelSettings:
 #  API: lm_studio_api
 #  Model: LMStudio
   Params: # Default parameter values
-    max_new_tokens: 3000
+    max_new_tokens: 10000
     temperature: 0.8
     top_p: 0.1
     n: 1

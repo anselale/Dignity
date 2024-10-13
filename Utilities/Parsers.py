@@ -249,7 +249,7 @@ class MessageParser:
                                       f"Message: {message['message']}")
         # Join the messages with two newlines, putting newlines at the end instead of the beginning
         formatted_messages = "\n\n".join(formatted_messages).strip()
-        logger.log(f"Formatted Messages:\n{formatted_messages}", 'debug', 'Trinity')
+        logger.log(f"Formatted Messages:\n{formatted_messages}", 'debug', 'o7')
         return formatted_messages
 
     @staticmethod

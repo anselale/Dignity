@@ -23,7 +23,7 @@ Logging:
     ModelIO: debug
     Actions: error
     Results: error
-    Trinity: debug
+    o7: debug
     DiscordClient: info
     Memory: error
     Formatting: error

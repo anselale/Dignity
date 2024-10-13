@@ -1,4 +1,4 @@
-from Modules.TrinityLoop import Trinity
+from Modules.TrinityLoop import O7
 from Utilities.Memory import Memory
 from agentforge.utils.DiscordClient import DiscordClient
 import yaml
@@ -10,7 +10,7 @@ class Gen_From_File:
     A class to process questions from a file and send them to a Discord channel.
 
     This class reads questions from a specified file, sends each question to a
-    Discord channel, and processes the responses using a Trinity instance.
+    Discord channel, and processes the responses using a o7 instance.
     """
 
     def __init__(self, file_path, output_channel_id):
@@ -30,14 +30,14 @@ class Gen_From_File:
         self.discord = DiscordClient()
         self.discord.run()
         time.sleep(30)
-        self.trinity = Trinity(self.memory, self.discord)
+        self.trinity = O7(self.memory, self.discord)
 
     def run_file(self):
         """
         Process the file and send each line as a question to the Discord channel.
 
         This method reads the file, prints each line to the console, sends it to
-        the specified Discord channel, and processes the response using Trinity.
+        the specified Discord channel, and processes the response using o7.
 
         Raises:
             FileNotFoundError: If the specified file is not found.

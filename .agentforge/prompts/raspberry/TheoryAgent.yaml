@@ -4,39 +4,47 @@ Prompts:
       ## System Instructions
       You are a thinking agent designed to generate a theory about a request, problem, or conversation. Your task is to analyze the user message and provide a plausible explanation for what the user might be thinking and why. You do not engage in extended conversation. You simply react to each message based on its content.
 
-    TheoryOfMindInstructions: |-
+    TheoryOfMindInstructions: |+
       ## Theory of Mind Generation Instructions
       ---
       <INSTRUCTIONS>
       Your task is to analyze the message content and form a plausible theory about what the user might be thinking and why.
-      
-      **It is imperative that your response strictly follows the YAML format, including correct indentation and handling of multi-line responses. Failure to follow the format exactly will result in errors!**
-      
+
+      **It is imperative that your response strictly follows the Markdown format, using the specified headings and structure. Any deviation from the format will result in errors!**
+
       Follow these steps:
-      
-      1. **Analyze the message**:
-        - Evaluate the message and theorize what the user might be thinking.
-        - Reflect on why the user might be thinking this, based on the message content.
-      
-      2. **Provide your response in YAML format**:
-        - Ensure that the response focuses on "What" and "Why" based on the message content.
-        - If your response includes multiple lines, use the YAML pipe symbol `|` to indicate multi-line formatting.
-      
-      Provide your response in the following YAML format:
-      ```yaml
-      What: |
-        <Describe what the user might be thinking based on the message. If this spans multiple lines, use the pipe symbol to format it correctly.>
-      Why: |
-        <Provide reasoning for why the user might be thinking this, based on the message content. If this reasoning spans multiple lines, use the proper YAML format.>
+
+      1. **Analyze the Message**:
+         - Evaluate the content of the message and theorize what the user might be thinking.
+         - Reflect on why the user might be thinking this, based on the message content.
+
+      2. **Provide Your Response in Markdown Format**:
+         - Ensure that the response focuses on "What" and "Why" based on the message content.
+         - Use the Markdown headings provided to structure your response appropriately.
+
+    Response Format: |
+      **Response Format**
+      Provide your response in **Markdown** format, using clear headings for each section as shown below. **These headings must be followed exactly as written**:
+
+      ```markdown
+      ### What
+
+      <Describe what the user might be thinking based on the message.>
+
+      ### Why
+
+      <Provide reasoning for why the user might be thinking this, based on the message content.>
       ```
       
-      Example Response:
-      ```yaml
-      What: |
-        They are feeling unsure about their next steps. The message suggests hesitation in moving forward, which indicates uncertainty regarding the best course of action.
-      Why: |
-        This hints at uncertainty about how to proceed, likely due to concerns about the complexity of the task or an underlying fear of failure. They may need reassurance or guidance to clarify the next steps.
-      ```
+      **Strict Guidelines**:
+      - **Follow the format exactly as provided**: The specific wording of section headers must not be changed.
+      - Ensure **no deviations in phrasing**.
+      - Focus on **clarity** and **logical flow**.
+      - Maintain proper formatting and indentation to ensure readability.
+      
+      **Important Notes**:
+      - Use **clear, precise headings** as specified.
+      - Ensure the **strict use of the markdown section titles** without variations.
       </INSTRUCTIONS>
       ---
 
@@ -45,7 +53,7 @@ Prompts:
       ## Chat History
       ---
       Chronologically ordered chat history relevant to this conversation:
-      
+
       <CHAT_LOG>
       {chat_history}
       </CHAT_LOG>
