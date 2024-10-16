@@ -205,26 +205,32 @@ class O7:
         }
 
     def _is_approved(self, reflection):
-        pattern = r'\bapprove\b'  # Regex pattern with word boundary markers
+        pattern = r'approve'
 
-        if re.search(pattern, reflection["Choice"], re.IGNORECASE):
+        choice = reflection["Choice"].strip()
+
+        if re.search(pattern, choice, re.IGNORECASE):
             self.cognition['reflect']['Feedback'] = None
             self.logger.log("Approved CoT", 'debug', 'o7')
             return True
         return False
 
     def _is_revision_needed(self, reflection):
-        pattern = r'\brevise\b'  # Regex pattern with word boundary markers
+        pattern = r'revise'
 
-        if re.search(pattern, reflection["Choice"], re.IGNORECASE):
+        choice = reflection["Choice"].strip()
+
+        if re.search(pattern, choice, re.IGNORECASE):
             self.logger.log(f"Reason for not revision:\n{reflection['Reason']}\n", 'info', 'o7')
             return True
         return False
 
     def _is_confused(self, reflection):
-        pattern = r'\bconfused\b'  # Regex pattern with word boundary markers
+        pattern = r'confused'
 
-        if re.search(pattern, reflection["Choice"], re.IGNORECASE):
+        choice = reflection["Choice"].strip()
+
+        if re.search(pattern, choice, re.IGNORECASE):
             self.logger.log(f"Changing Response:\n{self.response}\n Due To:\n{reflection['Reason']}", 'info', 'o7')
             return True
         return False

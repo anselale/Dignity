@@ -1,3 +1,4 @@
+import re
 from agentforge.agent import Agent
 from agentforge.utils.ParsingUtils import ParsingUtils
 from .ParsingAgent import ParsingAgent
@@ -34,6 +35,7 @@ class ChatAgent(Agent):
     parsing_utils = ParsingUtils()
     parser_agent = ParsingAgent()
     max_parsing_attempts = 3  # Set the maximum number of parsing attempts
+    max_generation_attempts = 3  # Set the maximum number of generation attempts
 
     def process_data(self):
         cognition = self.data['cognition']
@@ -58,7 +60,7 @@ class ChatAgent(Agent):
         self.data['understanding'] = cognition['cot'].get("Initial Understanding")
         self.data['thought_process'] = cognition['cot'].get("Thought Process")
         self.data['conclusions'] = cognition['cot'].get("Conclusions")
-        self.data['attempt'] = cognition['cot'].get("Attempt")
+        self.data['attempt'] = cognition['cot'].get("Response")
 
         # Reflection Agent
         self.data['choice'] = cognition['reflect'].get("Choice")
@@ -71,36 +73,53 @@ class ChatAgent(Agent):
 
     def parse_result(self):
         self.logger.log(f"{self.agent_name} Results:\n{self.result}", 'debug', 'o7')
-        result_str = str(self.result)
-        parsing_attempts = 0
-        max_attempts = self.max_parsing_attempts
+        generation_attempts = 0
+        max_generation_attempts = self.max_generation_attempts
 
-        try:
-            expected_format = self.retrieve_response_format()
-            while parsing_attempts < max_attempts:
-                parsed_result = self.attempt_parsing_and_validation(result_str, expected_format)
-                if parsed_result:
-                    # Parsing and validation succeeded
-                    self.result = parsed_result
-                    self.result['result'] = result_str
-                    return
-                else:
-                    parsing_attempts += 1
-                    self.logger.log(f"Parsing attempt {parsing_attempts} failed.", 'info')
-                    if parsing_attempts >= max_attempts:
-                        error_message = "Parsing Error: Unable to parse result into expected format after maximum attempts."
-                        self.result = {'error': error_message}
+        while generation_attempts < max_generation_attempts:
+            result_str = str(self.result)
+            parsing_attempts = 0
+            max_attempts = self.max_parsing_attempts
+
+            try:
+                expected_format = self.retrieve_response_format()
+                while parsing_attempts < max_attempts:
+                    parsed_result = self.attempt_parsing_and_validation(result_str, expected_format)
+                    if parsed_result:
+                        # Parsing and validation succeeded
+                        self.result = parsed_result
+                        self.result['result'] = result_str
                         return
                     else:
-                        self.logger.log("Attempting to parse with ParsingAgent.", 'info')
-                        # Call the ParsingAgent to attempt parsing
-                        result_str = self.run_parsing_agent(result_str)
-                        if result_str is None:
-                            self.result = {'error': 'ParsingAgent failed to produce a result.'}
-                            return
-                        # Continue the loop with the new result_str
-        except Exception as e:
-            self.handle_parsing_error(result_str, e)
+                        parsing_attempts += 1
+                        self.logger.log(f"Parsing attempt {parsing_attempts} failed.", 'info')
+                        if parsing_attempts >= max_attempts:
+                            break  # Break out of parsing loop to retry generation
+                        else:
+                            self.logger.log("Attempting to parse with ParsingAgent.", 'info')
+                            # Call the ParsingAgent to attempt parsing
+                            result_str = self.run_parsing_agent(result_str)
+
+                            # Use regex to check for the invalid text pattern anywhere in the result
+                            if result_str is None or re.search(r"\*\*\[INVALID TEXT: Unable to parse\]\*\*",
+                                                               result_str):
+                                self.logger.log("ParsingAgent failed to reformat the response.", 'info')
+                                break  # Break out of parsing loop to retry generation
+                            # Continue the loop with the new result_str
+                # After parsing attempts exhausted or failed, increment generation_attempts and rerun the LLM
+                generation_attempts += 1
+                if generation_attempts >= max_generation_attempts:
+                    error_message = "Parsing Error: Unable to parse result into expected format after maximum generation attempts."
+                    self.result = {'error': error_message}
+                    return
+                else:
+                    self.logger.log("Re-running LLM to generate a new response.", 'info')
+                    # Rerun the LLM to get a new response
+                    self.run_llm()
+                    # The result of LLM is stored in self.result, so we can continue
+            except Exception as e:
+                self.handle_parsing_error(result_str, e)
+                return  # Exit after handling exception
 
     def attempt_parsing_and_validation(self, result_str, expected_format):
         """
@@ -108,7 +127,7 @@ class ChatAgent(Agent):
         Returns the parsed result if successful, or None if unsuccessful.
         """
         parsed_result = self.parse_agent_result(result_str)
-        if parsed_result is None:
+        if parsed_result is None or parsed_result is {}:
             self.logger.log("Parsing Error: Unable to parse result into dictionary.", 'error')
             return None
 
@@ -199,7 +218,7 @@ class ChatAgent(Agent):
                 return None
 
             # Call the ParsingAgent
-            parsing_agent_result = self.parser_agent.run(response_format=response_format_markdown, text=result_str)
+            parsing_agent_result = self.parser_agent.run(target_structure=response_format_markdown, text=result_str)
 
             # The ParsingAgent returns a corrected result string
             return parsing_agent_result
