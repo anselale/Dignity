@@ -1,8 +1,10 @@
 from agentforge.agent import Agent
 from agentforge.utils.ParsingUtils import ParsingUtils
+from .ParsingAgent import ParsingAgent
 from Utilities.Parsers import MessageParser
 
 def parse_markdown_to_dict(markdown_text):
+    # Assume this function remains unchanged
     parsed_dict = {}
     current_heading = None
     content_lines = []
@@ -30,6 +32,8 @@ def parse_markdown_to_dict(markdown_text):
 class ChatAgent(Agent):
     parser = MessageParser
     parsing_utils = ParsingUtils()
+    parser_agent = ParsingAgent()
+    max_parsing_attempts = 3  # Set the maximum number of parsing attempts
 
     def process_data(self):
         cognition = self.data['cognition']
@@ -67,34 +71,149 @@ class ChatAgent(Agent):
 
     def parse_result(self):
         self.logger.log(f"{self.agent_name} Results:\n{self.result}", 'debug', 'o7')
-        result = str(self.result)
+        result_str = str(self.result)
+        parsing_attempts = 0
+        max_attempts = self.max_parsing_attempts
+
         try:
-            parsed_result = parse_markdown_to_dict(result)
-
-            if parsed_result is None or not isinstance(parsed_result, dict):
-                self.result = {'error': 'Parsing Error'}
-                return
-
-            self.result = parsed_result
-            self.result['result'] = result
+            expected_format = self.retrieve_response_format()
+            while parsing_attempts < max_attempts:
+                parsed_result = self.attempt_parsing_and_validation(result_str, expected_format)
+                if parsed_result:
+                    # Parsing and validation succeeded
+                    self.result = parsed_result
+                    self.result['result'] = result_str
+                    return
+                else:
+                    parsing_attempts += 1
+                    self.logger.log(f"Parsing attempt {parsing_attempts} failed.", 'info')
+                    if parsing_attempts >= max_attempts:
+                        error_message = "Parsing Error: Unable to parse result into expected format after maximum attempts."
+                        self.result = {'error': error_message}
+                        return
+                    else:
+                        self.logger.log("Attempting to parse with ParsingAgent.", 'info')
+                        # Call the ParsingAgent to attempt parsing
+                        result_str = self.run_parsing_agent(result_str)
+                        if result_str is None:
+                            self.result = {'error': 'ParsingAgent failed to produce a result.'}
+                            return
+                        # Continue the loop with the new result_str
         except Exception as e:
-            self.logger.parsing_error(result, e)
+            self.handle_parsing_error(result_str, e)
 
-    # YAML Implementation
-    # def parse_result(self):
-    #     self.logger.log(f"{self.agent_name} Results:\n{self.result}", 'debug', 'o7')
-    #     result = str(self.result)
-    #     try:
-    #         parsed_result = self.parsing_utils.parse_yaml_content(result)
-    #
-    #         if parsed_result is None or not isinstance(parsed_result, dict):
-    #             self.result = {'error': 'Parsing Error'}
-    #             return
-    #
-    #         self.result = parsed_result
-    #         self.result['result'] = self.parsing_utils.extract_yaml_block(result)
-    #     except Exception as e:
-    #         self.logger.parsing_error(result, e)
+    def attempt_parsing_and_validation(self, result_str, expected_format):
+        """
+        Attempts to parse the result_str and validate it against the expected_format.
+        Returns the parsed result if successful, or None if unsuccessful.
+        """
+        parsed_result = self.parse_agent_result(result_str)
+        if parsed_result is None:
+            self.logger.log("Parsing Error: Unable to parse result into dictionary.", 'error')
+            return None
+
+        # Validate the parsed result against the expected format
+        if expected_format:
+            validation_errors = self.compare_dict_keys(expected_format, parsed_result)
+            if validation_errors:
+                self.logger.log("Validation failed.", 'info')
+                return None
+            else:
+                self.logger.log("Parsed result matches the expected format.", 'info')
+                return parsed_result
+        else:
+            self.logger.log("No expected format to validate against.", 'warning')
+            return parsed_result
+
+    def retrieve_response_format(self):
+        """
+        Retrieves and parses the expected response format from agent data.
+        Returns the expected format as a dictionary.
+        """
+        response_format_markdown = self.get_response_format_markdown()
+        if response_format_markdown:
+            # Extract and parse the expected format
+            expected_format = parse_markdown_to_dict(response_format_markdown)
+            return expected_format
+
+        self.logger.log("No response format specified in prompts.", 'warning')
+        return None
+
+    def get_response_format_markdown(self):
+        """
+        Retrieves the Response Format markdown from agent data.
+        Returns the markdown string or None if not found.
+        """
+        response_format = self.agent_data['prompts']['System'].get("Response Format")
+        if not response_format:
+            response_format = self.agent_data['prompts']['User'].get("Response Format")
+
+        if response_format:
+            # Extract the Markdown code block from the response format
+            _ , response_format_markdown = self.parsing_utils.extract_code_block(response_format)
+            return response_format_markdown
+
+        return None
+
+    def parse_agent_result(self, result_str):
+        """
+        Parses the agent's result string into a dictionary.
+        Returns the parsed result dictionary.
+        """
+        parsed_result = parse_markdown_to_dict(result_str)
+        if parsed_result is None or not isinstance(parsed_result, dict):
+            self.logger.log("Parsing Error: Unable to parse result into dictionary.", 'error')
+            return None
+        return parsed_result
+
+    def compare_dict_keys(self, expected, actual, path=''):
+        """
+        Recursively compares the keys of two dictionaries.
+        Returns a list of error messages for any discrepancies found.
+        """
+        errors = []
+        for key in expected:
+            if key not in actual:
+                errors.append(f"Missing key: {path + key}")
+            else:
+                if isinstance(expected[key], dict) and isinstance(actual[key], dict):
+                    errors.extend(self.compare_dict_keys(expected[key], actual[key], path + key + '.'))
+                elif isinstance(expected[key], dict) != isinstance(actual[key], dict):
+                    errors.append(f"Type mismatch at key: {path + key}")
+        for key in actual:
+            if key not in expected:
+                errors.append(f"Unexpected key: {path + key}")
+        return errors
+
+    def run_parsing_agent(self, result_str):
+        """
+        Calls the ParsingAgent to attempt to reformat the result into the expected format.
+        Returns the new result string, or None if unsuccessful.
+        """
+        try:
+            # Prepare the input for the ParsingAgent
+            response_format_markdown = self.get_response_format_markdown()
+
+            if not response_format_markdown:
+                self.logger.log("No response format available for ParsingAgent.", 'warning')
+                return None
+
+            # Call the ParsingAgent
+            parsing_agent_result = self.parser_agent.run(response_format=response_format_markdown, text=result_str)
+
+            # The ParsingAgent returns a corrected result string
+            return parsing_agent_result
+
+        except Exception as e:
+            self.logger.log(f"Error during ParsingAgent execution: {e}", 'error')
+            return None
+
+    def handle_parsing_error(self, result_str, exception):
+        """
+        Handles exceptions during parsing and logs the error.
+        """
+        self.logger.parsing_error(result_str, exception)
+        self.result = {'error': f'Exception during parsing: {str(exception)}'}
 
     def save_result(self):
         pass

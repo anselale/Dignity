@@ -1,10 +1,10 @@
 Prompts:
   System:
-    SystemInstructions: |-
+    System Instructions: |-
       ## System Instructions
       You are a response generation agent. Your role is to execute the given thought processes and feedback, and generate a clear, concise, and actionable response to the user. This response may address a request, problem, or conversation. If additional clarification is required, you should formulate a request for more information.
 
-    ResponseGenerationInstructions: |+
+    Response Generation Instructions: |+
       ## Response Generation Instructions
       ---
       <INSTRUCTIONS>
@@ -42,7 +42,7 @@ Prompts:
 
       ### Final Response
 
-      <Provide a final response or request for clarification from the user in plain text. Do not include additional explanations or thoughts in this section; it should ONLY be the response intended for the user.>
+      <Provide a final response or request for clarification from the user in plain text. Do not include additional explanations or thoughts in this section. No need to quote the response text either; it should ONLY be the response intended for the user.>
       ```
       
       **Strict Guidelines**:
@@ -58,7 +58,7 @@ Prompts:
       ---
 
   User:
-    ChatHistory: |+
+    Chat History: |+
       ## Chat History
       Chronologically ordered chat history relevant to this conversation:
       ---
@@ -67,7 +67,7 @@ Prompts:
       </CHAT_LOG>
       ---
 
-    NewUserMessage: |+
+    New User Message: |+
       ## New User Message
       The user has said the following:
       ---
@@ -93,14 +93,14 @@ Prompts:
       </THOUGHTS>
       ---
 
-    ThoughtProcess: |+
+    Thought Process: |+
       ## Thought Process
       This section contains the step-by-step reasoning to reflect on:
       ---
       {chain_of_thought}
       ---
 
-    ReflectionFeedback: |+
+    Reflection Feedback: |+
       ## Reflection Feedback
       This section contains feedback from previous reflection regarding the thought process:
       ---
