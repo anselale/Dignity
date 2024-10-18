@@ -217,7 +217,8 @@ class ChatAgent(Agent):
         Parses the agent's result string into a dictionary.
         Returns the parsed result dictionary.
         """
-        parsed_result = parse_markdown_to_dict(result_str)
+        _ , cleaned_results = self.parsing_utils.extract_code_block(result_str)
+        parsed_result = parse_markdown_to_dict(cleaned_results)
         if parsed_result is None or not isinstance(parsed_result, dict):
             self.logger.log("Parsing Error: Unable to parse result into dictionary.", 'error')
             return None

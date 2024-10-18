@@ -13,8 +13,8 @@ def thought_flow_to_xml(thought_flow):
     # Define the mapping from (outer_key, inner_key) to XML tags
     mapping = {
         ('thought', 'Emotion'): 'EMOTIONS',
-        ('thought', 'Inner Thought'): 'INITIAL THOUGHTS',
-        ('thought', 'Reason'): 'INITIAL THOUGHTS',
+        ('thought', 'Inner Thought'): 'INITIAL_THOUGHTS',
+        ('thought', 'Reason'): 'INITIAL_THOUGHTS',
         ('theory', 'What'): 'EMPATHIZING',
         ('theory', 'Why'): 'EMPATHIZING',
         ('cot', 'Initial Understanding'): 'UNDERSTANDING',
@@ -23,7 +23,7 @@ def thought_flow_to_xml(thought_flow):
         ('reflect', 'Choice'): 'REFLECTION',
         ('reflect', 'Reason'): 'REFLECTION',
         ('reflect', 'Feedback'): 'REFLECTION',
-        ('generate', 'Reasoning'): 'FINAL THOUGHTS',
+        ('generate', 'Reasoning'): 'FINAL_THOUGHTS',
         ('generate', 'Final Response'): 'OUTPUT'
     }
 
@@ -74,8 +74,8 @@ def thought_flow_to_xml(thought_flow):
     xml_output = "\n".join(xml_output_lines)
 
     # Create XML File for easy viewing of flow
-    # with open('thought_flow_output.xml', 'w') as file:
-    #     file.write(xml_output)
+    with open('thought_flow_output.xml', 'a') as file:
+        file.write(xml_output)
 
     return xml_output
 
