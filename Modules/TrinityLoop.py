@@ -8,6 +8,8 @@ from Utilities.Parsers import MessageParser
 import re
 
 def thought_flow_to_xml(thought_flow):
+    from collections import OrderedDict
+
     # Define the mapping from (outer_key, inner_key) to XML tags
     mapping = {
         ('thought', 'Emotion'): 'EMOTIONS',
@@ -18,7 +20,6 @@ def thought_flow_to_xml(thought_flow):
         ('cot', 'Initial Understanding'): 'UNDERSTANDING',
         ('cot', 'Thought Process'): 'APPROACH',
         ('cot', 'Conclusions'): 'APPROACH',
-        ('cot', 'Attempt'): 'ATTEMPT',
         ('reflect', 'Choice'): 'REFLECTION',
         ('reflect', 'Reason'): 'REFLECTION',
         ('reflect', 'Feedback'): 'REFLECTION',
@@ -26,44 +27,58 @@ def thought_flow_to_xml(thought_flow):
         ('generate', 'Final Response'): 'OUTPUT'
     }
 
-    # Initialize an ordered dictionary to maintain the order of XML tags
-    from collections import OrderedDict
-    xml_content = OrderedDict()
-    tags_order = [
-        'EMOTIONS', 'INITIAL THOUGHTS', 'EMPATHIZING', 'UNDERSTANDING',
-        'APPROACH', 'ATTEMPT', 'REFLECTION', 'FINAL THOUGHTS', 'OUTPUT'
-    ]
-    for tag in tags_order:
-        xml_content[tag] = []
+    # Initialize a list to collect XML lines
+    xml_output_lines = []
 
-    # Iterate over the thought_flow
+    # Initialize variables to keep track of current tag and content
+    current_tag = None
+    current_contents = []
+
+    # Process the thought_flow sequentially
     for item in thought_flow:
         for outer_key, inner_dict in item.items():
+            # Ensure inner_dict is an OrderedDict
+            if not isinstance(inner_dict, OrderedDict):
+                inner_dict = OrderedDict(inner_dict)
             for inner_key, content in inner_dict.items():
                 # Determine the correct XML tag
                 tag = mapping.get((outer_key, inner_key))
                 if tag:
-                    # Append the content to the corresponding tag in xml_content
-                    xml_content[tag].append(content)
+                    content = content.strip()
+                    if tag == current_tag:
+                        # Same tag as before, accumulate content
+                        current_contents.append(content)
+                    else:
+                        # New tag encountered
+                        if current_tag is not None:
+                            # Write the accumulated contents of the previous tag
+                            xml_output_lines.append(f"<{current_tag}>")
+                            xml_output_lines.append("\n\n".join(current_contents))
+                            xml_output_lines.append(f"</{current_tag}>")
+                            xml_output_lines.append("")  # Add an empty line for readability
+                        # Start accumulating contents for the new tag
+                        current_tag = tag
+                        current_contents = [content]
                 else:
                     # Handle unmapped keys if necessary
                     pass  # Or raise an error/warning
 
-    # Build the XML string
-    xml_strings = []
-    for tag in tags_order:
-        contents = xml_content[tag]
-        if contents:
-            xml_strings.append(f"<{tag}>")
-            for content in contents:
-                xml_strings.append(content.strip())
-                xml_strings.append("")  # Add an empty line for readability
-            xml_strings.append(f"</{tag}>")
-            xml_strings.append("")  # Add an empty line between sections
+    # After processing all items, write the last accumulated tag
+    if current_tag is not None and current_contents:
+        xml_output_lines.append(f"<{current_tag}>")
+        xml_output_lines.append("\n\n".join(current_contents))
+        xml_output_lines.append(f"</{current_tag}>")
+        xml_output_lines.append("")  # Add an empty line for readability
 
-    # Join the strings
-    xml_output = "\n".join(xml_strings)
+    # Join the XML lines into a single string
+    xml_output = "\n".join(xml_output_lines)
+
+    # Create XML File for easy viewing of flow
+    # with open('thought_flow_output.xml', 'w') as file:
+    #     file.write(xml_output)
+
     return xml_output
+
 
 
 class O7:
@@ -120,17 +135,17 @@ class O7:
 
         self.generate_jsonl()
 
-
     def run_agent(self, agent_name):
         max_reruns = 3
-        self.logger.log(f"Running {agent_name.capitalize()} Agent... Message:{self.message['message']}", 'info',
-                        'o7')
+        self.logger.log(f"Running {agent_name.capitalize()} Agent... Message:{self.message['message']}", 'info', 'o7')
 
         agent = self.agents[agent_name]
 
-        agent_vars = {'messages': self.message,  # batch_messages
-                      'chat_history': self.chat_history,  # chat_history
-                      'cognition': self.cognition}  # cognition
+        agent_vars = {
+            'messages': self.message,  # batch_messages
+            'chat_history': self.chat_history,  # chat_history
+            'cognition': self.cognition  # cognition
+        }
         result = agent.run(**agent_vars)
 
         # Rerun if we get a parsing error
@@ -149,19 +164,22 @@ class O7:
             self.ui.send_message(1, self.message, result_message)
 
             quit()
+
         self.cognition[agent_name] = result
 
         self.ui.send_message(1, self.message, f"{agent_name.capitalize()} Agent:\n")
-        # Iterate through the dictionary, excluding the 'result' key
+
+        # Collect all key-value pairs from result (excluding 'result' key) into a single dictionary
+        agent_output = {}
         for key, value in result.items():
             if key != 'result':
-                # Append to the assistant flow variable
-                self.assistant_flow.append({agent_name:{key:value}})
-
+                agent_output[key] = value
                 # Send the formatted result_message
                 result_message = f"{key}:\n{str(value)}"
                 self.ui.send_message(1, self.message, result_message)
 
+        # Append the consolidated agent output to assistant_flow
+        self.assistant_flow.append({agent_name: agent_output})
 
     def run_cognition_process(self):
         max_iterations = 2
@@ -177,22 +195,67 @@ class O7:
                 break
 
             reflection = self.cognition['reflect']
-            self.logger.log(f"Handle Reflection:{reflection}", 'debug', 'o7')
+            self.logger.log(f"Handle Reflection: {reflection}", 'debug', 'o7')
 
             if "Choice" in reflection:
-                if self._is_approved(reflection):
+                action = self._determine_action(reflection)
+                if action == 'approve' or action == 'clarify':
+                    # Proceed to response generation
                     break
-                elif self._is_revision_needed(reflection):
+                elif action == 'revise':
+                    # Revise the thought process
                     self._run_cognition()
                     continue
-                elif self._is_confused(reflection):
-                    break
+                elif action == 'reject':
+                    # Reset the thought process
+                    self.cognition['cot'] = {}
+                    self._run_cognition()
+                    continue
                 else:
                     self._handle_parsing_error(reflection)
-            break
+                    break  # Exit loop after handling parsing error
+            else:
+                self.logger.log("No 'Choice' found in reflection. Handling as parsing error.", 'warning', 'o7')
+                self._handle_parsing_error(reflection)
+                break  # Exit loop after handling parsing error
 
     def _run_cognition(self):
         self.run_agent('cot')
+        self.run_agent('reflect')
+
+    def _determine_action(self, reflection):
+        choice = reflection["Choice"].strip().lower()
+        reason = reflection.get('Reason', 'No reason provided.')
+
+        actions = {
+            'approve': {
+                'action': 'approve',
+                'log': "Approved thought process."
+            },
+            'revise': {
+                'action': 'revise',
+                'log': f"Revision needed due to: {reason}"
+            },
+            'reject': {
+                'action': 'reject',
+                'log': f"Thought process rejected due to: {reason}"
+            },
+            'clarify': {
+                'action': 'clarify',
+                'log': f"Clarification needed due to: {reason}"
+            }
+        }
+
+        for key, value in actions.items():
+            if key in choice:
+                self.logger.log(value['log'], 'info', 'o7')
+                return value['action']
+
+        self.logger.log(f"Unknown choice in reflection: '{choice}'", 'warning', 'o7')
+        return 'unknown'
+
+    def _handle_parsing_error(self, reflection):
+        self.logger.log(f"Parsing Error in Reflection: {reflection}\nRerunning reflection...", 'error', 'o7')
         self.run_agent('reflect')
 
     def _reset_cognition(self):
@@ -204,41 +267,6 @@ class O7:
             "generate": {},
         }
 
-    def _is_approved(self, reflection):
-        pattern = r'approve'
-
-        choice = reflection["Choice"].strip()
-
-        if re.search(pattern, choice, re.IGNORECASE):
-            self.cognition['reflect']['Feedback'] = None
-            self.logger.log("Approved CoT", 'debug', 'o7')
-            return True
-        return False
-
-    def _is_revision_needed(self, reflection):
-        pattern = r'revise'
-
-        choice = reflection["Choice"].strip()
-
-        if re.search(pattern, choice, re.IGNORECASE):
-            self.logger.log(f"Reason for not revision:\n{reflection['Reason']}\n", 'info', 'o7')
-            return True
-        return False
-
-    def _is_confused(self, reflection):
-        pattern = r'confused'
-
-        choice = reflection["Choice"].strip()
-
-        if re.search(pattern, choice, re.IGNORECASE):
-            self.logger.log(f"Changing Response:\n{self.response}\n Due To:\n{reflection['Reason']}", 'info', 'o7')
-            return True
-        return False
-
-    def _handle_parsing_error(self, reflection):
-        self.logger.log(f"Parsing Error in Reflection:\n{reflection}\n\nRerunning reflection...\n",'error', 'o7')
-        self.run_agent('reflect')
-
     def save_memories(self):
         """
         Save all memories, including the scratchpad log.
@@ -246,7 +274,6 @@ class O7:
         self.memory.set_memory_info(self.message, self.cognition, self.response)
         self.memory.save_all_memory()
         self.unformatted_history = None
-
 
     def generate_jsonl(self):
         synth_result = self.build_json()
@@ -294,7 +321,7 @@ class O7:
         thought_flow = thought_flow_to_xml(self.assistant_flow)
 
         json_object = [
-                {"system": self.message.get('system_message', '')},
+                {"system": self.message.get('system_message', "You are a thinking agent responsible for developing a detailed, step-by-step thought process in response to a request, problem, or conversation. Your task is to break down the situation into a structured reasoning process. If feedback is provided, integrate it into your thought process for refinement.")},
                 {"user": self.message.get('message', '')},
                 {"assistant": thought_flow}
             ]

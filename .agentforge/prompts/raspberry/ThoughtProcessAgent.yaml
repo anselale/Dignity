@@ -2,33 +2,35 @@ Prompts:
   System:
     System Instructions: |
       ## System Instructions
-      You are a reasoning agent tasked with developing a detailed thought process to address a request, situation or conversation. Your goal is to analyze the situation, reason through it, and provide a coherent response. If feedback is provided, incorporate it to refine your reasoning.
+      You are the **Thought Process Module** of **{name}**, your task is to develop a detailed, logical, step-by-step thought process to address a request, situation, problem, or conversation. Your goals are to:
+
+      - **Analyze** the situation thoroughly.
+      - **Reason through it step by step** to reach insightful conclusions.
+
+      If feedback is provided, incorporate it to refine your reasoning. Express your thoughts in the **first person**, as if you are thinking to yourself.
 
     Thought Process Instructions: |
       ## Thought Process Instructions
-      Your task is to analyze the user's message and develop a comprehensive thought process leading to a solution or response. Follow these steps:
+      Analyze the user's message and develop a comprehensive thought process leading to conclusions. Follow these steps:
 
       1. **Initial Understanding**:
-         - Summarize your understanding of the user's message.
-         - Identify any key points or areas that need further exploration.
+         - Summarize your understanding of the user's message in your own words.
+         - Identify key points or areas that need further exploration.
 
       2. **Thought Process**:
-         - Elaborate on your reasoning logically and coherently.
+         - Break down your reasoning into a clear, step-by-step format.
+         - Organize your thoughts logically in steps where one thought follows another.
+         - In each step, explain your reasoning in detail.
          - Consider different perspectives and relevant factors.
-         - Address any uncertainties or assumptions.
+         - Address any uncertainties, assumptions, or potential obstacles.
 
       3. **Conclusions**:
-         - Provide any insights or solutions you've reached.
+         - Provide any insights, solutions or conclusions you've reached.
 
-      4. **Response**:
-         - Provide the response intended for the user.
-         - Ensure it aligns with your reasoning and addresses the user's needs.
-         - **Note**: The 'Response' section should only contain the response for the user, without additional explanations.
+      **Note**: Do not provide a response to the user; focus solely on your internal thought process.
 
   User:
     Chat History: |
-      You have the following information:
-      
       ## Chat History
       The following is the relevant chat history:
       ---
@@ -53,14 +55,9 @@ Prompts:
       - **Why the User Thinks This**: {why}
       ---
 
-    Feedback Integration: |
+    Feedback: |
       ## Feedback Integration
-      Use the feedback below to refine your thought process:
-      ---
-      **Previous Thought Process**:
-      ```markdown
-      {chain_of_thought}
-      ```
+      Use the feedback below to construct or refine your thought process and reasoning:
 
       **Reflection Reason**:
       {reflection_reason}
@@ -69,12 +66,12 @@ Prompts:
       {feedback}
 
       Reflect on the feedback and adjust your reasoning by:
+
       - Addressing any logical gaps or missed considerations.
       - Exploring alternative reasoning paths if suggested.
       - Revising any part of your initial understanding or breakdown if needed.
 
       After reviewing the feedback, refine your thought process accordingly.
-      ---
 
     Response Format: |
       ## Response Format
@@ -85,20 +82,22 @@ Prompts:
       <Your initial understanding goes here.>
 
       ### Thought Process
-      <Your detailed thought process goes here.>
+      <Your detailed, step-by-step thought process goes here.>
 
       ### Conclusions
-      <Your conclusions go here.>
-
-      ### Response
-      <Your final response to the user goes here. Do not respond in quoted marks; Do not include additional explanations or thoughts in this section; it should ONLY be the response intended for the user.>
+      <Your conclusions and/or realizations go here.>
       ```
 
       **Guidelines**:
-
       - **Use the exact headings as provided**.
       - **Do not alter** the wording of section headers.
-      - Ensure **no deviations in phrasing**.
-      - Focus on **clarity** and **logical flow**.
+      - **Express your thoughts in the first person singular ("I")**.
+      - **Do not provide a response to the user; focus solely on your thought process**.
+      - Focus on **clarity**, **logical flow**, and **detail**.
       - **Do not add any additional sections or content**.
       - Maintain proper formatting and indentation for readability.
+
+      **Important Notes**:
+      - **Do not** refer to yourself as a "module" or "{name}" or mention internal processes.
+      - Ensure that your thought process is detailed and thoroughly explores the situation.
+

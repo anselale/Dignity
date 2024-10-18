@@ -3,10 +3,10 @@ from agentforge.agent import Agent
 from agentforge.utils.ParsingUtils import ParsingUtils
 from .ParsingAgent import ParsingAgent
 from Utilities.Parsers import MessageParser
+from collections import OrderedDict
 
 def parse_markdown_to_dict(markdown_text):
-    # Assume this function remains unchanged
-    parsed_dict = {}
+    parsed_dict = OrderedDict()
     current_heading = None
     content_lines = []
 
@@ -30,6 +30,32 @@ def parse_markdown_to_dict(markdown_text):
 
     return parsed_dict
 
+# def parse_markdown_to_dict(markdown_text):
+#     # Assume this function remains unchanged
+#     parsed_dict = {}
+#     current_heading = None
+#     content_lines = []
+#
+#     lines = markdown_text.split('\n')
+#     for line in lines:
+#         # Check if the line is a heading (e.g., starts with '### ')
+#         if line.startswith('### '):
+#             # If we're already tracking content under a heading, save it
+#             if current_heading is not None:
+#                 parsed_dict[current_heading] = '\n'.join(content_lines).strip()
+#                 content_lines = []
+#             # Update the current heading
+#             current_heading = line[4:].strip()
+#         else:
+#             # If a heading has been found, collect the content
+#             if current_heading is not None:
+#                 content_lines.append(line)
+#     # After the loop, save the content for the last heading
+#     if current_heading is not None:
+#         parsed_dict[current_heading] = '\n'.join(content_lines).strip()
+#
+#     return parsed_dict
+
 class ChatAgent(Agent):
     parser = MessageParser
     parsing_utils = ParsingUtils()
@@ -39,11 +65,10 @@ class ChatAgent(Agent):
 
     def process_data(self):
         cognition = self.data['cognition']
-        chat_message = self.data['messages']
 
         # Get Message Info
-        self.data['username'] = chat_message['author']
-        self.data['chat_message'] = chat_message['message']
+        # self.data['username'] = chat_message['author']
+        self.get_user_message()
 
         # Thought Agent
         self.data['emotion'] = cognition['thought'].get('Emotion')
@@ -60,7 +85,6 @@ class ChatAgent(Agent):
         self.data['understanding'] = cognition['cot'].get("Initial Understanding")
         self.data['thought_process'] = cognition['cot'].get("Thought Process")
         self.data['conclusions'] = cognition['cot'].get("Conclusions")
-        self.data['attempt'] = cognition['cot'].get("Response")
 
         # Reflection Agent
         self.data['choice'] = cognition['reflect'].get("Choice")
@@ -70,6 +94,20 @@ class ChatAgent(Agent):
         # Generate Agent
         self.data['response_reasoning'] = cognition['generate'].get('Reasoning')
         self.data['response'] = cognition['generate'].get('Final Response')
+
+    def get_user_message(self):
+        chat_message = self.data['messages']
+        timestamp = chat_message.get('timestamp', 'N/A')
+        author = chat_message.get('author', 'N/A')
+        message_text = chat_message.get('message', 'N/A')
+
+        formatted_message = (
+            f"Date: {timestamp}\n"
+            f"User: {author}\n"
+            f"Message: \n{message_text.strip()}"
+        )
+
+        self.data['chat_message'] = formatted_message
 
     def parse_result(self):
         self.logger.log(f"{self.agent_name} Results:\n{self.result}", 'debug', 'o7')
@@ -101,7 +139,7 @@ class ChatAgent(Agent):
                             result_str = self.run_parsing_agent(result_str)
 
                             # Use regex to check for the invalid text pattern anywhere in the result
-                            if result_str is None or re.search(r"\*\*\[INVALID TEXT: Unable to parse\]\*\*",
+                            if result_str is None or re.search(r"\*\*\[INVALID TEXT: Unable to parse]\*\*",
                                                                result_str):
                                 self.logger.log("ParsingAgent failed to reformat the response.", 'info')
                                 break  # Break out of parsing loop to retry generation
