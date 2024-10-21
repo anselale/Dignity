@@ -47,8 +47,6 @@ Prompts:
       - **Emotion**: {emotion}
       - **Inner Thought**: {thought}
       - **Reason**: {reason}
-      - **User's Possible Thoughts**: {what}
-      - **Why the User Thinks This**: {why}
       ---
 
     Response Format: |
