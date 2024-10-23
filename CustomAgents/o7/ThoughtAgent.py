@@ -1,4 +1,4 @@
-from CustomAgents.Trinity.ChatAgent import ChatAgent
+from CustomAgents.o7.ChatAgent import ChatAgent
 
 
 class ThoughtAgent(ChatAgent):

@@ -1,20 +1,90 @@
-from CustomAgents.Trinity.ThoughtAgent import ThoughtAgent
-from CustomAgents.Trinity.ThoughtChainAgent import ThoughtChainAgent
-from CustomAgents.Trinity.TheoryAgent import TheoryAgent
-from CustomAgents.Trinity.GenerateAgent import GenerateAgent
-from CustomAgents.Trinity.ReflectAgent import ReflectAgent
-from agentforge.utils.functions.Logger import Logger
+from CustomAgents.o7.ThoughtAgent import ThoughtAgent
+from CustomAgents.o7.ThoughtProcessAgent import ThoughtProcessAgent
+from CustomAgents.o7.TheoryAgent import TheoryAgent
+from CustomAgents.o7.GenerateAgent import GenerateAgent
+from CustomAgents.o7.ReflectAgent import ReflectAgent
+from agentforge.utils.Logger import Logger
 from Utilities.Parsers import MessageParser
+import re
+
+def thought_flow_to_xml(thought_flow):
+    from collections import OrderedDict
+
+    # Define the mapping from (outer_key, inner_key) to XML tags
+    mapping = {
+        ('thought', 'Emotion'): 'EMOTIONS',
+        ('thought', 'Inner Thought'): 'INITIAL_THOUGHTS',
+        ('thought', 'Reason'): 'INITIAL_THOUGHTS',
+        ('theory', 'What'): 'EMPATHIZING',
+        ('theory', 'Why'): 'EMPATHIZING',
+        ('cot', 'Initial Understanding'): 'UNDERSTANDING',
+        ('cot', 'Thought Process'): 'APPROACH',
+        ('cot', 'Conclusions'): 'APPROACH',
+        ('reflect', 'Choice'): 'REFLECTION',
+        ('reflect', 'Reason'): 'REFLECTION',
+        ('reflect', 'Feedback'): 'REFLECTION',
+        ('generate', 'Reasoning'): 'FINAL_THOUGHTS',
+        ('generate', 'Final Response'): 'OUTPUT'
+    }
+
+    # Initialize a list to collect XML lines
+    xml_output_lines = []
+
+    # Initialize variables to keep track of current tag and content
+    current_tag = None
+    current_contents = []
+
+    # Process the thought_flow sequentially
+    for item in thought_flow:
+        for outer_key, inner_dict in item.items():
+            # Ensure inner_dict is an OrderedDict
+            if not isinstance(inner_dict, OrderedDict):
+                inner_dict = OrderedDict(inner_dict)
+            for inner_key, content in inner_dict.items():
+                # Determine the correct XML tag
+                tag = mapping.get((outer_key, inner_key))
+                if tag:
+                    content = content.strip()
+                    if tag == current_tag:
+                        # Same tag as before, accumulate content
+                        current_contents.append(content)
+                    else:
+                        # New tag encountered
+                        if current_tag is not None:
+                            # Write the accumulated contents of the previous tag
+                            xml_output_lines.append(f"<{current_tag}>")
+                            xml_output_lines.append("\n\n".join(current_contents))
+                            xml_output_lines.append(f"</{current_tag}>")
+                            xml_output_lines.append("")  # Add an empty line for readability
+                        # Start accumulating contents for the new tag
+                        current_tag = tag
+                        current_contents = [content]
+                else:
+                    # Handle unmapped keys if necessary
+                    pass  # Or raise an error/warning
+
+    # After processing all items, write the last accumulated tag
+    if current_tag is not None and current_contents:
+        xml_output_lines.append(f"<{current_tag}>")
+        xml_output_lines.append("\n\n".join(current_contents))
+        xml_output_lines.append(f"</{current_tag}>")
+        xml_output_lines.append("")  # Add an empty line for readability
+
+    # Join the XML lines into a single string
+    xml_output = "\n".join(xml_output_lines)
+
+    # Create XML File for easy viewing of flow
+    with open('thought_flow_output.xml', 'a') as file:
+        file.write(xml_output)
+
+    return xml_output
 
 
-class Trinity:
+
+class O7:
     def __init__(self, memory_instance, discord_client):
         self.memory = memory_instance
         self.persona = self.memory.get_persona()
-        # self.thought = ThoughtAgent()
-        # self.theory = TheoryAgent()
-        # self.generate = GenerateAgent()
-        # self.reflect = ReflectAgent()
         self.logger = Logger(self.__class__.__name__)
         self.chat_history = None
         self.user_history = None
@@ -26,161 +96,176 @@ class Trinity:
         self.parser = MessageParser
         self.ui = UI(discord_client)
         self.response: str = ''
+        self.assistant_flow = []
+        self.cognition = {}
 
         # Grouping agent-related instances into a dictionary
         self.agents = {
             "thought": ThoughtAgent(),
             "theory": TheoryAgent(),
-            "cot": ThoughtChainAgent(),
+            "cot": ThoughtProcessAgent(),
             "generate": GenerateAgent(),
             "reflect": ReflectAgent(),
         }
 
+    def do_chat(self, message):
+        self._reset_cognition()
+        self.message = message
+        self.ui.channel_id_layer_0 = self.message["channel_id"]
+        self.ui.current_thread_id = None  # Reset the thread ID for each new chat
+        self.assistant_flow = []
+        self.chat_history, self.unformatted_history = self.memory.fetch_history(collection_name=message['channel'])
+
+        # Run Thought Agent
+        self.run_agent('thought')
+
+        # Run Theory Agent
+        self.run_agent('theory')
+
+        # Run Cognition Process
+        self.run_cognition_process()
+
+        # Run Generate Agent
+        self.run_agent('generate')
+        self.response = self.cognition['generate'].get('Final Response')
+        self.ui.send_message(0, self.message, self.response)
+
+        # Save chat history
+        self.save_memories()
+
+        self.generate_jsonl()
+
+    def run_agent(self, agent_name):
+        max_reruns = 3
+        self.logger.log(f"Running {agent_name.capitalize()} Agent... Message:{self.message['message']}", 'info', 'o7')
+
+        agent = self.agents[agent_name]
+
+        agent_vars = {
+            'messages': self.message,  # batch_messages
+            'chat_history': self.chat_history,  # chat_history
+            'cognition': self.cognition  # cognition
+        }
+        result = agent.run(**agent_vars)
+
+        # Rerun if we get a parsing error
+        has_run = 1
+        while 'error' in result:
+            result_message = f"{agent_name.capitalize()} Agent: Parsing Error! Retrying..."
+            self.logger.log(result_message, 'error', 'o7')
+            self.ui.send_message(1, self.message, result_message)
+            if has_run < max_reruns:
+                result = agent.run(**agent_vars)
+                has_run += 1
+                continue
+
+            result_message = f"{agent_name.capitalize()} Agent Parsing Error. EXITING!!!\n"
+            self.logger.log(result_message, 'error', 'o7')
+            self.ui.send_message(1, self.message, result_message)
+
+            quit()
+
+        self.cognition[agent_name] = result
+
+        self.ui.send_message(1, self.message, f"{agent_name.capitalize()} Agent:\n")
+
+        # Collect all key-value pairs from result (excluding 'result' key) into a single dictionary
+        agent_output = {}
+        for key, value in result.items():
+            if key != 'result':
+                agent_output[key] = value
+                # Send the formatted result_message
+                result_message = f"{key}:\n{str(value)}"
+                self.ui.send_message(1, self.message, result_message)
+
+        # Append the consolidated agent output to assistant_flow
+        self.assistant_flow.append({agent_name: agent_output})
+
+    def run_cognition_process(self):
+        max_iterations = 2
+        iteration_count = 0
+
+        # Run initial CoT and Reflection agents
+        self._run_cognition()
+
+        while True:
+            iteration_count += 1
+            if iteration_count > max_iterations:
+                self.logger.log("Maximum iteration count reached, forcing response", 'warning', 'o7')
+                break
+
+            reflection = self.cognition['reflect']
+            self.logger.log(f"Handle Reflection: {reflection}", 'debug', 'o7')
+
+            if "Choice" in reflection:
+                action = self._determine_action(reflection)
+                if action == 'approve' or action == 'clarify':
+                    # Proceed to response generation
+                    break
+                elif action == 'revise':
+                    # Revise the thought process
+                    self._run_cognition()
+                    continue
+                elif action == 'reject':
+                    # Reset the thought process
+                    self.cognition['cot'] = {}
+                    self._run_cognition()
+                    continue
+                else:
+                    self._handle_parsing_error(reflection)
+                    break  # Exit loop after handling parsing error
+            else:
+                self.logger.log("No 'Choice' found in reflection. Handling as parsing error.", 'warning', 'o7')
+                self._handle_parsing_error(reflection)
+                break  # Exit loop after handling parsing error
+
+    def _run_cognition(self):
+        self.run_agent('cot')
+        self.run_agent('reflect')
+
+    def _determine_action(self, reflection):
+        choice = reflection["Choice"].strip().lower()
+        reason = reflection.get('Reason', 'No reason provided.')
+
+        actions = {
+            'approve': {
+                'action': 'approve',
+                'log': "Approved thought process."
+            },
+            'revise': {
+                'action': 'revise',
+                'log': f"Revision needed due to: {reason}"
+            },
+            'reject': {
+                'action': 'reject',
+                'log': f"Thought process rejected due to: {reason}"
+            },
+            'clarify': {
+                'action': 'clarify',
+                'log': f"Clarification needed due to: {reason}"
+            }
+        }
+
+        for key, value in actions.items():
+            if key in choice:
+                self.logger.log(value['log'], 'info', 'o7')
+                return value['action']
+
+        self.logger.log(f"Unknown choice in reflection: '{choice}'", 'warning', 'o7')
+        return 'unknown'
+
+    def _handle_parsing_error(self, reflection):
+        self.logger.log(f"Parsing Error in Reflection: {reflection}\nRerunning reflection...", 'error', 'o7')
+        self.run_agent('reflect')
+
+    def _reset_cognition(self):
         self.cognition = {
-            "choose": {},
             "thought": {},
             "theory": {},
             "cot": {},
             "reflect": {},
             "generate": {},
-            "kb": None,
-            "scratchpad": None,
-            "reranked_memories": None
         }
-        pass
-
-    def do_chat(self, message):
-        self.message = message
-        self.ui.channel_id_layer_0 = self.message["channel_id"]
-        self.ui.current_thread_id = None  # Reset the thread ID for each new chat
-
-        # Send the initial response for debugging and testing
-        # initial_response = "Processing your message..."
-        # self.ui.send_message(0, self.message, initial_response)
-
-        if self.message['channel'].startswith('Direct Message'):
-            self.chat_history, self.unformatted_history = self.memory.fetch_history(collection_name=message['author'], prefix='dm')
-        else:
-            print("Fetch Channel History")
-            self.chat_history, self.unformatted_history = self.memory.fetch_history(collection_name=message['channel'])
-        print("Fetch User History")
-        self.user_history, self.unformatted_user_history = self.memory.fetch_history(collection_name=message['author'],
-                                                      query=self.message['message'],
-                                                      is_user_specific=True,
-                                                      query_size=3)
-        print("Fetch DM History")
-        self.dm_history, self.unformatted_dm_history = self.memory.fetch_history(collection_name=message['author'],
-                                                    query=self.message['message'],
-                                                    is_user_specific=True,
-                                                    query_size=3, prefix='dm')
-
-        # Run Thought Agent
-        self.run_agent('thought')
-        self.memory.recall_journal_entry(self.message['message'], self.cognition['thought']["Categories"], 3)
-        self.memory.recall_categories(self.message['message'], self.cognition['thought']["Categories"], 3)
-        self.cognition['scratchpad'] = self.memory.get_scratchpad(self.message['author'])
-
-        # Run Theory Agent
-        self.run_agent('theory')
-
-        # chat with docs RAG
-        self.cognition['kb'] = self.memory.query_kb(message, self.cognition['theory'].get('What'))
-
-        # Run Reflection Agent
-        self.run_agent('cot')
-        self.run_agent('reflect')
-        self.handle_reflect_agent_decision()
-
-        # Run Generate Agent
-        self.run_agent('generate')
-        response = self.cognition['generate'].get('Response')
-        self.ui.send_message(0, self.message, response)
-
-        self.save_memories()
-        # write journal
-        print("Check Journal")
-        journal = self.memory.check_journal()
-        if journal:
-            self.ui.send_message(1, self.message, journal)
-        
-        # Save message to scratchpad log
-        # self.memory.save_scratchpad_log(message['author'], message['message'])
-
-        # check and update scratchpad if necessary
-        self.logger.log(f"About to check scratchpad for {self.message['author']}", 'debug', 'Trinity')
-        updated_scratchpad = self.memory.check_scratchpad(self.message['author'])
-        self.logger.log(f"check_scratchpad returned: {updated_scratchpad[:100] if updated_scratchpad else None}", 'debug', 'Trinity')
-        if updated_scratchpad:
-            scratchpad_message = f"Updated scratchpad for {self.message['author']}:\n```\n{updated_scratchpad[:500]}...\n```"
-            self.ui.send_message(1, self.message, scratchpad_message)
-
-    def run_agent(self, agent_name):
-        self.logger.log(f"Running {agent_name.capitalize()} Agent... Message:{self.message['message']}", 'info',
-                        'Trinity')
-
-        memories = self.memory.get_current_memories()
-        journals = self.memory.get_current_journals()
-        agent = self.agents[agent_name]
-
-        # Rerank implementation
-        queries_list = [self.unformatted_user_history, self.unformatted_history, self.unformatted_dm_history]
-        queries = []
-        for i in queries_list:
-            if i is not None:
-                queries.append(i)
-        if self.cognition['thought']:
-            query = self.cognition['thought']
-        else:
-            query = self.message['message']
-        self.cognition['reranked_memories'] = self.memory.combine_and_rerank(queries, query, 5)
-
-        # agent.load_additional_data(self.messages, self.chosen_msg_index, self.chat_history,
-        #                            self.user_history, memories, self.cognition)
-        agent_vars = {'messages': self.message,  # batch_messages
-                      'chat_history': self.chat_history,  # chat_history
-                      'memories': self.cognition['reranked_memories'],  # reranked memories
-                      'journals': journals,  # journals
-                      'kb': self.cognition['kb'],  # knowledgebase
-                      'cognition': self.cognition}  # cognition
-        self.cognition[agent_name] = agent.run(**agent_vars)
-
-        # Send result to Brain Channel
-        result_message = f"{agent_name.capitalize()} Agent:\n{str(self.cognition[agent_name]['result'])}"
-        self.ui.send_message(1, self.message, result_message)
-
-    def handle_reflect_agent_decision(self):
-        max_iterations = 2
-        iteration_count = 0
-
-        while True:
-            iteration_count += 1
-            if iteration_count > max_iterations:
-                self.logger.log("Maximum iteration count reached, forcing response", 'warning', 'Trinity')
-                break
-
-            else:
-                reflection = self.cognition['reflect']
-                self.logger.log(f"Handle Reflection:{reflection}", 'debug', 'Trinity')
-
-                if "Choice" in reflection:
-                    if reflection["Choice"] == "approve":
-                        self.logger.log("Approved CoT", 'debug', 'Trinity')
-                        break
-
-                    elif reflection["Choice"] == "revise":
-                        self.logger.log(f"Reason for not revision:\n{reflection['Reason']}\n", 'info', 'Trinity')
-                        self.run_agent('cot')
-                        self.run_agent('reflect')
-                        continue
-
-                    elif reflection["Choice"] == "confused":
-                        self.logger.log(f"Changing Response:\n{self.response}\n Due To:\n{reflection['Reason']}",
-                                        'info', 'Trinity')
-                        break
-                    else:
-                        self.logger.log(f"No Choice in Reflection Response:\n{reflection}", 'error', 'Trinity')
-                        self.run_agent('reflect')
-            break
 
     def save_memories(self):
         """
@@ -188,10 +273,59 @@ class Trinity:
         """
         self.memory.set_memory_info(self.message, self.cognition, self.response)
         self.memory.save_all_memory()
-        self.memory.wipe_current_memories()
-        self.unformatted_dm_history = None
-        self.unformatted_user_history = None
         self.unformatted_history = None
+
+    def generate_jsonl(self):
+        synth_result = self.build_json()
+        self.append_json_to_file(synth_result)
+
+    def append_json_to_file(self, json_object, file_path='Logs/DS_POC.json'):
+        """
+        Append the JSON object to a file, maintaining proper JSON structure.
+        """
+        import json
+        import os
+
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+        try:
+            # Read existing content
+            if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+                with open(file_path, 'r+') as file:
+                    # Load existing data
+                    data = json.load(file)
+                    if not isinstance(data, list):
+                        data = [data]  # Convert to list if it's not already
+                    
+                    # Append new object
+                    data.append(json_object)
+                    
+                    # Move file pointer to beginning and write updated data
+                    file.seek(0)
+                    json.dump(data, file, indent=4)
+                    file.truncate()
+            else:
+                # If file doesn't exist or is empty, create it with the new object
+                with open(file_path, 'w') as file:
+                    json.dump([json_object], file, indent=4)
+            
+            self.logger.log(f"JSON object appended to {file_path}", 'info', 'o7')
+        except Exception as e:
+            self.logger.log(f"Error appending JSON to file: {str(e)}", 'error', 'o7')
+
+    def build_json(self):
+        """
+        Build a JSON-compatible dictionary containing the system message, user message, and assistant response.
+        """
+        thought_flow = thought_flow_to_xml(self.assistant_flow)
+
+        json_object = [
+                {"system": self.message.get('system_message', "You are a thinking agent responsible for developing a detailed, step-by-step thought process in response to a request, problem, or conversation. Your task is to break down the situation into a structured reasoning process. If feedback is provided, integrate it into your thought process for refinement.")},
+                {"user": self.message.get('message', '')},
+                {"assistant": thought_flow}
+            ]
+        return json_object
 
 
 class UI:
@@ -253,6 +387,7 @@ class UI:
                 else:
                     self.logger.log("Failed to create or find thread for layer 1 message", 'error', 'DiscordClient')
             except Exception as e:
+                sent_message = self.client.send_message(self.channel_id_layer_0, response)
                 self.logger.log(f"Error in send_message for layer 1: {str(e)}", 'error', 'DiscordClient')
         else:
             self.logger.log(f"Invalid layer: {layer}", 'error', 'DiscordClient')

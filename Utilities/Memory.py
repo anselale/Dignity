@@ -1,7 +1,7 @@
-from agentforge.utils.chroma_utils import ChromaUtils
-from agentforge.utils.functions.Logger import Logger
+from agentforge.utils.ChromaUtils import ChromaUtils
+from agentforge.utils.Logger import Logger
 from Utilities.Parsers import MessageParser
-from Utilities.Journal import Journal
+# from Utilities.Journal import Journal
 
 
 class Memory:
@@ -121,22 +121,21 @@ class Memory:
 
         print("checking collection size")
         collection_size = self.memory.count_collection(collection_name)
-        print(f"Collection size {collection_size}")
+        print(f"Collection size: {collection_size}")
 
         if collection_size == 0:
-            return "No Results!", None
-
-        qsize = max(collection_size - query_size, 0)
+            return "No Chat History Yet! This is the start of a new conversation.", None
 
         # Adjust the method of fetching history based on whether it's user-specific
         if is_user_specific and query:
-            if qsize == 0:
-                qsize = 1
             print("querying memory")
-            history = self.memory.query_memory(collection_name=collection_name, query=query, num_results=qsize)
+            history = self.memory.query_memory(collection_name=collection_name, query=query, num_results=query_size)
             formatted_history = self.parser.format_user_specific_history_entries(history)
         else:
-            filters = {"id": {"$gte": qsize}}
+            qsize = min(collection_size, query_size)  # Determine the number of messages to retrieve
+            start_id = collection_size - qsize + 1  # Calculate the starting 'id' to get the last 'qsize' messages
+            filters = {"id": {"$gte": start_id}}  # Retrieve messages with 'id' greater than or equal to 'start_id'
+
             history = self.memory.load_collection(collection_name=collection_name, where=filters)
             formatted_history = self.parser.format_general_history_entries(history)
 
@@ -156,12 +155,12 @@ class Memory:
         """
         Save all types of memories, including category, channel, bot response, user history, and scratchpad log.
         """
-        self.save_category_memory()
+        # self.save_category_memory()
         self.save_channel_memory()
         self.save_bot_response()
-        self.save_user_history()
-        self.save_scratchpad_log(self.user_message['author'], self.user_message['message'])
-        self.logger.log(f"Saved all memories.", 'debug', 'Trinity')
+        # self.save_user_history()
+        # self.save_scratchpad_log(self.user_message['author'], self.user_message['message'])
+        self.logger.log(f"Saved all memories.", 'debug', 'o7')
 
     def set_memory_info(self, message_batch: dict, cognition: dict, response: str):
         """
@@ -203,9 +202,7 @@ class Memory:
             "InnerThought": self.cognition["thought"].get("Inner Thought"),
             "Reason": self.cognition["reflect"].get("Reason"),
             "User": chat_message["author"],
-            # "Mentions": chat_message["mentions"],
             "Channel": str(chat_message["channel"]),
-            "Categories": str(self.cognition["thought"]["Categories"])
         }
         # Need to implement a last accessed metadata
 
@@ -218,7 +215,7 @@ class Memory:
                         f"Data (Message)={message}\n"
                         f"ID={memory_id}\n"
                         f"Metadata={metadata}",
-                        'debug', 'Trinity')
+                        'debug', 'o7')
 
     def save_category_memory(self):
         """
@@ -244,7 +241,7 @@ class Memory:
         bot_response = self.response
         self.logger.log(f"Saving Channel to: {collection_name}\nMessage:\n{message}", 'debug', 'Memory')
         self.save_to_collection(collection_name, message, bot_response, metadata_extra)
-        self.save_to_collection('journal_log_table', message, bot_response, metadata_extra)
+        # self.save_to_collection('journal_log_table', message, bot_response, metadata_extra)
 
     def save_bot_response(self):
         """
@@ -258,7 +255,7 @@ class Memory:
         collection_name = self.parser.format_string(collection_name)
         self.logger.log(f"Saving Bot Response to: {collection_name}\nMessage:\n{message}", 'debug', 'Memory')
         self.save_to_collection(collection_name, message, self.user_message['message'])
-        self.save_to_collection('journal_log_table', message, self.user_message['message'])
+        # self.save_to_collection('journal_log_table', message, self.user_message['message'])
 
     def save_user_history(self):
         """
@@ -410,25 +407,25 @@ class Memory:
         self.current_memories = []
         self.current_journals = []
 
-    def check_journal(self):
-        """
-        Check if it's time to write a journal entry and do so if necessary.
-
-        Returns:
-            bool or None: True if journal was written, None otherwise.
-        """
-        count = self.memory.count_collection('journal_log_table')
-        print(count)
-        if count >= 100:
-            journal_function = Journal()
-            print("Journal initialized")
-            journal_written = journal_function.do_journal()
-            if journal_written:
-                print("Deleting Journal collection")
-                self.memory.delete_collection('journal_log_table')
-            return journal_written
-        else:
-            return None
+    # def check_journal(self):
+    #     """
+    #     Check if it's time to write a journal entry and do so if necessary.
+    #
+    #     Returns:
+    #         bool or None: True if journal was written, None otherwise.
+    #     """
+    #     count = self.memory.count_collection('journal_log_table')
+    #     print(count)
+    #     if count >= 100:
+    #         journal_function = Journal()
+    #         print("Journal initialized")
+    #         journal_written = journal_function.do_journal()
+    #         if journal_written:
+    #             print("Deleting Journal collection")
+    #             self.memory.delete_collection('journal_log_table')
+    #         return journal_written
+    #     else:
+    #         return None
 
     def query_kb(self, message, theory):
         """
@@ -600,62 +597,62 @@ class Memory:
         self.save_scratchpad_log(scratchpad_log_name, updated_log)
         self.logger.log(f"Saved message to scratchpad log for user: {username}", 'debug', 'Memory')
 
-    def check_scratchpad(self, username):
-        """
-        Check if it's time to update the scratchpad for a specific user and do so if necessary.
-
-        Args:
-            username (str): The username to check the scratchpad for.
-
-        Returns:
-            str or None: Updated scratchpad content if updated, None otherwise.
-        """
-        self.logger.log(f"Checking scratchpad for user: {username}", 'debug', 'Memory')
-
-        scratchpad_log = self.get_scratchpad_log(username)
-        self.logger.log(f"Scratchpad log entries: {len(scratchpad_log)}", 'debug', 'Memory')
-        for entry in scratchpad_log:
-            self.logger.log(f"Scratchpad log entry: {entry}", 'debug', 'Memory')
-        count = len(scratchpad_log)
-
-        self.logger.log(f"Number of entries in scratchpad log: {count}", 'debug', 'Memory')
-
-        if count >= 10:
-            self.logger.log(f"Scratchpad log count >= 10, updating scratchpad", 'debug', 'Memory')
-            from CustomAgents.Trinity.ScratchpadAgent import ScratchpadAgent
-            scratchpad_agent = ScratchpadAgent()
-
-            current_scratchpad = self.get_scratchpad(username)
-            self.logger.log(f"Current scratchpad content: {current_scratchpad[:100]}...", 'debug', 'Memory')
-
-            scratchpad_log_content = "\n".join(scratchpad_log)
-            self.logger.log(f"Scratchpad log content: {scratchpad_log_content[:100]}...", 'debug', 'Memory')
-
-            agent_vars = {
-                "username": username,
-                "scratchpad_log": scratchpad_log_content,
-                "scratchpad": current_scratchpad
-            }
-            scratchpad_result = scratchpad_agent.run(**agent_vars)
-            self.logger.log(f"Scratchpad agent result: {scratchpad_result[:100]}...\nVars: {agent_vars}", 'debug',
-                            'Memory')
-
-            updated_scratchpad = self.parser.extract_updated_scratchpad(scratchpad_result)
-            self.logger.log(f"Updated scratchpad content: {updated_scratchpad[:100]}...", 'debug', 'Memory')
-
-            self.save_scratchpad(username, updated_scratchpad)
-            self.logger.log(f"Saved updated scratchpad for user: {username}", 'debug', 'Memory')
-
-            # Clear the scratchpad log after processing
-            collection_name = f"scratchpad_log_{username}"
-            collection_name = self.parser.format_string(collection_name)
-            self.memory.delete_collection(collection_name)
-            self.logger.log(f"Cleared scratchpad log for user: {username}", 'debug', 'Memory')
-
-            return updated_scratchpad
-
-        self.logger.log(f"Scratchpad log count < 10, no update needed", 'debug', 'Memory')
-        return None
+    # def check_scratchpad(self, username):
+    #     """
+    #     Check if it's time to update the scratchpad for a specific user and do so if necessary.
+    #
+    #     Args:
+    #         username (str): The username to check the scratchpad for.
+    #
+    #     Returns:
+    #         str or None: Updated scratchpad content if updated, None otherwise.
+    #     """
+    #     self.logger.log(f"Checking scratchpad for user: {username}", 'debug', 'Memory')
+    #
+    #     scratchpad_log = self.get_scratchpad_log(username)
+    #     self.logger.log(f"Scratchpad log entries: {len(scratchpad_log)}", 'debug', 'Memory')
+    #     for entry in scratchpad_log:
+    #         self.logger.log(f"Scratchpad log entry: {entry}", 'debug', 'Memory')
+    #     count = len(scratchpad_log)
+    #
+    #     self.logger.log(f"Number of entries in scratchpad log: {count}", 'debug', 'Memory')
+    #
+    #     if count >= 10:
+    #         self.logger.log(f"Scratchpad log count >= 10, updating scratchpad", 'debug', 'Memory')
+    #         from CustomAgents.o7.ScratchpadAgent import ScratchpadAgent
+    #         scratchpad_agent = ScratchpadAgent()
+    #
+    #         current_scratchpad = self.get_scratchpad(username)
+    #         self.logger.log(f"Current scratchpad content: {current_scratchpad[:100]}...", 'debug', 'Memory')
+    #
+    #         scratchpad_log_content = "\n".join(scratchpad_log)
+    #         self.logger.log(f"Scratchpad log content: {scratchpad_log_content[:100]}...", 'debug', 'Memory')
+    #
+    #         agent_vars = {
+    #             "username": username,
+    #             "scratchpad_log": scratchpad_log_content,
+    #             "scratchpad": current_scratchpad
+    #         }
+    #         scratchpad_result = scratchpad_agent.run(**agent_vars)
+    #         self.logger.log(f"Scratchpad agent result: {scratchpad_result[:100]}...\nVars: {agent_vars}", 'debug',
+    #                         'Memory')
+    #
+    #         updated_scratchpad = self.parser.extract_updated_scratchpad(scratchpad_result)
+    #         self.logger.log(f"Updated scratchpad content: {updated_scratchpad[:100]}...", 'debug', 'Memory')
+    #
+    #         self.save_scratchpad(username, updated_scratchpad)
+    #         self.logger.log(f"Saved updated scratchpad for user: {username}", 'debug', 'Memory')
+    #
+    #         # Clear the scratchpad log after processing
+    #         collection_name = f"scratchpad_log_{username}"
+    #         collection_name = self.parser.format_string(collection_name)
+    #         self.memory.delete_collection(collection_name)
+    #         self.logger.log(f"Cleared scratchpad log for user: {username}", 'debug', 'Memory')
+    #
+    #         return updated_scratchpad
+    #
+    #     self.logger.log(f"Scratchpad log count < 10, no update needed", 'debug', 'Memory')
+    #     return None
 
     def combine_and_rerank(self, query_results: list, rerank_query, num_results=5):
         """
