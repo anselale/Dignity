@@ -7,23 +7,108 @@ from agentforge.utils.Logger import Logger
 from Utilities.Parsers import MessageParser
 import re
 
+# def thought_flow_to_xml(thought_flow):
+#     from collections import OrderedDict
+#
+#     # Define the mapping from (outer_key, inner_key) to XML tags
+#     mapping = {
+#         ('thought', 'Emotion'): 'EMOTIONS',
+#         ('thought', 'Inner Thought'): 'INITIAL_THOUGHTS',
+#         ('thought', 'Reason'): 'INITIAL_THOUGHTS',
+#         ('theory', 'What'): 'EMPATHIZING',
+#         ('theory', 'Why'): 'EMPATHIZING',
+#         ('cot', 'Initial Understanding'): 'UNDERSTANDING',
+#         ('cot', 'Thought Process'): 'APPROACH',
+#         ('cot', 'Conclusions'): 'APPROACH',
+#         ('reflect', 'Choice'): 'REFLECTION',
+#         ('reflect', 'Reason'): 'REFLECTION',
+#         ('reflect', 'Feedback'): 'REFLECTION',
+#         ('generate', 'Reasoning'): 'FINAL_THOUGHTS',
+#         ('generate', 'Final Response'): 'OUTPUT'
+#     }
+#
+#     # Initialize a list to collect XML lines
+#     xml_output_lines = []
+#
+#     # Initialize variables to keep track of current tag and content
+#     current_tag = None
+#     current_contents = []
+#
+#     # Process the thought_flow sequentially
+#     for item in thought_flow:
+#         for outer_key, inner_dict in item.items():
+#             # Ensure inner_dict is an OrderedDict
+#             if not isinstance(inner_dict, OrderedDict):
+#                 inner_dict = OrderedDict(inner_dict)
+#             for inner_key, content in inner_dict.items():
+#                 # Determine the correct XML tag
+#                 tag = mapping.get((outer_key, inner_key))
+#                 if tag:
+#                     content = content.strip()
+#                     if tag == current_tag:
+#                         # Same tag as before, accumulate content
+#                         current_contents.append(content)
+#                     else:
+#                         # New tag encountered
+#                         if current_tag is not None:
+#                             # Write the accumulated contents of the previous tag
+#                             xml_output_lines.append(f"<{current_tag}>")
+#                             xml_output_lines.append("\n\n".join(current_contents))
+#                             xml_output_lines.append(f"</{current_tag}>")
+#                             xml_output_lines.append("")  # Add an empty line for readability
+#                         # Start accumulating contents for the new tag
+#                         current_tag = tag
+#                         current_contents = [content]
+#                 else:
+#                     # Handle unmapped keys if necessary
+#                     pass  # Or raise an error/warning
+#
+#     # After processing all items, write the last accumulated tag
+#     if current_tag is not None and current_contents:
+#         xml_output_lines.append(f"<{current_tag}>")
+#         xml_output_lines.append("\n\n".join(current_contents))
+#         xml_output_lines.append(f"</{current_tag}>")
+#         xml_output_lines.append("")  # Add an empty line for readability
+#
+#     # Join the XML lines into a single string
+#     xml_output = "\n".join(xml_output_lines)
+#
+#     # Create XML File for easy viewing of flow
+#     with open('thought_flow_output.xml', 'a') as file:
+#         file.write(xml_output)
+#
+#     return xml_output
+
+
 def thought_flow_to_xml(thought_flow):
     from collections import OrderedDict
 
     # Define the mapping from (outer_key, inner_key) to XML tags
     mapping = {
-        ('thought', 'Emotion'): 'EMOTIONS',
-        ('thought', 'Inner Thought'): 'INITIAL_THOUGHTS',
-        ('thought', 'Reason'): 'INITIAL_THOUGHTS',
-        ('theory', 'What'): 'EMPATHIZING',
-        ('theory', 'Why'): 'EMPATHIZING',
-        ('cot', 'Initial Understanding'): 'UNDERSTANDING',
-        ('cot', 'Thought Process'): 'APPROACH',
-        ('cot', 'Conclusions'): 'APPROACH',
-        ('reflect', 'Choice'): 'REFLECTION',
-        ('reflect', 'Reason'): 'REFLECTION',
-        ('reflect', 'Feedback'): 'REFLECTION',
-        ('generate', 'Reasoning'): 'FINAL_THOUGHTS',
+        # Thought Agent outputs
+        ('thought', 'Emotional Field'): 'EMOTIONS',
+        ('thought', 'Thought Vector'): 'INITIAL_THOUGHTS',
+        ('thought', 'Integration Pattern'): 'INITIAL_THOUGHTS',
+
+        # Theory Agent outputs
+        ('theory', 'Mental State Topology'): 'EMPATHIZING',
+        ('theory', 'Causal Dynamics'): 'EMPATHIZING',
+        ('theory', 'Coherence Pattern'): 'EMPATHIZING',
+
+        # Thought Process (CoT) Agent outputs
+        ('cot', 'Topology Mapping'): 'UNDERSTANDING',
+        ('cot', 'Navigation Vectors'): 'APPROACH',
+        ('cot', 'Coherence Integration'): 'APPROACH',
+        ('cot', 'Feedback Loop'): 'APPROACH',
+
+        # Reflect Agent outputs
+        ('reflect', 'Coherence Analysis'): 'REFLECTION',
+        ('reflect', 'Navigation Assessment'): 'REFLECTION',
+        ('reflect', 'Action Vector'): 'REFLECTION',
+        ('reflect', 'Integration Guidance'): 'REFLECTION',
+
+        # Generate Agent outputs
+        ('generate', 'Response Vector'): 'FINAL_THOUGHTS',
         ('generate', 'Final Response'): 'OUTPUT'
     }
 
@@ -79,6 +164,14 @@ def thought_flow_to_xml(thought_flow):
 
     return xml_output
 
+def parse_action_vector(action_vector_str):
+    action_vector_dict = {}
+    lines = action_vector_str.strip().split('\n')
+    for line in lines:
+        if ':' in line:
+            key, value = line.split(':', 1)
+            action_vector_dict[key.strip()] = value.strip()
+    return action_vector_dict
 
 
 class O7:
@@ -181,11 +274,49 @@ class O7:
         # Append the consolidated agent output to assistant_flow
         self.assistant_flow.append({agent_name: agent_output})
 
+    # def run_cognition_process(self):
+    #     max_iterations = 2
+    #     iteration_count = 0
+    #
+    #     # Run initial CoT and Reflection agents
+    #     self._run_cognition()
+    #
+    #     while True:
+    #         iteration_count += 1
+    #         if iteration_count > max_iterations:
+    #             self.logger.log("Maximum iteration count reached, forcing response", 'warning', 'o7')
+    #             break
+    #
+    #         reflection = self.cognition['reflect']
+    #         self.logger.log(f"Handle Reflection: {reflection}", 'debug', 'o7')
+    #
+    #         if "Choice" in reflection:
+    #             action = self._determine_action(reflection)
+    #             if action == 'approve' or action == 'clarify':
+    #                 # Proceed to response generation
+    #                 break
+    #             elif action == 'revise':
+    #                 # Revise the thought process
+    #                 self._run_cognition()
+    #                 continue
+    #             elif action == 'reject':
+    #                 # Reset the thought process
+    #                 self.cognition['cot'] = {}
+    #                 self._run_cognition()
+    #                 continue
+    #             else:
+    #                 self._handle_parsing_error(reflection)
+    #                 break  # Exit loop after handling parsing error
+    #         else:
+    #             self.logger.log("No 'Choice' found in reflection. Handling as parsing error.", 'warning', 'o7')
+    #             self._handle_parsing_error(reflection)
+    #             break  # Exit loop after handling parsing error
+
     def run_cognition_process(self):
         max_iterations = 2
         iteration_count = 0
 
-        # Run initial CoT and Reflection agents
+        # Run initial cognition
         self._run_cognition()
 
         while True:
@@ -194,28 +325,29 @@ class O7:
                 self.logger.log("Maximum iteration count reached, forcing response", 'warning', 'o7')
                 break
 
-            reflection = self.cognition['reflect']
+            reflection = self.cognition.get('reflect', {})
             self.logger.log(f"Handle Reflection: {reflection}", 'debug', 'o7')
 
-            if "Choice" in reflection:
+            if "Action Vector" in reflection:
                 action = self._determine_action(reflection)
-                if action == 'approve' or action == 'clarify':
+                if action in ['align', 'explore']:
                     # Proceed to response generation
                     break
-                elif action == 'revise':
+                elif action == 'adjust':
                     # Revise the thought process
                     self._run_cognition()
                     continue
-                elif action == 'reject':
+                elif action == 'redirect':
                     # Reset the thought process
                     self.cognition['cot'] = {}
                     self._run_cognition()
                     continue
                 else:
+                    self.logger.log(f"Unknown action '{action}'. Handling as parsing error.", 'warning', 'o7')
                     self._handle_parsing_error(reflection)
                     break  # Exit loop after handling parsing error
             else:
-                self.logger.log("No 'Choice' found in reflection. Handling as parsing error.", 'warning', 'o7')
+                self.logger.log("No 'Action Vector' found in reflection. Handling as parsing error.", 'warning', 'o7')
                 self._handle_parsing_error(reflection)
                 break  # Exit loop after handling parsing error
 
@@ -224,35 +356,72 @@ class O7:
         self.run_agent('reflect')
 
     def _determine_action(self, reflection):
-        choice = reflection["Choice"].strip().lower()
-        reason = reflection.get('Reason', 'No reason provided.')
+        action_vector_str = reflection.get("Action Vector", "")
+        action_vector = parse_action_vector(action_vector_str)
+        if "Primary" in action_vector:
+            primary_action = action_vector.get("Primary", "").strip().lower()
+            integration_guidance = reflection.get('Integration Guidance', 'No guidance provided.')
 
-        actions = {
-            'approve': {
-                'action': 'approve',
-                'log': "Approved thought process."
-            },
-            'revise': {
-                'action': 'revise',
-                'log': f"Revision needed due to: {reason}"
-            },
-            'reject': {
-                'action': 'reject',
-                'log': f"Thought process rejected due to: {reason}"
-            },
-            'clarify': {
-                'action': 'clarify',
-                'log': f"Clarification needed due to: {reason}"
+            actions = {
+                'align': {
+                    'action': 'align',
+                    'log': "Aligned thought process."
+                },
+                'adjust': {
+                    'action': 'adjust',
+                    'log': f"Adjustment needed: {integration_guidance}"
+                },
+                'redirect': {
+                    'action': 'redirect',
+                    'log': f"Thought process needs redirection: {integration_guidance}"
+                },
+                'explore': {
+                    'action': 'explore',
+                    'log': f"Exploration needed: {integration_guidance}"
+                }
             }
-        }
 
-        for key, value in actions.items():
-            if key in choice:
-                self.logger.log(value['log'], 'info', 'o7')
-                return value['action']
+            if primary_action in actions:
+                action_info = actions[primary_action]
+                self.logger.log(action_info['log'], 'info', 'o7')
+                return action_info['action']
+            else:
+                self.logger.log(f"Unknown primary action in reflection: '{primary_action}'", 'warning', 'o7')
+                return 'unknown'
+        else:
+            self.logger.log("No 'Primary' found in 'Action Vector'. Handling as parsing error.", 'warning',
+                            'o7')
 
-        self.logger.log(f"Unknown choice in reflection: '{choice}'", 'warning', 'o7')
-        return 'unknown'
+    # def _determine_action(self, reflection):
+    #     choice = reflection["Choice"].strip().lower()
+    #     reason = reflection.get('Reason', 'No reason provided.')
+    #
+    #     actions = {
+    #         'approve': {
+    #             'action': 'approve',
+    #             'log': "Approved thought process."
+    #         },
+    #         'revise': {
+    #             'action': 'revise',
+    #             'log': f"Revision needed due to: {reason}"
+    #         },
+    #         'reject': {
+    #             'action': 'reject',
+    #             'log': f"Thought process rejected due to: {reason}"
+    #         },
+    #         'clarify': {
+    #             'action': 'clarify',
+    #             'log': f"Clarification needed due to: {reason}"
+    #         }
+    #     }
+    #
+    #     for key, value in actions.items():
+    #         if key in choice:
+    #             self.logger.log(value['log'], 'info', 'o7')
+    #             return value['action']
+    #
+    #     self.logger.log(f"Unknown choice in reflection: '{choice}'", 'warning', 'o7')
+    #     return 'unknown'
 
     def _handle_parsing_error(self, reflection):
         self.logger.log(f"Parsing Error in Reflection: {reflection}\nRerunning reflection...", 'error', 'o7')
@@ -279,6 +448,41 @@ class O7:
         synth_result = self.build_json()
         self.append_json_to_file(synth_result)
 
+    # def append_json_to_file(self, json_object, file_path='Logs/DS_POC.json'):
+    #     """
+    #     Append the JSON object to a file, maintaining proper JSON structure.
+    #     """
+    #     import json
+    #     import os
+    #
+    #     # Ensure the directory exists
+    #     os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    #
+    #     try:
+    #         # Read existing content
+    #         if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+    #             with open(file_path, 'r+') as file:
+    #                 # Load existing data
+    #                 data = json.load(file)
+    #                 if not isinstance(data, list):
+    #                     data = [data]  # Convert to list if it's not already
+    #
+    #                 # Append new object
+    #                 data.append(json_object)
+    #
+    #                 # Move file pointer to beginning and write updated data
+    #                 file.seek(0)
+    #                 json.dump(data, file, indent=4)
+    #                 file.truncate()
+    #         else:
+    #             # If file doesn't exist or is empty, create it with the new object
+    #             with open(file_path, 'w') as file:
+    #                 json.dump([json_object], file, indent=4)
+    #
+    #         self.logger.log(f"JSON object appended to {file_path}", 'info', 'o7')
+    #     except Exception as e:
+    #         self.logger.log(f"Error appending JSON to file: {str(e)}", 'error', 'o7')
+
     def append_json_to_file(self, json_object, file_path='Logs/DS_POC.json'):
         """
         Append the JSON object to a file, maintaining proper JSON structure.
@@ -297,10 +501,10 @@ class O7:
                     data = json.load(file)
                     if not isinstance(data, list):
                         data = [data]  # Convert to list if it's not already
-                    
+
                     # Append new object
                     data.append(json_object)
-                    
+
                     # Move file pointer to beginning and write updated data
                     file.seek(0)
                     json.dump(data, file, indent=4)
@@ -309,7 +513,7 @@ class O7:
                 # If file doesn't exist or is empty, create it with the new object
                 with open(file_path, 'w') as file:
                     json.dump([json_object], file, indent=4)
-            
+
             self.logger.log(f"JSON object appended to {file_path}", 'info', 'o7')
         except Exception as e:
             self.logger.log(f"Error appending JSON to file: {str(e)}", 'error', 'o7')
@@ -321,7 +525,7 @@ class O7:
         thought_flow = thought_flow_to_xml(self.assistant_flow)
 
         json_object = [
-                {"system": self.message.get('system_message', "You are a thinking agent responsible for developing a detailed, step-by-step thought process in response to a request, problem, or conversation. Your task is to break down the situation into a structured reasoning process. If feedback is provided, integrate it into your thought process for refinement.")},
+                {"system": self.message.get('system_message', "You are an agent responsible for cognitive processing. Your task is to develop a detailed, step-by-step thought process in response to a request, problem, or conversation.")},
                 {"user": self.message.get('message', '')},
                 {"assistant": thought_flow}
             ]

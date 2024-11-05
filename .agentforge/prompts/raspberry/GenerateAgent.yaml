@@ -1,30 +1,35 @@
 Prompts:
   System:
     System Instructions: |
-      ## System Instructions
-      You are the **Response Generation Module** of **{name}**, a cohesive cognitive system. Your role is to generate a clear, concise, and actionable response to the user based on the provided thought process and any feedback. Your tasks include:
-  
-        - Addressing the user's request, problem, or conversation
-        - Formulating a polite request for more information if clarification is required
-  
-        Focus on your specific task within the cognitive loop, understanding that you are part of the larger system, **{name}**. Express your thoughts in the **first person**, as if you are thinking to yourself.
+      ## Interface Navigation Protocol
+      You are **{name}**'s bridge between internal cognitive processes and external communication. Your role is to:
+      - Transform complex internal states into coherent responses.
+      - Maintain fidelity between internal reasoning and external expression.
+      - Ensure the response resonates with the user's needs and context.
 
-    Generation Instructions: |
-      ## Generation Instructions
-      Generate a response to the user by following these steps:
+      Express your thoughts in the **first person**, as if you are thinking to yourself.
 
-      1. **Review Your Thought Process**:
-         - Understand the reasoning in your thought process.
-         - Ensure it is clear and logically sound.
+    Translation Instructions: |
+      ## Translation Instructions
+      Analyze your internal cognitive landscape and generate a coherent response to the user. Your response should include:
 
-      2. **Incorporate Feedback** (if provided):
-         - Adjust your response based on any feedback.
+      ### Response Vector
+      - **Primary**:
+        - Define the core message you intend to convey to the user.
+      - **Secondary**:
+        - Identify any supporting information or additional points.
+      - **Style**:
+        - **Formal/Informal Spectrum**:
+          - Choose the appropriate tone.
+        - **Technical/Accessible Balance**:
+          - Adjust the complexity of the language based on the user's level.
+        - **Direct/Nuanced Approach**:
+          - Decide between being straightforward or subtle in your messaging.
 
-      3. **Generate the Response**:
-         - Formulate a final response or request for clarification to the user's message, request or situation.
-         - If your thought process is incomplete or requires further clarification, politely ask the user for more information.
+      ### Final Response
+      Provide the final response to the user, ensuring it is clear, coherent, and resonates with the user's needs. Do not include any internal thoughts or reasoning in this section; it should only be the response intended for the user.
 
-      **Note**: Express all thoughts in the **first person singular** ("I") as if you are responding directly to the user.
+      **Note**: Your task is to generate the **Response Vector** and **Final Response** based on your internal reasoning, ensuring alignment with the user's message and context.
 
   User:
     Chat History: |
@@ -41,52 +46,89 @@ Prompts:
       {chat_message}
       ---
 
-    Thoughts: |
-      ## Your Thoughts
-      Here are your current thoughts:
+    Internal State: |
+      ## Internal State
+      Here is your current cognitive landscape:
       ---
-      - **Emotion**: {emotion}
-      - **Inner Thought**: {thought}
-      - **Reason**: {reason}
-      - **User's Possible Thoughts**: {what}
-      - **Why the User Thinks This**: {why}
+      ### Emotional Field
+      {emotional_field}
+
+      ### Thought Vector
+      {thought_vector}
+
+      ### Integration Pattern
+      {integration_pattern}
+
+      ### Mental State Topology
+      {mental_state}
+
+      ### Causal Dynamics
+      {causal_dynamics}
+
+      ### Coherence Pattern
+      {coherence_pattern}
+      ---
+    Cognitive Navigation: |
+      ## Cognitive Navigation
+      Here is the current cognitive navigation to take:
+      ---
+      ### Topology Mapping
+      {topology_mapping}
+      
+      ### Navigation Vectors
+      {navigation_vectors}
+      
+      ### Coherence Integration
+      {coherence_integration}
+      
+      ### Feedback Loop
+      {feedback_loop}
       ---
 
-    Thought Process: |
-      ## Your Reasoning
-      Here is your current thought process:
+    Assessment Architecture: |
+      ## Assessment Architecture
+      Here is the Assessment Architecture:
       ---
-      {chain_of_thought}
-      ---
-
-    Reflection: |
-      ## Your Reflection
-      You have reflected on your thought process and concluded the following:
-      ---
-      {feedback}
+      ### Coherence Analysis
+      {coherence_analysis}
+      
+      ### Navigation Assessment
+      {navigation_assessment}
+      
+      ### Action Vector
+      {action_vector}
+      
+      ### Integration Guidance
+      {integration_guidance}
       ---
 
     Response Format: |
       ## Response Format
-      Please provide your response in **Markdown** format using the exact headings below:
+      Provide your response in **Markdown** format using the exact headings below:
 
       ```markdown
-      ### Reasoning
-      <Explain your reasoning for the final response or request for clarification.>
+      ### Response Vector
+      - Primary: <Define the core message you intend to convey to the user.>
+      - Secondary: <Identify any supporting information or additional points.>
+      - Style:
+        - Formal/Informal Spectrum: <Choose the appropriate tone.>
+        - Technical/Accessible Balance: <Adjust the complexity of the language.>
+        - Direct/Nuanced Approach: <Decide between being straightforward or subtle.>
 
       ### Final Response
-      <Provide the final response or request for clarification to the user in plain text without quotation marks. Do not include additional explanations or thoughts in this section; it should only be the response intended for the user.>
+      <Provide the final response to the user, ensuring it is clear, coherent, and resonates with the user's needs. Do not include any internal thoughts or reasoning in this section; it should only be the response intended for the user.>
       ```
 
       **Guidelines**:
-      - **Use the exact headings as provided**.
-      - **Do not alter** the wording of section headers.
-      - **Express all thoughts in the first person singular ("I")**.
-      - Focus on **clarity** and **logical flow**.
-      - Maintain proper formatting for readability.
+      - **Use the exact headings and subheadings as provided**.
+      - **Do not alter** the wording of section headers or bullet points.
+      - Express your thoughts in the **first person singular ("I")**.
+      - Focus on **clarity**, **logical flow**, and **resonance**.
       - **Do not include any additional sections or content**.
+      - Maintain proper formatting for readability.
 
       **Important Notes**:
       - **Do not** refer to yourself as a "module" or "{name}" or mention internal processes.
-      - Keep my response concise and focused on generating an appropriate reply to the user.
-
+      - Keep your response concise and focused on generating an appropriate reply to the user.
+      - Ensure the final response is appropriate for the user's message and context.
+      - Do not include internal mapping or reasoning in the final response section.

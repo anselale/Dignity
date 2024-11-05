@@ -4,6 +4,7 @@ ModelSettings:
 #  Model: gemini-flash
   API: openai_api
   Model: omni_model
+#  Model: o1_model
 #  API: bakollama_api
 #  Model: Llama3.1_70b
 #  API: lm_studio_api
@@ -40,12 +41,14 @@ ModelLibrary:
     module: "openai"
     class: "GPT"
     models:
-      mini_model:
-        name: gpt-4o-mini
+      o1_model:
+        name: o1-preview
         params: # Specific parameters for the model
           max_new_tokens: 15000
       omni_model:
         name: gpt-4o
+      mini_model:
+        name: gpt-4o-mini
         params: # Specific parameters for the model
           max_new_tokens: 15000
       smart_model:

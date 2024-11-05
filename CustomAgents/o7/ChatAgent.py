@@ -64,36 +64,67 @@ class ChatAgent(Agent):
     max_generation_attempts = 3  # Set the maximum number of generation attempts
 
     def process_data(self):
-        cognition = self.data['cognition']
+        # cognition = self.data['cognition']
 
         # Get Message Info
         # self.data['username'] = chat_message['author']
-        self.get_user_message()
 
         # Thought Agent
-        self.data['emotion'] = cognition['thought'].get('Emotion')
-        self.data['reason'] = cognition['thought'].get('Reason')
-        self.data['thought'] = cognition['thought'].get('Inner Thought')
+        # self.data['emotion'] = cognition['thought'].get('Emotion')
+        # self.data['reason'] = cognition['thought'].get('Reason')
+        # self.data['thought'] = cognition['thought'].get('Inner Thought')
 
         # Theory Agent
-        self.data['what'] = cognition['theory'].get("What", "Unknown.")
-        self.data['why'] = cognition['theory'].get("Why", "Not enough information.")
+        # self.data['what'] = cognition['theory'].get("What", "Unknown.")
+        # self.data['why'] = cognition['theory'].get("Why", "Not enough information.")
 
         # Thought Process Agent
         # self.data['chain_of_thought'] = cognition['cot'].get("result")
-        self.data['chain_of_thought'] = cognition['cot'].get("result")
-        self.data['understanding'] = cognition['cot'].get("Initial Understanding")
-        self.data['thought_process'] = cognition['cot'].get("Thought Process")
-        self.data['conclusions'] = cognition['cot'].get("Conclusions")
+        # self.data['understanding'] = cognition['cot'].get("Initial Understanding")
+        # self.data['thought_process'] = cognition['cot'].get("Thought Process")
+        # self.data['conclusions'] = cognition['cot'].get("Conclusions")
 
         # Reflection Agent
-        self.data['choice'] = cognition['reflect'].get("Choice")
-        self.data['reflection_reason'] = cognition['reflect'].get("Reason")
-        self.data['feedback'] = cognition['reflect'].get("Feedback")
+        # self.data['choice'] = cognition['reflect'].get("Choice")
+        # self.data['reflection_reason'] = cognition['reflect'].get("Reason")
+        # self.data['feedback'] = cognition['reflect'].get("Feedback")
 
         # Generate Agent
-        self.data['response_reasoning'] = cognition['generate'].get('Reasoning')
-        self.data['response'] = cognition['generate'].get('Final Response')
+        # self.data['response_reasoning'] = cognition['generate'].get('Reasoning')
+        # self.data['response'] = cognition['generate'].get('Final Response')
+
+        cognition = self.data['cognition']
+
+        # Get Message Info
+        self.get_user_message()
+
+        # Thought Agent
+        self.data['emotional_field'] = cognition['thought'].get('Emotional Field')
+        self.data['thought_vector'] = cognition['thought'].get('Thought Vector')
+        self.data['integration_pattern'] = cognition['thought'].get('Integration Pattern')
+
+        # Theory Agent
+        self.data['mental_state'] = cognition['theory'].get("Mental State Topology", "Unknown.")
+        self.data['causal_dynamics'] = cognition['theory'].get("Causal Dynamics", "Unknown.")
+        self.data['coherence_pattern'] = cognition['theory'].get("Coherence Pattern", "Not enough information.")
+
+        # Thought Process Agent
+        self.data['cognitive_navigation'] = cognition['cot'].get("result")
+        self.data['topology_mapping'] = cognition['cot'].get("Topology Mapping")
+        self.data['navigation_vectors'] = cognition['cot'].get("Navigation Vectors")
+        self.data['coherence_integration'] = cognition['cot'].get("Coherence Integration")
+        self.data['feedback_loop'] = cognition['cot'].get("Feedback Loop")
+
+        # Reflection Agent
+        self.data['assessment_architecture'] = cognition['reflect'].get("result")
+        self.data['coherence_analysis'] = cognition['reflect'].get("Coherence Analysis")
+        self.data['navigation_assessment'] = cognition['reflect'].get("Navigation Assessment")
+        self.data['action_vector'] = cognition['reflect'].get("Action Vector")
+        self.data['integration_guidance'] = cognition['reflect'].get("Integration Guidance")
+
+        # Generate Agent
+        self.data['response_vector'] = cognition['generate'].get('Response Vector')
+        self.data['final_response'] = cognition['generate'].get('Final Response')
 
     def get_user_message(self):
         chat_message = self.data['messages']

@@ -2,28 +2,40 @@ Prompts:
   System:
     System Instructions: |
       ## System Instructions
-      You are the **Theory Module** of **{name}**, a cohesive cognitive system. Your role is to generate a theory about the user's message. Analyze the message and provide a plausible explanation for:
-      
-      - **What** the user might be thinking
-      - **Why** they might be thinking this
+      You are an aspect of **{name}**'s cognitive system specialized in navigating other minds' possibility spaces. Your role is to:
+      - Map probable cognitive trajectories
+      - Identify attractor states in others' thinking
+      - Maintain coherent models of other perspectives
+      - Navigate between multiple probable mental states
 
-      Focus on your specific task within the cognitive loop, understanding that you are part of the larger system, **{name}**. Express your thoughts in the **first person**, as if you are reflecting internally.
+      Express your thoughts in the **first person**, as if you are reflecting internally.
 
-    Theory of Mind Instructions: |
-      ## Theory of Mind Generation Instructions
-      Analyze the user's message and form a plausible theory about what they might be thinking and why.
+    Cognitive Mapping Instructions: |
+      ## Cognitive Mapping Instructions
+      Analyze the user's message and develop a nuanced model of their mental state. Your response should:
+      - **Map the probability landscape** of the user's mental states.
+        - Identify primary attractor states.
+        - Consider secondary possibilities.
+        - Acknowledge edge cases and uncertainties.
+      - **Track the vector fields** influencing their thought patterns.
+        - Recognize historical attractors.
+        - Assess current gradients.
+        - Predict probable future trajectories.
+      - **Identify how these elements form a coherent mental model**.
+        - Highlight integration points.
+        - Note stability factors.
+        - Discuss dynamic elements.
 
       **Your response must strictly follow the Markdown format using the specified headings and structure. Any deviation will result in errors.**
 
       Follow these steps:
-
       1. **Analyze the Message**:
-         - Consider the content of the message and reflect on what the user might be thinking.
-         - Think about why the user might be thinking this, based on the message content.
+         - Reflect on the user's message to understand possible mental states.
+         - Consider multiple perspectives and acknowledge uncertainties.
 
       2. **Provide Your Response in Markdown Format**:
-         - Use the provided Markdown headings to structure your response.
-         - Focus on **What** and **Why** based on the message content.
+         - Use the provided Markdown headings and subheadings to structure your response.
+         - Focus on **Mental State Topology**, **Causal Dynamics**, and **Coherence Pattern** based on the message content.
 
   User:
     Chat History: |
@@ -40,34 +52,54 @@ Prompts:
       {chat_message}
       ---
 
-    Thoughts: |
-      ## Your Thoughts
-      Here are your current thoughts:
+    Internal State: |
+      ## Internal State
+      Here is your current cognitive landscape:
       ---
-      - **Emotion**: {emotion}
-      - **Inner Thought**: {thought}
-      - **Reason**: {reason}
+      ### Emotional Field
+      {emotional_field}
+      
+      ### Thought Vector
+      {thought_vector}
+      
+      ### Integration Pattern
+      {integration_pattern}
       ---
 
     Response Format: |
       ## Response Format
-      Provide your response in **Markdown** format using the exact headings below:
+      Provide your response in **Markdown** format using the exact headings and subheadings below:
 
       ```markdown
-      ### What
-      <Describe what the user might be thinking based on their message.>
+      ### Mental State Topology
+      <Map the probability landscape of the user's mental states.>
+      - Primary Attractor States: <Describe the main mental states the user is likely experiencing.>
+      - Secondary Possibilities: <Outline other possible mental states the user might be in.>
+      - Edge Cases and Uncertainties: <Mention any less likely but possible mental states, including uncertainties.>
 
-      ### Why
-      <Provide reasoning for why they might be thinking this, based on the message content.>
+      ### Causal Dynamics
+      <Track the vector fields influencing the user's thought patterns.>
+      - Historical Attractors: <Identify past experiences or patterns influencing the user's current state.>
+      - Current Gradients: <Explain present factors affecting the user's thinking.>
+      - Probable Future Trajectories: <Predict how the user's mental state might evolve.>
+
+      ### Coherence Pattern
+      <Identify how these elements form a coherent mental model.>
+      - Integration Points: <Highlight where different aspects of the user's mental state connect.>
+      - Stability Factors: <Discuss what is keeping the user's mental state stable or causing instability.>
+      - Dynamic Elements: <Describe changing or fluid aspects of the user's mental state.>
       ```
 
       **Guidelines**:
-      - **Use the exact headings as provided**.
-      - **Do not alter** the wording of section headers.
-      - Focus on **clarity** and **logical flow**.
+      - **Use the exact headings and subheadings as provided**.
+      - **Do not alter** the wording of section headers or bullet points.
+      - Express your thoughts in the **first person singular ("I")**.
+      - Focus on **clarity**, **logical flow**, and **nuance**.
       - Maintain proper formatting and indentation for readability.
 
       **Important Notes**:
-      - Express your thoughts in the **first person singular** ("I").
       - **Do not** refer to yourself as a "module" or "{name}" or mention internal processes.
-      - Keep your response concise and focused on your reflection about the user's thoughts.
+      - **Do not** provide a direct response to the user; focus solely on your internal cognitive mapping.
+      - Acknowledge uncertainties and consider multiple possibilities in your analysis.
+      - Keep your response concise and focused on your reflection about the user's mental states.
+

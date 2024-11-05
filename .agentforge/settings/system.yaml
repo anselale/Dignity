@@ -23,8 +23,8 @@ Logging:
     ModelIO: debug
     Actions: error
     Results: error
-    o7: debug
-    DiscordClient: info
+    o7: error
+    DiscordClient: error
     Memory: error
     Formatting: error
 
