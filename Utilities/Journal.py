@@ -1,4 +1,4 @@
-from agentforge.utils.chroma_utils import ChromaUtils
+from agentforge.utils.ChromaUtils import ChromaUtils
 from CustomAgents.Trinity.JournalAgent import JournalAgent
 from CustomAgents.Trinity.JournalThoughtAgent import JournalThoughtAgent
 from Utilities.Parsers import MessageParser

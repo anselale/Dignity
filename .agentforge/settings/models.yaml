@@ -2,10 +2,10 @@
 ModelSettings:
 #  API: groq_api
 #  Model: llama31
-#  API: gemini_api
-#  Model: gemini-flash
-  API: openrouter_api
-  Model: hermes
+  API: gemini_api
+  Model: gemini-flash
+#  API: openrouter_api
+#  Model: hermes
 #  API: openai_api
 #  Model: omni_model
 #  API: claude3_api
@@ -78,6 +78,8 @@ ModelLibrary:
         name: nousresearch/hermes-3-llama-3.1-405b
       reflection:
         name: mattshumer/reflection-70b:free
+      liquid:
+        name: liquid/lfm-40b:free
   claude_old:
     module: "claude_old"
     class: "Claude"

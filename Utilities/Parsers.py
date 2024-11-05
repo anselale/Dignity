@@ -1,6 +1,6 @@
 import re
 from typing import Dict
-from agentforge.utils.functions.Logger import Logger
+from agentforge.utils.Logger import Logger
 
 
 logger = Logger(__name__)
@@ -134,10 +134,13 @@ class MessageParser:
 
         for index, _ in sorted_indices:
             metadata = history['metadatas'][index]
-            entry_details = []
+
+            user = metadata.get('User', 'N/A')
+            date = metadata.get('isotimestamp', 'N/A')
+            message = history['documents'][index] if index < len(history.get('documents', [])) else 'N/A'
+
             # Start with User and Message
-            entry_details.append(f"User: {metadata.get('User', 'N/A')}")
-            entry_details.append(f"Message: {history['documents'][index] if index < len(history.get('documents', [])) else 'N/A'}")
+            entry_details: list = [f"Date: {date}", f"User: {user}", f"Message: {message}"]
 
             excluded_metadata = [
                 "User", "id", "Response", "Reason", "Emotion", "InnerThought",

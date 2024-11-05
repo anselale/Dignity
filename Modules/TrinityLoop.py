@@ -2,7 +2,7 @@ from CustomAgents.Trinity.ThoughtAgent import ThoughtAgent
 from CustomAgents.Trinity.TheoryAgent import TheoryAgent
 from CustomAgents.Trinity.GenerateAgent import GenerateAgent
 from CustomAgents.Trinity.ReflectAgent import ReflectAgent
-from agentforge.utils.functions.Logger import Logger
+from agentforge.utils.Logger import Logger
 from Utilities.Parsers import MessageParser
 
 
@@ -113,17 +113,19 @@ class Trinity:
         # Rerank implementation
         queries_list = [self.unformatted_user_history, self.unformatted_history, self.unformatted_dm_history]
         queries = []
-        for i in queries_list:
-            if i is not None:
-                queries.append(i)
-        for i in self.category_memory:
-            if i is not None:
+        if queries_list:
+            for i in queries_list:
+                if i is not None:
+                    queries.append(i)
+        if self.category_memory is not None:
+            for i in self.category_memory:
                 queries.append(i)
         if self.cognition['thought']:
             query = self.cognition['thought']
         else:
             query = self.message['message']
-        self.cognition['reranked_memories'] = self.memory.combine_and_rerank(queries, query, 5)
+        if queries is not None:
+            self.cognition['reranked_memories'] = self.memory.combine_and_rerank(queries, query, 5)
 
         # agent.load_additional_data(self.messages, self.chosen_msg_index, self.chat_history,
         #                            self.user_history, memories, self.cognition)

@@ -1,5 +1,5 @@
-from agentforge.utils.chroma_utils import ChromaUtils
-from agentforge.utils.functions.Logger import Logger
+from agentforge.utils.ChromaUtils import ChromaUtils
+from agentforge.utils.Logger import Logger
 from Utilities.Parsers import MessageParser
 from Utilities.Journal import Journal
 
@@ -124,21 +124,22 @@ class Memory:
         print(f"Collection size {collection_size}")
 
         if collection_size == 0:
-            return "No Results!", None
-
-        qsize = min(collection_size, query_size)
+            return None, None
+            # return "No Chat History Yet! This is the start of a new conversation.", "No Chat History Yet! This is the start of a new conversation."
 
         # Adjust the method of fetching history based on whether it's user-specific
         if is_user_specific and query:
-            if qsize == 0:
-                qsize = 1
             print("querying memory")
-            history = self.memory.query_memory(collection_name=collection_name, query=query, num_results=qsize)
+            history = self.memory.query_memory(collection_name=collection_name, query=query, num_results=query_size)
             formatted_history = self.parser.format_user_specific_history_entries(history)
         else:
-            filters = {"id": {"$gte": qsize}}
+            qsize = min(collection_size, query_size)  # Determine the number of messages to retrieve
+            start_id = collection_size - qsize + 1  # Calculate the starting 'id' to get the last 'qsize' messages
+            filters = {"id": {"$gte": start_id}}  # Retrieve messages with 'id' greater than or equal to 'start_id'
+
             history = self.memory.load_collection(collection_name=collection_name, where=filters)
             formatted_history = self.parser.format_general_history_entries(history)
+
 
         self.logger.log(f"Fetched History:\n{history}\n", 'debug', 'Memory')
         return formatted_history, history
@@ -163,7 +164,7 @@ class Memory:
         self.save_scratchpad_log(self.user_message['author'], self.user_message['message'])
         self.logger.log(f"Saved all memories.", 'debug', 'Trinity')
 
-    def set_memory_info(self,   message_batch: dict, cognition: dict, response: str):
+    def set_memory_info(self, message_batch: dict, cognition: dict, response: str):
         """
         Set the current memory information for processing.
 
@@ -391,7 +392,9 @@ class Memory:
                         print(f"Full Entry: {full_entry}")
                         # Add the relevant fields to the recalled_memories dictionary
                         recalled_memories['ids'].append(full_entry['ids'][0])
-                        recalled_memories['metadatas'].append({key: value for key, value in full_entry['metadatas'][0].items() if key.lower() not in ['source', 'isotimestamp', 'unixtimestamp']})
+                        recalled_memories['metadatas'].append(
+                            {key: value for key, value in full_entry['metadatas'][0].items() if
+                             key.lower() not in ['source', 'isotimestamp', 'unixtimestamp']})
                         recalled_memories['documents'].append(full_entry['documents'][0])
 
             print(f"Full Entries Appended: {recalled_memories}")

@@ -5,7 +5,7 @@ from Utilities.Parsers import MessageParser
 class ChatAgent(Agent):
     parser = MessageParser
 
-    def load_additional_data(self):
+    def process_data(self):
         chat_message = self.data['messages']
         self.data['new_messages'] = self.parser.format_messages(self.data['messages'])
         # self.data['chat_history'] = chat_history
