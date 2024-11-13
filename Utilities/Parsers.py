@@ -2,7 +2,6 @@ import re
 from typing import Dict
 from agentforge.utils.Logger import Logger
 
-
 logger = Logger(__name__)
 
 
@@ -107,7 +106,8 @@ class MessageParser:
             entry_details = []
             # Start with User and Message
             entry_details.append(f"User: {metadata.get('User', 'N/A')}")
-            entry_details.append(f"Message: {history['documents'][i] if i < len(history.get('documents', [])) else 'N/A'}")
+            entry_details.append(
+                f"Message: {history['documents'][i] if i < len(history.get('documents', [])) else 'N/A'}")
 
             # Add Inner Thought and Response if available
             if 'InnerThought' in metadata:
@@ -188,12 +188,12 @@ class MessageParser:
     def extract_updated_scratchpad(scratchpad_result: str) -> str:
         pattern = r'<updated_scratchpad>(.*?)</updated_scratchpad>'
         match = re.search(pattern, scratchpad_result, re.DOTALL)
-        
+
         if match:
             return match.group(1).strip()
         else:
             return ""
-    
+
     @staticmethod
     def format_journal_entries(history):
         """
@@ -243,13 +243,13 @@ class MessageParser:
         formatted_messages = []
         for index, message in enumerate(messages):
             # Add the formatted message to the list without leading newlines
-            formatted_messages.append(f"ID: {index}\n"  
+            formatted_messages.append(f"ID: {index}\n"
                                       f"Date: {message['timestamp']}\n"  # Check if were formatting the timestamp
                                       f"Author: {message['author']}\n"
                                       f"Message: {message['message']}")
         # Join the messages with two newlines, putting newlines at the end instead of the beginning
         formatted_messages = "\n\n".join(formatted_messages).strip()
-        logger.log(f"Formatted Messages:\n{formatted_messages}", 'debug', 'Trinity')
+        logger.log(f"Formatted Messages:\n{formatted_messages}", 'debug', 'o7')
         return formatted_messages
 
     @staticmethod
@@ -335,10 +335,21 @@ class MessageParser:
         """
         pattern = r'<updated_scratchpad>(.*?)</updated_scratchpad>'
         match = re.search(pattern, scratchpad_result, re.DOTALL)
-        
+
         if match:
             return match.group(1).strip()
         else:
             logger.log("No updated scratchpad content found in the result.", 'warning', 'Formatting')
             return ""
 
+    @staticmethod
+    def parse_answer(text):
+        start = text.find('Answer:')
+        if start != -1:
+            start += len('Answer:')
+            end = text.find('</form>', start)
+            if end != -1:
+                return text[start:end].strip()
+            else:
+                return text[start:].strip()
+        return None

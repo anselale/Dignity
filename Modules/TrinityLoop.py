@@ -114,12 +114,30 @@ class Trinity:
         queries_list = [self.unformatted_user_history, self.unformatted_history, self.unformatted_dm_history]
         queries = []
         if queries_list:
-            for i in queries_list:
-                if i is not None:
-                    queries.append(i)
+            for result in queries_list:
+                if result is not None:
+                    # Create a standardized entry for each document
+                    for i in range(len(result['documents'])):
+                        normalized_entry = {
+                            'documents': [result['documents'][i]],
+                            'ids': [result['ids'][min(i, len(result['ids']) - 1)]],
+                            'metadatas': [result['metadatas'][i]]
+                        }
+                        queries.append(normalized_entry)
+            # for i in queries_list:
+            #     if i is not None:
+            #         queries.append(i)
         if self.category_memory is not None:
-            for i in self.category_memory:
-                queries.append(i)
+            for result in queries_list:
+                if result is not None:
+                    # Create a standardized entry for each document
+                    for i in range(len(result['documents'])):
+                        normalized_entry = {
+                            'documents': [result['documents'][i]],
+                            'ids': [result['ids'][min(i, len(result['ids']) - 1)]],
+                            'metadatas': [result['metadatas'][i]]
+                        }
+                        queries.append(normalized_entry)
         if self.cognition['thought']:
             query = self.cognition['thought']
         else:
