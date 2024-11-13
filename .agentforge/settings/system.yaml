@@ -7,7 +7,9 @@ StorageEnable: true
 SaveMemory: true # Saving Memory won't work if Storage is disabled
 ISOTimeStampMemory: true
 UnixTimeStampMemory: true
-
+PersistDirectory: ./DB/ChromaDB  # Relative path for persistent storage
+DBFreshStart: false # Will wipe storage everytime the system is initialized
+Embedding: all-distilroberta-v1
 
 # Misc. Settings
 OnTheFly: true
