@@ -3,6 +3,34 @@ import time
 import json
 # from agentforge.tools.BraveSearch import BraveSearchAPI
 
+
+import google.generativeai as genai
+def test_gem(request):
+    genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+
+    # Create the model
+    generation_config = {
+      "temperature": 1,
+      "top_p": 0.95,
+      "top_k": 64,
+      "max_output_tokens": 8192,
+      "response_mime_type": "text/plain",
+    }
+
+    model = genai.GenerativeModel(
+      model_name="gemini-exp-1114",
+      generation_config=generation_config,
+    )
+
+    chat_session = model.start_chat(
+      history=[
+      ]
+    )
+
+    response = chat_session.send_message(request)
+
+    print(response.text)
+
 def print_env_variables():
     print("Environment Variables:")
     for key, value in os.environ.items():
@@ -16,6 +44,9 @@ def print_env_variables():
 
 if __name__ == "__main__":
     print_env_variables()
+
+    test_gem("This is a test message.")
+
     #
     # brave = BraveSearchAPI()
     #

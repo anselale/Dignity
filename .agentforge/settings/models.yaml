@@ -2,10 +2,10 @@
 ModelSettings:
 #  API: groq_api
 #  Model: llama31
-#  API: gemini_api
-#  Model: gemini-flash
-  API: openrouter_api
-  Model: liquid
+  API: gemini_api
+  Model: gemini-exp
+#  API: openrouter_api
+#  Model: llama70
 #  API: openai_api
 #  Model: omni_model
 #  API: claude3_api
@@ -75,9 +75,11 @@ ModelLibrary:
       phi3med:
         name: microsoft/phi-3-medium-128k-instruct:free
       hermes:
-        name: nousresearch/hermes-3-llama-3.1-405b
-      reflection:
-        name: mattshumer/reflection-70b:free
+        name: nousresearch/hermes-3-llama-3.1-405b:free
+      llama405:
+        name: meta-llama/llama-3.1-405b-instruct:free
+      llama70:
+        name: meta-llama/llama-3.1-70b-instruct:free
       liquid:
         name: liquid/lfm-40b:free
   claude_old:
@@ -100,6 +102,8 @@ ModelLibrary:
         name: gemini-1.5-pro
       gemini-flash:
         name: gemini-1.5-flash
+      gemini-exp:
+        name: gemini-exp-1114
   lm_studio_api:
     module: "LMStudio"
     class: "LMStudio"
