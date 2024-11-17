@@ -102,7 +102,7 @@ Prompts:
       4. Provide a reason why {username} might be thinking this.
   
       ## Response Format
-      Provide your response in the specified format using the exact headings below:
+      Any analytical content should precede the form completion. Provide your response in the specified format using the exact headings below:
 
       <form>
       What:

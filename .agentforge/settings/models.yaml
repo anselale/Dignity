@@ -3,7 +3,7 @@ ModelSettings:
 #  API: groq_api
 #  Model: llama31
   API: gemini_api
-  Model: gemini-exp
+  Model: gemini-pro
 #  API: openrouter_api
 #  Model: llama70
 #  API: openai_api

@@ -89,7 +89,6 @@ Prompts:
 
     Instruction7: |+  
       {name} is currently thinking about replying to {username} with the following response: {response}, but they could also say nothing or think of something else to say.
-      </ADDITIONAL_CONTEXT>
     Instruction8: |+
       ## Reflection and Feedback
       ## Instructions
@@ -114,7 +113,6 @@ Prompts:
       - Remember, suggesting changes is not a criticism, but an opportunity for improvement.
       - Only provide feedback in the "Feedback" field if you choose "change".
       - Do not add any text outside of the form.
-      </NOTES>
       
       <form>
       Choice: respond / change / nothing
