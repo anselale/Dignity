@@ -17,14 +17,16 @@ OnTheFly: true
 # Logging Settings
 Logging:
   Enabled: true
+  ConsoleLevel: info  # Set console verbosity
   Folder: ./Logs
   Files:
-    AgentForge: error
+    AgentForge: debug
     ModelIO: debug
     Actions: error
     Results: error
     Trinity: debug
-    DiscordClient: error
+    Dignity: debug
+    DiscordClient: debug
     Memory: debug
     Formatting: error
 

@@ -8,8 +8,8 @@ class Memory:
         self.logger = Logger('Memory')
         self.storage = StorageInterface().storage_utils
 
-        self.persona_file = self.storage.config.data['settings']['system'].get('Persona')
-        self.persona = self.storage.config.data['personas'][self.persona_file].get('Name')
+        self.persona_file = self.storage.config.template_data['settings']['system'].get('Persona')
+        self.persona = self.storage.config.template_data['personas'][self.persona_file].get('Name')
 
         self.parser = MessageParser
         self.response = ''

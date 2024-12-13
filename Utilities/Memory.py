@@ -14,7 +14,7 @@ class Memory:
         Initialize the Memory system.
 
         Args:
-            persona_file (str): Path to the persona file.
+            persona_file (dict): The persona file.
             persona_name (str): Name of the persona.
         """
         self.logger = Logger('Memory')

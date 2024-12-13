@@ -1,0 +1,40 @@
+agents:
+  - name: EmotionResponse
+    class: CustomAgents.Dignity.ChatAgent
+  - name: TheoryOfMind
+    class: CustomAgents.Dignity.ChatAgent
+  - name: ThoughtProcess
+    class: CustomAgents.Dignity.ChatAgent
+  - name: Reflection
+    class: CustomAgents.Dignity.ChatAgent
+  - name: GenerateResponse
+    class: CustomAgents.Dignity.ChatAgent
+
+flow:
+  - step:
+    agent: EmotionResponse
+    next:
+        - TheoryOfMind
+
+  - step:
+      agent: TheoryOfMind
+      next: ThoughtProcess
+
+  - step:
+      agent: ThoughtProcess
+      next: Reflection
+
+  - step:
+      agent: Reflection
+      condition:
+        type: variable
+        on: Choice
+        cases:
+          "revise": ThoughtProcess
+          "reject": ThoughtProcess
+          "approve": GenerateResponse
+          "clarify": GenerateResponse
+        default: GenerateResponse
+
+  - step:
+      agent: GenerateResponse
