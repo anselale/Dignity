@@ -3,13 +3,19 @@ PersonasEnabled: true
 Persona: mystery
 
 # Storage Settings
-StorageEnable: true
-SaveMemory: true # Saving Memory won't work if Storage is disabled
+StorageEnabled: true
+SaveMemory: true  # Saving Memory won't work if Storage is disabled
 ISOTimeStampMemory: true
 UnixTimeStampMemory: true
 PersistDirectory: ./DB/ChromaDB  # Relative path for persistent storage
 DBFreshStart: false # Will wipe storage everytime the system is initialized
 Embedding: all-distilroberta-v1
+
+# Debug Settings
+DebugMode: false
+SaveMemoryWhileDebugging: false
+DebuggingText: Text designed to simulate an LLM response for debugging purposes without
+  having to invoke the model.
 
 # Misc. Settings
 OnTheFly: true
@@ -18,16 +24,16 @@ OnTheFly: true
 Logging:
   Enabled: true
   Folder: ./Logs
-  Files:
-    AgentForge: error
+  Files: # Log levels: critical, error, warning, info, debug.
+    AgentForge: debug
     ModelIO: debug
-    Actions: error
-    Results: error
+    Actions: debug
+    Results: debug
     Trinity: debug
-    DiscordClient: error
+    DiscordClient: debug
     Memory: debug
-    Formatting: error
+    Formatting: debug
 
-# Paths the system (agents) have access to read and write
+# The system will have Read/Write access to the paths below.
 Paths:
   Files: ./Files

@@ -1,19 +1,9 @@
 # Default settings for all models unless overridden
-ModelSettings:
+Selected Model:
 #  API: groq_api
 #  Model: llama31
-  API: gemini_api
-  Model: gemini-pro
-#  API: openrouter_api
-#  Model: llama70
-#  API: openai_api
-#  Model: omni_model
-#  API: claude3_api
-#  Model: claude-3
-#  API: ollama_api
-#  Model: DolphinMistral
-#  API: lm_studio_api
-#  Model: LMStudio
+  API: gemini_with_vision
+  Model: gemini-flash-vis
   Params: # Default parameter values
     max_new_tokens: 3000
     temperature: 0.8
@@ -41,7 +31,7 @@ ModelSettings:
     seed: -1
 
 # Library of Models and Parameter Defaults Override
-ModelLibrary:
+Model Library:
   openai_api:
     module: "openai"
     class: "GPT"
@@ -82,6 +72,10 @@ ModelLibrary:
         name: meta-llama/llama-3.1-70b-instruct:free
       liquid:
         name: liquid/lfm-40b:free
+      gemini-exp:
+        name: google/gemini-exp-1121
+      gemini-exp2:
+        name: google/gemini-pro-1.5-exp
   claude_old:
     module: "claude_old"
     class: "Claude"
@@ -94,6 +88,17 @@ ModelLibrary:
     models:
       claude-3:
         name: claude-3-opus-20240229
+  gemini_with_vision:
+    Gemini_With_Vision:
+      models:
+        gemini-flash-vis:
+          identifier: gemini-1.5-flash
+      params:
+        candidate_count: 1
+        max_output_tokens: 10000
+        temperature: 0.8
+        top_k: 40
+        top_p: 0.1
   gemini_api:
     module: "gemini"
     class: "Gemini"
@@ -104,6 +109,8 @@ ModelLibrary:
         name: gemini-1.5-flash
       gemini-exp:
         name: gemini-exp-1114
+      gemini-exp2:
+        name: gemini-exp-1121
   lm_studio_api:
     module: "LMStudio"
     class: "LMStudio"

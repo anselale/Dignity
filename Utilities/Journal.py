@@ -4,7 +4,7 @@ from CustomAgents.Trinity.JournalThoughtAgent import JournalThoughtAgent
 from Utilities.Parsers import MessageParser
 import os
 from datetime import datetime
-import agentforge.tools.SemanticChunk as Chunker
+import agentforge.tools.semantic_chunk as Chunker
 
 
 class Journal:

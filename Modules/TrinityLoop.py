@@ -2,7 +2,7 @@ from CustomAgents.Trinity.ThoughtAgent import ThoughtAgent
 from CustomAgents.Trinity.TheoryAgent import TheoryAgent
 from CustomAgents.Trinity.GenerateAgent import GenerateAgent
 from CustomAgents.Trinity.ReflectAgent import ReflectAgent
-from agentforge.utils.Logger import Logger
+from agentforge.utils.logger import Logger
 from Utilities.Parsers import MessageParser
 
 
@@ -138,8 +138,11 @@ class Trinity:
                             'metadatas': [result['metadatas'][i]]
                         }
                         queries.append(normalized_entry)
+
+        # This is where the rerank happens. Needs to be adjusted to Theory agent instead
+        # Should only need to run one time per loop. Currently runs each time.
         if self.cognition['thought']:
-            query = self.cognition['thought']
+            query = self.cognition['thought']['Inner Thought']
         else:
             query = self.message['message']
         if queries is not None:
