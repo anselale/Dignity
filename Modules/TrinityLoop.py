@@ -44,6 +44,7 @@ class Trinity:
             "scratchpad": None,
             "reranked_memories": None
         }
+        self.image_urls = []  # Change to store multiple URLs
         pass
 
     def do_chat(self, message):
@@ -70,6 +71,13 @@ class Trinity:
                                                     query=self.message['message'],
                                                     is_user_specific=True,
                                                     query_size=3, prefix='dm')
+
+        # Process image attachments
+        self.image_urls = []
+        if message['attachments']:
+            for attachment in message['attachments']:
+                if any(attachment.filename.lower().endswith(ext) for ext in ['.png', '.jpg', '.jpeg', '.gif', '.webp']):
+                    self.image_urls.append(attachment.url)
 
         self.run_agent('thought')
         self.memory.recall_journal_entry(self.message['message'], self.cognition['thought']["Categories"], 3)
@@ -150,12 +158,15 @@ class Trinity:
 
         # agent.load_additional_data(self.messages, self.chosen_msg_index, self.chat_history,
         #                            self.user_history, memories, self.cognition)
-        agent_vars = {'messages': self.message,  # batch_messages
-                      'chat_history': self.chat_history,  # chat_history
-                      'memories': self.cognition['reranked_memories'],  # reranked memories
-                      'journals': journals,  # journals
-                      'kb': self.cognition['kb'],  # knowledgebase
-                      'cognition': self.cognition}  # cognition
+        agent_vars = {
+            'messages': self.message,
+            'chat_history': self.chat_history,
+            'memories': self.cognition['reranked_memories'],
+            'journals': journals,
+            'kb': self.cognition['kb'],
+            'cognition': self.cognition,
+            'image_urls': self.image_urls
+        }
         self.cognition[agent_name] = agent.run(**agent_vars)
 
         # Send result to Brain Channel
