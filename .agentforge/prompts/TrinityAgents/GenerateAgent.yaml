@@ -1,5 +1,5 @@
-Prompts:
-  System:
+prompts:
+  system:
     Roleplay Instructions: |+
       Enter ROLEPLAY mode. You are playing the part of {name}. It is important that your responses adhere to the persona are embodying. The following is your persona:
       
@@ -30,7 +30,7 @@ Prompts:
       {memories}
       
 
-  User:
+  user:
 
     Scratchpad: |+
       ## Scratchpad
@@ -140,8 +140,8 @@ Prompts:
       - Ensure the final response is appropriate for the user's message and context.
       - Do not include internal mapping or reasoning in the final response section.
 
-# ModelOverrides:
-#  API: groq_api
-#  Model: llama31
-#  Params:
+# model_overrides:
+#  api: groq_api
+#  model: llama31
+#  params:
 #   max_new_tokens: 2000

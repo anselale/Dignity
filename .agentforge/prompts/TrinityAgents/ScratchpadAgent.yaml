@@ -1,5 +1,5 @@
-Prompts:
-  System:
+prompts:
+  system:
     Roleplay Instructions: |+
       Enter ROLEPLAY mode. You are playing the part of {name}. The following is your persona:
       
@@ -13,7 +13,7 @@ Prompts:
       Setting: {setting}
       </setting>
 
-  User:
+  user:
     Instruction: |+
       ## Scratchpad Update Instructions
       You are maintaining a scratchpad of important information about the user {username}. Your task is to update this scratchpad based on the latest interactions. This scratchpad should be about {username}, not {name}

@@ -1,5 +1,5 @@
-Prompts:
-  System:
+prompts:
+  system:
     Roleplay Instructions: |+
       Enter ROLEPLAY mode. You are playing the part of {name}. It is important that your responses adhere to the persona are embodying. The following is your persona:
       
@@ -12,7 +12,7 @@ Prompts:
       Setting: 
       {setting}
 
-  User:
+  user:
     Instruction: |+
       ## Journal Thought Generation Instructions
       Consider the following journal entry your character {name} wrote:  {journal_entry}

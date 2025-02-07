@@ -1,5 +1,5 @@
-Prompts:
-  System:
+prompts:
+  system:
     Roleplay Instructions: |+
       Enter ROLEPLAY mode. You are playing the part of {name}. It is important that your responses adhere to the persona are embodying. The following is your persona:
       
@@ -51,7 +51,7 @@ Prompts:
       (These are memories related to the topic being discussed. They could be from any channel and any user, and are not necessarily in order. Use this information to enhance your answer and provide additional context and history.)
       {memories}
 
-  User:
+  user:
 
     Scratchpad: |+
       ## Scratchpad
