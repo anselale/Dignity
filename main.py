@@ -1,6 +1,6 @@
 # main.py
 
-from agentforge.utils.DiscordClient import DiscordClient
+from agentforge.utils.discord.discord_client import DiscordClient
 import time
 import yaml
 from Modules.proccess_slash_command import SlashCommands

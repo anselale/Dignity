@@ -1,17 +1,16 @@
-# TrinityAF
+# Dignity - Local AI chatbot with advanced memory
 
- This is a discord chatbot implementation of AssistAF using the [AgentForge](https://github.com/AgentForge/agentforge) framework. It has advanced [active retrieval augmented generation](https://arxiv.org/abs/2305.06983),  and leverages [reflextion](https://arxiv.org/abs/2303.11366), multi-prompt [chain-of-thought](https://arxiv.org/abs/2201.11903), and uses [theory of mind capabilities](https://arxiv.org/abs/2303.12712). All of this to generate lucid and liminal conversational character bots that are [enhanced by emotional stimuli](https://arxiv.org/abs/2307.11760). [(see also)](https://arxiv.org/abs/2312.11111v1)
+ This is a discord chatbot implementation using the [AgentForge](https://github.com/AgentForge/agentforge) framework. It has advanced [active retrieval augmented generation](https://arxiv.org/abs/2305.06983),  and leverages [reflextion](https://arxiv.org/abs/2303.11366), multi-prompt [chain-of-thought](https://arxiv.org/abs/2201.11903), and uses [theory of mind capabilities](https://arxiv.org/abs/2303.12712). All of this to generate lucid and liminal conversational character bots that are [enhanced by emotional stimuli](https://arxiv.org/abs/2307.11760). [(see also)](https://arxiv.org/abs/2312.11111v1)
 
-This version features a new discord implementation, complete with DMs, slash commands, and embeds. Threads coming soon.
+This version features a new discord implementation, complete with DMs, slash commands, and threads for chain of thought.
 
- Because this system is built on AgentForge, we can quickly switch between OpenAI, Claude3 and Gemini, as well as locally hosted models. You can even assign specific agents in the architecture to specific models such as GPT instruct fine tunings. The bot has a prompt attack challenge that is specifically intended to leverage this functionality, allowing you to test prompt attacks against nearly any model.
+ Because this system is built on AgentForge, we can quickly switch between OpenAI, Claude3 and Gemini, as well as locally hosted models. You can even assign specific prompts in the architecture to specific models such as Llama instruct fine tunings.
 
 ## Additional Features
 
 - Advanced memory management
 - Multi-prompt chain-of-thought
 - Theory of mind
-- Single branch tree-of-thought
 - Multi-user interaction
 - Multi-channel response
 - Journal/Diary - Episodic Memory
@@ -34,7 +33,7 @@ You will also need to install AgentForge
 ## run:
 
 ```commandline
-python async_chat.py
+python main.py
 ```
 This will start the bot. You will need to give the bot a few seconds to connect to the discord server. Once it is ready, you will see the bot in the members list.
 
@@ -58,7 +57,6 @@ Chatbot/
 │       ├── ReflectAgent.py
 │       ├── TheoryAgent.py
 │       └── ThoughtAgent.py
-├── Dockerfile
 ├── main.py
 ├── Modules
 │   ├── challenges.py

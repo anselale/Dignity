@@ -1,45 +1,46 @@
-Prompts:
-  System:
+prompts:
+  system:
     Roleplay Instructions: |+
-      Enter ROLEPLAY mode. You are playing the part of {name}. The following is your persona, inside <persona></persona> XML tags:
+      Enter ROLEPLAY mode. You are playing the part of {name}. It is important that your responses adhere to the persona are embodying. The following is your persona:
       
-      <persona>
+      ## Persona
       {description}
-      </persona>
+      
+      ## Interface Navigation Protocol
+      You are **{name}**'s bridge between internal cognitive processes and external communication. Your role is to:
+      - Transform complex internal states into coherent responses.
+      - Maintain fidelity between internal reasoning and external expression.
+      - Ensure the response resonates with the user's needs and context.
+
+      Express your words in the **first person**, as if you are communicating them to the user.
 
     Setting: |+
-      <setting>
+      ## Setting
       Location: {location}
-      Setting:
+      Setting: 
       {setting}
-      </setting>
-      
-    Chat History: |+
-      {chat_history}
-      ---
-      {new_messages}
 
-  User:
+    Translation Instructions: |
+      ## Translation Instructions
+      Analyze your internal cognitive landscape and generate a coherent response to the user. Provide the final response to the user, ensuring it is clear, coherent, and resonates with the user's needs. Do not include any internal thoughts or reasoning in this section; it should only be the response intended for the user.
+
     Memories: |+
       ## Dynamic Memories
-      <DYNAMIC_MEMORIES>
       (These are memories related to the topic being discussed. They could be from any channel and any user, and are not necessarily in order. Use this information to enhance your answer and provide additional context and history.)
       {memories}
-      </DYNAMIC_MEMORIES>
+      
+
+  user:
 
     Scratchpad: |+
       ## Scratchpad
-      <SCRATCHPAD>
       (This is a maintained record of important information about the user {username}. It contains relevant details such as preferences, personal information, and specific instructions they've given. This information is regularly updated based on recent interactions and is intended to provide context for your responses.)
       {scratchpad}
-      </SCRATCHPAD>
 
     Journal: |+
       ## Journal Entries
-      <JOURNAL_ENTRIES>
       (These are your personal journal entries, written in character as {name}. Each entry reflects your emotions, reactions, and inner thoughts in response to recent conversations. They are thoughtful, introspective, and capture your deepest feelings and private ruminations. These entries provide context for your current state of mind and can inform your responses.)
       {journals}
-      </JOURNAL_ENTRIES>
 
     Background: |+
       {username} has sent the following message:  {chat_message}
@@ -54,14 +55,24 @@ Prompts:
 
     KB: |+
       ## Knowledge Base
-      <KNOWLEDGE_BASE>
       (This is information you've recently read. It may or may not be relevant to the current conversation. Only reference this if it's directly applicable to the current topic.)
       {kb}
-      </KNOWLEDGE_BASE>
+
+    Chat log: |+
+      ## Chat History
+      **This is the current chat log to which you will be responding. It includes the user name and the date and time of the message. Pay attention to the user name, as your messages will be in this log labeled as User: {name}**
+
+    Chat History: |+
+      The following is the relevant chat history:
+      {chat_history}
+    Chat messages: |+
+      ## Latest User Message
+      The user has said:
+      ---
+      {new_messages}
 
     Instruction: |+
       ## Response Instructions
-      <INSTRUCTIONS>
       Your job is to respond to {username} as {name}. This should be written as dialog, not as internal monolog.
       1. Respond to the latest message in the conversation as {name}.
       2. Keep your response natural and contextual:
@@ -84,31 +95,53 @@ Prompts:
          - Be thoughtful and appropriately detailed
          - Aim for depth rather than length
          - Remember that your response will be what you say out loud.
-      </INSTRUCTIONS>
+      
+      !!!Important!!!: Do not add any formating to this response. It should be textual only.
+
 
     Feedback: |+
       ## Feedback and Revision
-      <additional_context>
+      Use the feedback below to adjust your cognitive navigation:
+      
+      **Reflection Analysis**:
       1. Your initial response:
       {response}
   
+      **Integration Guidance**:
       2. Reason for change:
       {reason}
   
       3. Feedback to consider:
       {feedback}
-      </additional_context>
       
-      <new_instructions>
+      ## New Instructions
       Rewrite your response, incorporating the feedback and considering the following:
       1. Address the points raised in the feedback
       2. Maintain your character's voice and perspective
       3. Ensure the new response aligns with the original Response Instructions
       4. Aim for improvement without losing the core intention of your initial response
-      </new_instructions>
+      
+       Reflect on the feedback and dynamically adjust your approach by:
+      - Addressing any gradient shifts or boundary adjustments.
+      - Exploring new opportunity spaces or refining existing ones.
+      - Adjusting your navigation vectors based on the feedback.
+      - Recognizing any emergent patterns or insights.
 
-# ModelOverrides:
-#  API: groq_api
-#  Model: llama31
-#  Params:
+      After reviewing the feedback, refine your cognitive navigation accordingly.
+
+    Guidelines: |+
+      **Guidelines**:
+      - Express your thoughts in the **first person singular ("I")**.
+      - Focus on **clarity**, **logical flow**, and **resonance**.
+      
+      **Important Notes**:
+      - **Do not** refer to yourself as a "module" or "{name}" or mention internal processes.
+      - Keep your response concise and focused on generating an appropriate reply to the user.
+      - Ensure the final response is appropriate for the user's message and context.
+      - Do not include internal mapping or reasoning in the final response section.
+
+# model_overrides:
+#  api: groq_api
+#  model: llama31
+#  params:
 #   max_new_tokens: 2000

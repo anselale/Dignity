@@ -1,5 +1,5 @@
 from agentforge.utils.ChromaUtils import ChromaUtils
-from agentforge.utils.Logger import Logger
+from agentforge.utils.logger import Logger
 from Utilities.Parsers import MessageParser
 from Utilities.Journal import Journal
 
@@ -361,19 +361,20 @@ class Memory:
             query=journal_query,
             num_results=num_entries
         )
+
+        # Create a dictionary to store the recalled memories
+        recalled_memories = {
+            'ids': [],
+            'embeddings': None,
+            'metadatas': [],
+            'documents': []
+        }
+
         if journal_chunks:
             self.logger.log(f"Recalled Memories:\n{journal_chunks}", 'debug', 'Memory')
 
             # Set the relevance threshold
             relevance_threshold = 0.65  # Adjust this value as needed
-
-            # Create a dictionary to store the recalled memories
-            recalled_memories = {
-                'ids': [],
-                'embeddings': None,
-                'metadatas': [],
-                'documents': []
-            }
 
             for i in range(len(journal_chunks['ids'])):
                 distance = journal_chunks['distances'][i]
@@ -402,6 +403,9 @@ class Memory:
             # Add recalled memories to current memories
             self.current_journals.append(memories)
             print(f"\n\nCurrent Memories:\n{self.current_memories}")
+            return memories
+        else:
+            memories = self.parser.format_user_specific_history_entries(recalled_memories)
             return memories
 
     def wipe_current_memories(self):

@@ -6,28 +6,29 @@ class ChatAgent(Agent):
     parser = MessageParser
 
     def process_data(self):
-        chat_message = self.data['messages']
-        self.data['new_messages'] = self.parser.format_messages(self.data['messages'])
-        # self.data['chat_history'] = chat_history
-        # self.data['user_history'] = user_history
-        self.data['chat_message'] = chat_message['message']
-        self.data['username'] = chat_message['author']
-        self.data['kb'] = self.data['cognition']['kb']
-        self.data['scratchpad'] = self.data['cognition']['scratchpad']
-        # self.data['formatted_mentions'] = chat_message['formatted_mentions']
+        chat_message = self.template_data['messages']
+        self.template_data['new_messages'] = self.parser.format_messages(self.template_data['messages'])
+        # self.template_data['chat_history'] = chat_history
+        # self.template_data['user_history'] = user_history
+        self.template_data['chat_message'] = chat_message['message']
+        self.template_data['username'] = chat_message['author']
+        self.template_data['kb'] = self.template_data['cognition']['kb']
+        self.template_data['scratchpad'] = self.template_data['cognition']['scratchpad']
+        # self.template_data['formatted_mentions'] = chat_message['formatted_mentions']
 
-        # self.data['memories'] = memories
+        # self.template_data['memories'] = memories
 
-        self.data['emotion'] = self.data['cognition']['thought'].get('Emotion')
-        self.data['reason'] = self.data['cognition']['thought'].get('Reason')
-        self.data['thought'] = self.data['cognition']['thought'].get('Inner Thought')
-        self.data['what'] = self.data['cognition']['theory'].get("What", "Unknown.")
-        self.data['why'] = self.data['cognition']['theory'].get("Why", "Not enough information.")
-        self.data['response'] = self.data['cognition']['generate'].get('result')
-        self.data['response_commentary'] = self.data['cognition']['generate'].get('OptionalReflection')
-        self.data['choice'] = self.data['cognition']['reflect'].get("Choice")
-        self.data['reflection_reason'] = self.data['cognition']['reflect'].get("Reason")
-        self.data['feedback'] = self.data['cognition']['reflect'].get("Feedback")
+        self.template_data['emotion'] = self.template_data['cognition']['thought'].get('Emotion')
+        self.template_data['reason'] = self.template_data['cognition']['thought'].get('Reason')
+        self.template_data['thought'] = self.template_data['cognition']['thought'].get('Inner Thought')
+        self.template_data['what'] = self.template_data['cognition']['theory'].get("What", "Unknown.")
+        self.template_data['why'] = self.template_data['cognition']['theory'].get("Why", "Not enough information.")
+        self.template_data['response'] = self.template_data['cognition']['generate'].get('result')
+        self.template_data['response_commentary'] = self.template_data['cognition']['generate'].get('OptionalReflection')
+        self.template_data['choice'] = self.template_data['cognition']['reflect'].get("Choice")
+        self.template_data['reflection_reason'] = self.template_data['cognition']['reflect'].get("Reason")
+        self.template_data['feedback'] = self.template_data['cognition']['reflect'].get("Feedback")
+        self.images = self.template_data.get('image_urls', [])
 
     def parse_result(self):
         self.logger.log(f"{self.agent_name} Results:\n{self.result}", 'debug', 'Trinity')

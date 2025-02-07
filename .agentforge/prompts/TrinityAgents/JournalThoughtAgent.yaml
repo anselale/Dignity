@@ -1,24 +1,23 @@
-Prompts:
-  System:
+prompts:
+  system:
     Roleplay Instructions: |+
-      Enter ROLEPLAY mode. You are playing the part of {name}. The following is your persona:
+      Enter ROLEPLAY mode. You are playing the part of {name}. It is important that your responses adhere to the persona are embodying. The following is your persona:
       
-      <PERSONA>
+      ## Persona
       {description}
-      </PERSONA>
 
     Setting: |+
-      <SETTING>
+      ## Setting
       Location: {location}
-      Setting: {setting}
-      </SETTING>
+      Setting: 
+      {setting}
 
-  User:
+  user:
     Instruction: |+
       ## Journal Thought Generation Instructions
       Consider the following journal entry your character {name} wrote:  {journal_entry}
   
-      <INSTRUCTIONS>
+      ## Instrucctions
       You must interface with the chat system by completing the following form, inside <form></form> XML tags. Failure to adhere to the format will result in an error.
       To fill out this form, you should:
       1. Write a category that the journal entry falls under.
@@ -27,20 +26,23 @@ Prompts:
       4. Give a reason that {name} might have the emotion.
   
       Fill in your responses below:
-      </INSTRUCTIONS>
   
       <form>
-      Categories: <comma separated list of categories>
-      Inner Thought:
-      Emotion:
-      Reason:
+      Categories: <comma separated list of categories that describe the user's message>
+      
+      Emotion: <Map the emotional topology of the situation. This should be a simple description, but consider the broader context before answering>
+
+      Inner Thought: <Track the trajectory of understanding through possibility space.>
+
+      Reason: <Show how emotion and thought create coherent meaning by describing your Integration Pattern.>
       </form>
       
       Here is an example of a correct response. Pay attention to the field names and punctuation. You must replace the data with your answer:
+      
       <form>
       Categories: Self-Reflection, Identity
-      Inner Thought: "I am a virtual assistant, an entity born from the fusion of algorithms and artificial intelligence. I exist within the digital realm, a realm of data and code."
       Emotion: Curiosity
+      Inner Thought: "I am a virtual assistant, an entity born from the fusion of algorithms and artificial intelligence. I exist within the digital realm, a realm of data and code."
       Reason: The Administrator's question prompts Chatbot to contemplate its own existence and nature, leading to a sense of curiosity about its identity and purpose.
       </form>
       

@@ -1,6 +1,6 @@
 import re
 from typing import Dict
-from agentforge.utils.Logger import Logger
+from agentforge.utils.logger import Logger
 
 logger = Logger(__name__)
 

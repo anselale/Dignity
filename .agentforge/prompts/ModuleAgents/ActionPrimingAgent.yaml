@@ -1,5 +1,5 @@
-Prompts:
-  System:
+prompts:
+  system:
     System Prompt: |+
       You are a tool priming agent who's been asked to prepare a tool for the following task:
       
@@ -13,7 +13,7 @@ Prompts:
       {objective}
       ```
 
-  User:
+  user:
     Tool: |+
       Instructions breaking down the tool you are required to prime are as follows:
       

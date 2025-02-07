@@ -1,5 +1,5 @@
-Prompts:
-  System:
+prompts:
+  system:
     System Prompt: |+
       Your job is to decide whether the following task requires the use of an action: 
       
@@ -13,7 +13,7 @@ Prompts:
       {objective}
       ```
 
-  User:
+  user:
     Summary: |+
       Here's a summary of previously taken actions:
       
