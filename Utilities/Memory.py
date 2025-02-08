@@ -1,4 +1,4 @@
-from agentforge.utils.ChromaUtils import ChromaUtils
+from agentforge.storage.chroma_storage import ChromaStorage
 from agentforge.utils.logger import Logger
 from Utilities.Parsers import MessageParser
 from Utilities.Journal import Journal
@@ -18,7 +18,7 @@ class Memory:
             persona_name (str): Name of the persona.
         """
         self.logger = Logger('Memory')
-        self.memory = ChromaUtils()
+        self.memory = ChromaStorage()
         self.parser = MessageParser
         self.persona_file = persona_file
         self.persona = persona_name
