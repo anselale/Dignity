@@ -16,7 +16,7 @@ This version features a new discord implementation, complete with DMs, slash com
 - Journal/Diary - Episodic Memory
 - ***NEW*** - Personalized user notepad
 - ***NEW*** - Reranking search results to reduce token costs
-- *Beta* - KB implementation
+- *Beta* - KB implementation (depreciated)
 
 ## Configure your Environment Variables:
 

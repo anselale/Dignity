@@ -1,4 +1,4 @@
-from agentforge.utils.ChromaUtils import ChromaUtils
+from agentforge.storage.chroma_storage import ChromaStorage
 from CustomAgents.Trinity.JournalAgent import JournalAgent
 from CustomAgents.Trinity.JournalThoughtAgent import JournalThoughtAgent
 from Utilities.Parsers import MessageParser
@@ -17,7 +17,7 @@ class Journal:
         Initialize the Journal with necessary components for storage, parsing, and agent interactions.
         """
         print("Journal initializing")
-        self.storage = ChromaUtils()
+        self.storage = ChromaStorage()
         self.parser = MessageParser
         self.journal = JournalAgent()
         self.journalthought = JournalThoughtAgent()
