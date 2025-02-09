@@ -1,13 +1,18 @@
-StorageAPI: ChromaDB
+# Default storage settings for all agents unless overridden
+options:
+  enabled: false
+  save_memory: true          # Note: Saving memory won't work if storage is disabled
+  iso_timestamp: true        # Use ISO format for timestamps
+  unix_timestamp: true       # Use Unix format for timestamps
+  persist_directory: ./db/ChromaDB   # Relative path for persistent storage
+  fresh_start: false         # Wipes storage on system initialization if true
 
-ChromaDB:
-  chroma_db_impl: duckdb+parquet
-  persist_directory: ./DB/ChromaDB
-  collection_name: collection-test
-  DBFreshStart: False
-  embedding: all-distilroberta-v1
+# Selected Embedding
+embedding:
+  selected: distil_roberta
 
-Pinecone:
-  environment: us-east4-gcp
-  index_name: test-table
-  dimension: "768"
+# Embedding library (mapping of embeddings to their identifiers)
+embedding_library:
+  distil_roberta: all-distilroberta-v1
+  all_mini: all-MiniLM-L6-v2
+

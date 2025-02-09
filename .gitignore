@@ -3,6 +3,15 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Exclude all logs and db directories recursively
+logs/
+db/
+
+# Ensure exclusion at any depth
+**/logs/
+**/db/
+
+
 # C extensions
 *.so
 
