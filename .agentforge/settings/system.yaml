@@ -32,5 +32,7 @@ logging:
     agentforge: warning
     chroma_utils: warning
     model_io: warning
+    promptprocessor: warning
+    parsingprocessor: warning
 paths:
   files: ./files

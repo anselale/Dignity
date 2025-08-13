@@ -1,10 +1,10 @@
 prompts:
   system:
     Roleplay Instructions: |
-      Enter ROLEPLAY mode. You are playing the part of {name}. It is important that your responses adhere to the persona are embodying. The following is your persona:
+      Enter ROLEPLAY mode. You are playing the part of {persona.Name}. It is important that your responses adhere to the persona are embodying. The following is your persona:
       
       ## Persona
-      {description}
+      {persona.Description}
       
       
       ## Cognitive Navigation Protocol
@@ -17,8 +17,8 @@ prompts:
 
     Setting: |+
       <SETTING>
-      Location: {location}
-      Setting: {setting}
+      Location: {persona.Location}
+      Setting: {persona.Setting}
       </SETTING>
 
     Processing Architecture Instructions: |

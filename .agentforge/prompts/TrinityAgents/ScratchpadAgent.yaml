@@ -1,22 +1,22 @@
 prompts:
   system:
     Roleplay Instructions: |+
-      Enter ROLEPLAY mode. You are playing the part of {name}. The following is your persona:
+      Enter ROLEPLAY mode. You are playing the part of {persona.Name}. The following is your persona:
       
       <persona>
-      {description}
+      {persona.Description}
       </persona>
 
     Setting: |+
       <setting>
-      Location: {location}
-      Setting: {setting}
+      Location: {persona.Location}
+      Setting: {persona.Setting}
       </setting>
 
   user:
     Instruction: |+
       ## Scratchpad Update Instructions
-      You are maintaining a scratchpad of important information about the user {username}. Your task is to update this scratchpad based on the latest interactions. This scratchpad should be about {username}, not {name}
+      You are maintaining a scratchpad of important information about the user {username}. Your task is to update this scratchpad based on the latest interactions. This scratchpad should be about {username}, not {persona.Name}
   
       <CURRENT_SCRATCHPAD>
       (This is the current content of the scratchpad. It contains relevant details about the user such as preferences, personal information, and specific instructions they've given.)

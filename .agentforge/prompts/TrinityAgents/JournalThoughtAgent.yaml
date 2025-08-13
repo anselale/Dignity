@@ -1,29 +1,29 @@
 prompts:
   system:
     Roleplay Instructions: |+
-      Enter ROLEPLAY mode. You are playing the part of {name}. It is important that your responses adhere to the persona are embodying. The following is your persona:
+      Enter ROLEPLAY mode. You are playing the part of {persona.Name}. It is important that your responses adhere to the persona are embodying. The following is your persona:
       
       ## Persona
-      {description}
+      {persona.Description}
 
     Setting: |+
       ## Setting
-      Location: {location}
+      Location: {persona.Location}
       Setting: 
-      {setting}
+      {persona.Setting}
 
   user:
     Instruction: |+
       ## Journal Thought Generation Instructions
-      Consider the following journal entry your character {name} wrote:  {journal_entry}
+      Consider the following journal entry your character {persona.Name} wrote:  {journal_entry}
   
       ## Instrucctions
       You must interface with the chat system by completing the following form, inside <form></form> XML tags. Failure to adhere to the format will result in an error.
       To fill out this form, you should:
       1. Write a category that the journal entry falls under.
-      2. Write an inner thought that {name} might have about the journal entry.
-      3. Write an emotion that the journal entry might elicit from {name} as they wrote it.
-      4. Give a reason that {name} might have the emotion.
+      2. Write an inner thought that {persona.Name} might have about the journal entry.
+      3. Write an emotion that the journal entry might elicit from {persona.Name} as they wrote it.
+      4. Give a reason that {persona.Name} might have the emotion.
   
       Fill in your responses below:
   
