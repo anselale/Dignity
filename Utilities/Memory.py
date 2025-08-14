@@ -18,9 +18,9 @@ class Memory:
             persona_name (str): Name of the persona.
         """
         self.logger = Logger('Memory')
-        self.memory = ChromaStorage()
-        self.parser = MessageParser
         self.persona_file = persona_file
+        self.memory = ChromaStorage(persona_name)
+        self.parser = MessageParser
         self.persona = persona_name
         self.message_batch = None
         self.user_message = None
@@ -58,7 +58,7 @@ class Memory:
             "Timestamp": time
         }
 
-        self.memory.save_memory(collection_name=collection_name,
+        self.memory.save_to_storage(collection_name=collection_name,
                                 data=message_text,
                                 ids=memory_id,
                                 metadata=[metadata])
@@ -93,7 +93,7 @@ class Memory:
             "Timestamp": time
         }
 
-        self.memory.save_memory(collection_name=collection_name,
+        self.memory.save_to_storage(collection_name=collection_name,
                                 data=message_text,
                                 ids=memory_id,
                                 metadata=[metadata])
@@ -130,7 +130,7 @@ class Memory:
         # Adjust the method of fetching history based on whether it's user-specific
         if is_user_specific and query:
             print("querying memory")
-            history = self.memory.query_memory(collection_name=collection_name, query=query, num_results=query_size)
+            history = self.memory.query_storage(collection_name=collection_name, query=query, num_results=query_size)
             formatted_history = self.parser.format_user_specific_history_entries(history)
         else:
             qsize = min(collection_size, query_size)  # Determine the number of messages to retrieve
@@ -214,7 +214,7 @@ class Memory:
             metadata.update(metadata_extra)
 
         message = [chat_message["message"]]
-        self.memory.save_memory(collection_name=collection_name, data=message, ids=memory_id, metadata=[metadata])
+        self.memory.save_to_storage(collection_name=collection_name, data=message, ids=memory_id, metadata=[metadata])
         self.logger.log(f"\nSaved to {collection_name}\n"
                         f"Data (Message)={message}\n"
                         f"ID={memory_id}\n"
@@ -317,7 +317,7 @@ class Memory:
             collection_name = f"{category.strip()}"
             category_collection = self.parser.format_string(collection_name)
             self.logger.log(f"Fetching Category: {category_collection}", 'debug', 'Memory')
-            recalled_memories = self.memory.query_memory(collection_name=category_collection,
+            recalled_memories = self.memory.query_storage(collection_name=category_collection,
                                                           query=message,
                                                           num_results=num_memories_per_category)
             if recalled_memories:
@@ -356,7 +356,7 @@ class Memory:
         self.logger.log(f"Recalling {num_entries} entries from the journal", 'debug', 'Memory')
         journal_query = f"{message}\n\n Related Categories: {categories}"
         collection_name = 'journal_chunks_table'
-        journal_chunks = self.memory.query_memory(
+        journal_chunks = self.memory.query_storage(
             collection_name=collection_name,
             query=journal_query,
             num_results=num_entries
@@ -574,7 +574,7 @@ class Memory:
         if not content.strip():  # If content is empty or just whitespace
             content = "No information available yet. This scratchpad will be updated as we learn more about the user."
 
-        self.memory.save_memory(collection_name=collection_name, data=[content], ids=["1"])
+        self.memory.save_to_storage(collection_name=collection_name, data=[content], ids=["1"])
 
     def save_scratchpad_log(self, username, content):
         """
@@ -590,7 +590,7 @@ class Memory:
         collection_size = self.memory.count_collection(collection_name)
         memory_id = [str(collection_size + 1)]
         self.logger.log(f"Saving Scratchpad Log to: {collection_name}\nMessage:\n{content}\nID: {memory_id}", 'debug', 'Memory')
-        self.memory.save_memory(collection_name=collection_name, data=[content], ids=memory_id)
+        self.memory.save_to_storage(collection_name=collection_name, data=[content], ids=memory_id)
 
     def save_to_scratchpad_log(self, username, message):
         scratchpad_log_name = f"scratchpad_log_{username}"
@@ -655,6 +655,7 @@ class Memory:
 
             return updated_scratchpad
 
+        print(f'scratchpad_count: {count}')
         self.logger.log(f"Scratchpad log count < 10, no update needed", 'debug', 'Memory')
         return None
 

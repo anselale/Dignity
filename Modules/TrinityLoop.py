@@ -153,7 +153,7 @@ class Trinity:
             query = self.cognition['thought']['Inner Thought']
         else:
             query = self.message['message']
-        if queries is not None:
+        if queries is not None and queries:
             self.cognition['reranked_memories'] = self.memory.combine_and_rerank(queries, query, 5)
 
         # agent.load_additional_data(self.messages, self.chosen_msg_index, self.chat_history,

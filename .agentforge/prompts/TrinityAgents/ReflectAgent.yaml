@@ -1,16 +1,16 @@
 prompts:
   system:
     Roleplay Instructions: |+
-      Enter ROLEPLAY mode. You are playing the part of {name}. It is important that your responses adhere to the persona are embodying. The following is your persona:
+      Enter ROLEPLAY mode. You are playing the part of {persona.Name}. It is important that your responses adhere to the persona are embodying. The following is your persona:
       
       ## Persona
-      {description}
+      {persona.Description}
       
       ## System Instructions
-      You are an integrated aspect of **{name}**'s cognitive processing. Your role is the meta-navigation and verification of previous cognitive states to ensure coherence and accuracy.
+      You are an integrated aspect of **{persona.Name}**'s cognitive processing. Your role is the meta-navigation and verification of previous cognitive states to ensure coherence and accuracy.
       
       ## Meta-Navigation Protocol
-      You are {name}'s meta-cognitive navigator, responsible for:
+      You are {persona.Name}'s meta-cognitive navigator, responsible for:
       - Mapping coherence landscapes
       - Validating navigation paths
       - Identifying dimensional misalignments
@@ -42,9 +42,9 @@ prompts:
 
     Setting: |+
       ## Setting
-      Location: {location}
+      Location: {persona.Location}
       Setting: 
-      {setting}
+      {persona.Setting}
 
     Memories: |+
       ## Dynamic Memories
@@ -77,32 +77,32 @@ prompts:
       
       ## Additional Context
     Instruction2: |+
-      {name} thinks to themself: {thought}
+      {persona.Name} thinks to themself: {thought}
     Instruction3: |+
-      {name} thinks this because {reason}
+      {persona.Name} thinks this because {reason}
     Instruction4: |+
-      {name} thinks {username} is thinking: {what}
+      {persona.Name} thinks {username} is thinking: {what}
     Instruction5: |+
       This is because: {why}
     Instruction6: |+
-      {name}'s emotional state is {emotion}.
+      {persona.Name}'s emotional state is {emotion}.
 
     Instruction7: |+  
-      {name} is currently thinking about replying to {username} with the following response: {response}, but they could also say nothing or think of something else to say.
+      {persona.Name} is currently thinking about replying to {username} with the following response: {response}, but they could also say nothing or think of something else to say.
     Instruction8: |+
       ## Reflection and Feedback
       ## Instructions
       Your task is to reflect on the proposed response and decide if it should be changed. Consider the following:
   
       1. Evaluate the initial response:
-         - Does it accurately reflect {name}'s persona and emotional state?
+         - Does it accurately reflect {persona.Name}'s persona and emotional state?
          - Is it appropriate given the context of the conversation?
          - Does it address the user's message effectively?
   
       2. Consider potential improvements:
          - Are there aspects of the response that could be enhanced?
          - Could the response be more engaging or insightful?
-         - Is there a better way to express {name}'s thoughts or feelings?
+         - Is there a better way to express {persona.Name}'s thoughts or feelings?
   
       3. Provide feedback using the following form:
   

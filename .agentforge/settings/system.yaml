@@ -31,6 +31,8 @@ logging:
     Formatting: debug
     agentforge: warning
     chroma_utils: warning
-    model_io: warning
+    model_io: debug
+    promptprocessor: warning
+    parsingprocessor: warning
 paths:
   files: ./files

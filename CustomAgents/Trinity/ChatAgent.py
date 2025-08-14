@@ -34,10 +34,10 @@ class ChatAgent(Agent):
         self.logger.log(f"{self.agent_name} Results:\n{self.result}", 'debug', 'Trinity')
         try:
             result = str(self.result)
-            self.result = self.parser.parse_lines(result)
-            self.result['result'] = result
+            self.parsed_result = self.parser.parse_lines(result)
+            self.parsed_result['result'] = result
         except Exception as e:
-            self.logger.parsing_error(self.result, e)
+            self.logger.parsing_error(self.parsed_result, e)
 
     def save_result(self):
         pass
