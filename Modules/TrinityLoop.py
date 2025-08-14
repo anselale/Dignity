@@ -255,8 +255,8 @@ class UI:
                     self.logger.log(f"Sending message to channel: {channel_id}", 'debug', 'DiscordClient')
                     sent_message = self.client.send_message(channel_id, response)
                     if sent_message:
-                        self.logger.log(f"Message sent successfully. ID: {sent_message.id}", 'info', 'DiscordClient')
-                        return sent_message.id
+                        self.logger.log(f"Message sent successfully. Content: {response}", 'info', 'DiscordClient')
+                        # return sent_message.id
                     else:
                         self.logger.log("Failed to send message", 'error', 'DiscordClient')
                         return None
