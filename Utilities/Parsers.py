@@ -144,7 +144,7 @@ class MessageParser:
 
             excluded_metadata = [
                 "User", "id", "Response", "Reason", "Emotion", "InnerThought",
-                "Channel", "isotimestamp", "unixtimestamp", "Categories"
+                "Channel", "iso_timestamp", "unix_timestamp", "Categories"
             ]
 
             for key, value in metadata.items():

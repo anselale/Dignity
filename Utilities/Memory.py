@@ -655,6 +655,7 @@ class Memory:
 
             return updated_scratchpad
 
+        print(f'scratchpad_count: {count}')
         self.logger.log(f"Scratchpad log count < 10, no update needed", 'debug', 'Memory')
         return None
 
