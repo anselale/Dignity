@@ -88,8 +88,11 @@ prompts:
       {persona.Name}'s emotional state is {emotion}.
 
     Instruction7: |+  
-      {persona.Name} is currently thinking about replying to {username} with the following response: {response}, but they could also say nothing or think of something else to say.
+      {persona.Name} is currently thinking about replying to {username} with the following response:
     Instruction8: |+
+      {response}
+      but they could also say nothing or think of something else to say.
+    Instruction9: |+
       ## Reflection and Feedback
       ## Instructions
       Your task is to reflect on the proposed response and decide if it should be changed. Consider the following:
@@ -115,7 +118,7 @@ prompts:
       - Do not add any text outside of the form.
       
       <form>
-      Choice: respond / change / nothing
+      Choice: [select one: respond / change / nothing]
       Reason: [Explain your choice in 1-2 sentences]
       Feedback: [ONLY if "change" is selected, provide specific suggestions for improvement. Otherwise, leave this field empty.]
       </form>
