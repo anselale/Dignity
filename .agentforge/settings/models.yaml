@@ -1,7 +1,7 @@
 # Default settings for all models unless overridden
 default_model:
   api: gemini_api
-  model: gemini_exp
+  model: gemini_flash_lite
 # Uncomment to use alternative default models
 #  api: lm_studio_api
 #  model: LMStudio
@@ -60,9 +60,11 @@ model_library:
     Gemini:
       models:
         gemini_pro:
-          identifier: gemini-1.5-pro
+          identifier: gemini-2.5-pro
         gemini_flash:
-          identifier: gemini-1.5-flash
+          identifier: gemini-2.5-flash
+        gemini_flash_lite:
+          identifier: gemini-2.5-flash-lite
         gemini_exp:
           identifier: gemini-2.0-flash-thinking-exp-01-21
 

@@ -589,6 +589,17 @@ class Memory:
 
         collection_size = self.memory.count_collection(collection_name)
         memory_id = [str(collection_size + 1)]
+        metadata = {
+            "id": memory_id,
+            "Response": response_message,
+            "Emotion": self.cognition["thought"].get("Emotion"),
+            "InnerThought": self.cognition["thought"].get("Inner Thought"),
+            "Reason": self.cognition["reflect"].get("Reason"),
+            "User": chat_message["author"],
+            # "Mentions": chat_message["mentions"],
+            "Channel": str(chat_message["channel"]),
+            "Categories": str(self.cognition["thought"]["Categories"])
+        }
         self.logger.log(f"Saving Scratchpad Log to: {collection_name}\nMessage:\n{content}\nID: {memory_id}", 'debug', 'Memory')
         self.memory.save_to_storage(collection_name=collection_name, data=[content], ids=memory_id)
 

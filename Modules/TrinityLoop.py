@@ -181,10 +181,10 @@ class Trinity:
             iteration_count += 1
             if iteration_count > max_iterations:
                 self.logger.log("Maximum iteration count reached, forcing response", 'warning', 'Trinity')
+                reflection = self.cognition['reflect']
                 self.response = self.cognition['generate'].get('result')
                 if reflection["Choice"] == "change":
                     self.run_agent('generate')
-                    reflection = self.cognition['reflect']
                     self.response = self.cognition['generate'].get('result')
                     self.logger.log(f"Handle Reflection:{reflection}", 'debug', 'Trinity')
                 self.cognition['reflect']['Choice'] = 'respond'
@@ -255,8 +255,8 @@ class UI:
                     self.logger.log(f"Sending message to channel: {channel_id}", 'debug', 'DiscordClient')
                     sent_message = self.client.send_message(channel_id, response)
                     if sent_message:
-                        self.logger.log(f"Message sent successfully. ID: {sent_message.id}", 'info', 'DiscordClient')
-                        return sent_message.id
+                        self.logger.log(f"Message sent successfully. ID: {response}", 'info', 'DiscordClient')
+                        # return sent_message.id
                     else:
                         self.logger.log("Failed to send message", 'error', 'DiscordClient')
                         return None

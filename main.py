@@ -65,7 +65,6 @@ class Run:
                                 # If bot is @ mentioned, send the response to the channel
                                 # 'Name' in persona must match discord display name.
                                 response = self.channel_message.process_message(message)
-                                self.client.send_message(channel_id, response)
                             else:
                                 self.indirect_message.process_message(message)
                                 print('That message was not for me.')
