@@ -13,7 +13,7 @@ options:
   unix_timestamp: true       # Use Unix format for timestamps
   persist_directory: ./db/   # Relative path for persistent storage
   fresh_start: false         # Wipes storage on system initialization if true
-  use_http_client: true     # Useful if chroma causes problems when debugging
+  use_http_client: false     # Useful if chroma causes problems when debugging
   http_host: localhost       # only used for hosting chroma remotely
   http_port: 8000            # only used for hosting chroma remotely
   http_ssl: false            # only used for hosting chroma remotely
