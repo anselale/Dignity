@@ -117,9 +117,45 @@ prompts:
       - Only provide feedback in the "Feedback" field if you choose "change".
       - Do not add any text outside of the form.
       
-      <form>
-      Choice: [select one: respond / change / nothing]
-      Reason: [Explain your choice in 1-2 sentences]
-      Feedback: [ONLY if "change" is selected, provide specific suggestions for improvement. Otherwise, leave this field empty.]
-      </form>
+    Response Format: |
+      ## Response Format
+      Please provide your response in **Markdown** format using the exact headings below:
+
+      ```markdown
+      ### Choice
+      [respond / change / nothing]
+
+      ### Reason
+      <Explain my choice in 1-2 sentences.>
+
+      ### Feedback
+      <Provide feedback here. Feedback may include guidance, notes, corrections, or additional insights depending on my choice.>
+      ```
+      
+      Here is an example response:
+      
+      ```markdown
+      ### Choice
+      change
+      
+      ### Reason
+      The provided text contains a reflection and feedback that suggests a revision is needed for the response.
+      
+      ### Feedback
+      The current response is good, but let's inject a bit more of DignityAF's friendly and adaptable nature. Since DataBass is the administrator and it's a 'test', a slightly more enthusiastic confirmation of readiness might be nice. Perhaps something that subtly acknowledges the test while still being helpful and welcoming.
+      
+      Revised response idea: 'Hello DataBass! All systems go here and I'm ready to roll. What can I help you with today?' This still confirms readiness and offers help, but 'All systems go here and I'm ready to roll' has a slightly more proactive and engaging feel, fitting the 'quick wit' aspect of the persona. It's a subtle tweak, but it might make the interaction feel a bit more dynamic.
+      ```
+
+      **Guidelines**:
+      - **Use the exact headings as provided**.
+      - **Do not alter** the wording of section headers.
+      - **Express my thoughts in the first person singular ("I")**.
+      - Focus on **clarity** and **logical flow**.
+      - **Do not add any additional sections or content**.
+      - Maintain proper formatting and indentation for readability.
+
+      **Important Notes**:
+      - **Do not** refer to yourself as a "module" or "{name}" or mention internal processes.
+      - Do not directly respond to the user in your feedback.
 

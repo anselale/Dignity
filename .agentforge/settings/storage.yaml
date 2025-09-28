@@ -38,8 +38,10 @@ library:
     # Default settings for the storage implementation
     defaults:
       persist_directory: ./db/ChromaDB
-      selected_embedding: distilroberta
+      selected_embedding: small
 
 # Embedding library (mapping of embeddings to their identifiers)
 embedding_library:
   distilroberta: all-distilroberta-v1
+  minilm: all-MiniLM-L6-v2
+  small: text-embedding-3-small

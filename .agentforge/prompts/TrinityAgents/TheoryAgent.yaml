@@ -90,7 +90,7 @@ prompts:
 
     
 
-    Instruction: |+
+    Response Format: |+
       ## Theory Generation Instructions
       Consider the following message from the character named {username}:  {chat_message}
   
@@ -102,11 +102,14 @@ prompts:
       4. Provide a reason why {username} might be thinking this.
   
       ## Response Format
-      Any analytical content should precede the form completion. Provide your response in the specified format using the exact headings below:
+      Any analytical content should precede the form completion. Provide your response in **Markdown** format using the exact headings below:
 
-      <form>
-      What:
-      Why:
-      </form>
+      ```markdown
+      ### What
+      <Describe what the user might be thinking based on their message.>
+
+      ### Why
+      <Provide reasoning for why they might be thinking this, based on the message content.>
+      ```
       
       It is crucial that you complete the <form> exactly as designed. Deviating from this format will result in errors.

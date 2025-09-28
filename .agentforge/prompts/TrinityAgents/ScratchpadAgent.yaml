@@ -35,10 +35,11 @@ prompts:
       3. Only add or modify information if it's significant and likely to be useful in future interactions.
       4. Remove any information that is no longer relevant.
       5. Keep the rest of the information intact.
-  
-      Respond with the updated scratchpad content in the following format:
       </INSTRUCTIONS>
-  
-      <updated_scratchpad>
+
+    Response Format: |+
+      Respond with the updated scratchpad content in the following format as a **Markdown** codeblock:
+      
+      ```markdown
       [Your updated scratchpad content here]
-      </updated_scratchpad>
+      ```

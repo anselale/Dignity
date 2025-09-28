@@ -34,5 +34,6 @@ logging:
     model_io: debug
     promptprocessor: warning
     parsingprocessor: warning
+    o7: warning
 paths:
   files: ./files

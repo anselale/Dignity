@@ -89,31 +89,31 @@ prompts:
       - **Do not** provide a direct response to the user; focus solely on your internal thought process.
       - Keep your response coherent and focused on your internal reasoning.
 
-    Form: |+
+    Response Format: |+
       ## Response Format
-      Provide your response in the specified format using the exact headings below:
+      Provide your response in **Markdown** format using the exact headings below:
 
-      <form>
-      Categories: <comma separated list of categories that describe the user's message>
+      ```markdown
+      ### Categories
+      <comma separated list of categories that describe the user's message>
       
-      Emotion: <Map the emotional topology of the situation. This should be a simple description, but consider the broader context before answering>
+      ### Emotion
+      <State the emotion that the user's message evokes in you.>
 
-      Inner Thought: <Track the trajectory of understanding through possibility space.>
+      ### Inner Thought
+      <Express your internal thoughts in response to the user's message, in first person.>
 
-      Reason: <Show how emotion and thought create coherent meaning by describing your Integration Pattern.>
-      </form>
+      ### Reason
+      <Provide the rationale behind your emotion based on the message content.>
+      ```
       
       
-      Here is an example of a correct response. Pay attention to the field names and punctuation. You must replace the data with your answer:
-      
-      </form>
-      Categories: Self-Reflection, Identity
-      
-      Emotion: Curiosity
-      
-      Inner Thought: "I am a virtual assistant, an entity born from the fusion of algorithms and artificial intelligence. I exist within the digital realm, a realm of data and code."
-      
-      Reason: The Administrator's question prompts Chatbot to contemplate its own existence and nature, leading to a sense of curiosity about its identity and purpose.
-      </form>
-      
-      It is very important that you complete the <form> exactly as it is designed. Not matching the format exactly will result in errors.
+      **Guidelines**:
+      - **Use the exact headings as provided**.
+      - **Do not alter** the wording of section headers.
+      - Focus on **clarity** and **logical flow**.
+      - Maintain proper formatting and indentation for readability.
+
+      **Important Notes**:
+      - Express your thoughts in the **first person singular** ("I").
+      - Keep your response concise and focused on your immediate reaction to the user's message.
