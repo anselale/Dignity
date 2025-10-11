@@ -2,6 +2,7 @@ from agentforge.storage.chroma_storage import ChromaStorage
 from agentforge.utils.logger import Logger
 from Utilities.Parsers import MessageParser
 from Utilities.Journal import Journal
+from Utilities.KB.load_kb import LoadKB
 
 
 class Memory:
@@ -28,6 +29,10 @@ class Memory:
         self.response = None
         self.current_memories = []
         self.current_journals = []
+        self.memory.select_collection("collection_table")
+        print("Updating KB. This step can take a long time if you have added new files")
+        self.kb = LoadKB(self.memory)
+        print("KB update complete.")
 
     def save_channel_simple(self, message):
         """
@@ -161,7 +166,7 @@ class Memory:
         self.save_channel_memory()
         self.save_bot_response()
         self.save_user_history()
-        self.save_scratchpad_log(self.user_message['author'], self.user_message['message'])
+        self.save_scratchpad_log(self.user_message['author'], self.user_message['message'], self.response)
         self.logger.log(f"Saved all memories.", 'debug', 'Trinity')
 
     def set_memory_info(self, message_batch: dict, cognition: dict, response: str):
@@ -232,6 +237,7 @@ class Memory:
             self.logger.log(f"Saving Category to: {category_collection}\nMessage:\n{self.user_message}",
                             'debug', 'Memory')
             self.save_to_collection(category_collection, self.user_message, self.response)
+            self.update_category_table(category)
 
     def save_channel_memory(self):
         """
@@ -554,11 +560,37 @@ class Memory:
         """
         collection_name = f"scratchpad_log_{username}"
         collection_name = self.parser.format_string(collection_name)
-        result = self.memory.load_collection(collection_name=collection_name)
-        self.logger.log(f"Scratchpad Log: {result}", 'debug', 'Memory')
-        if result and result['documents']:
-            return result['documents']
-        return []
+        results = self.memory.load_collection(collection_name=collection_name)
+        self.logger.log(f"Scratchpad Log: {results}", 'debug', 'Memory')
+
+        log: list[str] = []
+        if not results:
+            return log
+
+        docs = results.get("documents") or []
+        metas = results.get("metadatas") or []
+        ids_ = results.get("ids") or []
+
+        # Zip row-wise; zip will stop at the shortest length to avoid IndexError
+        for doc, meta, id_ in zip(docs, metas, ids_):
+            # doc is a string (not a list), append directly
+            if isinstance(doc, str):
+                message_str = f"{username}: {doc}"
+                log.append(message_str)
+            else:
+                # Defensive fallback if wrapper ever returns a non-string
+                message = str(doc)
+                message_str = f"{username}: {message}"
+                log.append(message_str)
+
+            # meta is expected to be a dict; pull Response if present
+            if isinstance(meta, dict):
+                resp = meta.get("Response")
+                name = self.persona_file.get("Name")
+                resp_str = f"{name}: {resp}"
+                if resp is not None:
+                    log.append(resp_str)
+        return log
 
     def save_scratchpad(self, username, content):
         """
@@ -576,7 +608,7 @@ class Memory:
 
         self.memory.save_to_storage(collection_name=collection_name, data=[content], ids=["1"])
 
-    def save_scratchpad_log(self, username, content):
+    def save_scratchpad_log(self, username, content, response_message):
         """
         Save or update the scratchpad log for a specific user.
 
@@ -590,18 +622,18 @@ class Memory:
         collection_size = self.memory.count_collection(collection_name)
         memory_id = [str(collection_size + 1)]
         metadata = {
-            "id": memory_id,
+            "id": collection_size+1,
             "Response": response_message,
             "Emotion": self.cognition["thought"].get("Emotion"),
             "InnerThought": self.cognition["thought"].get("Inner Thought"),
             "Reason": self.cognition["reflect"].get("Reason"),
-            "User": chat_message["author"],
+            "User": username,
             # "Mentions": chat_message["mentions"],
-            "Channel": str(chat_message["channel"]),
+            "Channel": str(self.user_message["channel"]),
             "Categories": str(self.cognition["thought"]["Categories"])
         }
         self.logger.log(f"Saving Scratchpad Log to: {collection_name}\nMessage:\n{content}\nID: {memory_id}", 'debug', 'Memory')
-        self.memory.save_to_storage(collection_name=collection_name, data=[content], ids=memory_id)
+        self.memory.save_to_storage(collection_name=collection_name, data=[content], ids=memory_id, metadata=[metadata])
 
     def save_to_scratchpad_log(self, username, message):
         scratchpad_log_name = f"scratchpad_log_{username}"
@@ -711,4 +743,85 @@ class Memory:
         formatted_results = self.parser.format_user_specific_history_entries(reranked_results)
 
         return formatted_results
-        
+
+    def category_replace(self, categories: str, threshold: float = 0.30):
+        """
+        checks categories collection for close matches to reduce total
+        number of collections in database. Categories are selected by
+        similarity based on threshold.
+
+        Args:
+            categories (str): Comma-separated list of categories.
+            threshold (float): Similarity distance threshold for replacement.
+                Default is 0.65
+
+        Returns:
+            str: Comma-separated list of categories.
+        """
+
+        categories = categories.split(",")
+        resolved = []
+        for category in categories:
+            collection_name = "category_table"
+            category_query = self.parser.format_string(category)
+            self.logger.log(f"Looking for matching categories: {category_query}", 'debug', 'Memory')
+            collection_list = self.memory.query_storage(collection_name=collection_name,
+                                                          query=category_query,
+                                                          include=["documents", "distances"],
+                                                          num_results=1)
+            if collection_list and isinstance(collection_list, dict):
+                distance = collection_list["distances"][0]
+                nearest = collection_list["documents"][0]
+                if distance <= threshold:
+                    result = nearest
+                else:
+                    result = category_query
+                print(
+                    f"Initial Category: {category_query}, "
+                    f"Closest existing category: {nearest}\n"
+                    f"Distance: {distance:.10f}\n"
+                    f"Result: {result}"
+                )
+                resolved.append(result)
+            else:
+                resolved.append(category_query)
+        unique_categories = sorted(set(resolved))
+        return ", ".join(unique_categories)
+
+    def update_category_table(self, category):
+        collection_name = "category_table"
+        collection_list = self.memory.query_storage(collection_name=collection_name,
+                                                    query=category,
+                                                    include=["documents", "distances"],
+                                                    num_results=1)
+        if collection_list and isinstance(collection_list, dict):
+            distance = collection_list["distances"][0]
+            nearest = collection_list["documents"][0]
+            print(
+                f"Initial Category: {category}, "
+                f"Closest existing category: {nearest}\n"
+                f"Distance: {distance:.10f}\n"
+            )
+            if distance <= 0.01:
+                print("Duplicate")
+            else:
+                self.write_category_table(category)
+                print(f"New category created: {category}")
+        else:
+            self.write_category_table(category)
+
+    def write_category_table(self, category):
+        collection_name = "category_table"
+        collection_size = self.memory.search_metadata_min_max(collection_name, 'id', 'max')
+        if collection_size is None or "target" not in collection_size:
+            memory_id = ["1"]
+            collection_int = 1
+        else:
+            memory_id = [str(collection_size["target"] + 1 if collection_size["target"] is not None else 1)]
+            collection_int = collection_size["target"] + 1
+
+        metadata = {
+            "id": collection_int
+        }
+        self.memory.save_to_storage(collection_name=collection_name, data=[category], ids=memory_id, metadata=[metadata])
+

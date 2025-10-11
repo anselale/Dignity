@@ -333,14 +333,7 @@ class MessageParser:
         Returns:
         - str: The extracted updated scratchpad content.
         """
-        pattern = r'<updated_scratchpad>(.*?)</updated_scratchpad>'
-        match = re.search(pattern, scratchpad_result, re.DOTALL)
-
-        if match:
-            return match.group(1).strip()
-        else:
-            logger.log("No updated scratchpad content found in the result.", 'warning', 'Formatting')
-            return ""
+        return scratchpad_result
 
     @staticmethod
     def parse_answer(text):

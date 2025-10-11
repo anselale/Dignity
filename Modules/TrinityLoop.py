@@ -4,7 +4,7 @@ from CustomAgents.Trinity.GenerateAgent import GenerateAgent
 from CustomAgents.Trinity.ReflectAgent import ReflectAgent
 from agentforge.utils.logger import Logger
 from Utilities.Parsers import MessageParser
-
+from Utilities.KB.load_kb import LoadKB
 
 class Trinity:
     def __init__(self, memory_instance, discord_client):
@@ -80,6 +80,7 @@ class Trinity:
                     self.image_urls.append(attachment.url)
 
         self.run_agent('thought')
+        self.cognition['thought']["Categories"] = self.memory.category_replace(self.cognition['thought']["Categories"])
         self.memory.recall_journal_entry(self.message['message'], self.cognition['thought']["Categories"], 3)
         self.category_memory = self.memory.recall_categories(self.message['message'], self.cognition['thought']["Categories"], 3)
         self.cognition['scratchpad'] = self.memory.get_scratchpad(self.message['author'])
@@ -111,6 +112,7 @@ class Trinity:
             self.ui.send_message(1, self.message, scratchpad_message)
 
     def run_agent(self, agent_name):
+        print(f"Running {agent_name.capitalize()}")
         self.logger.log(f"Running {agent_name.capitalize()} Agent... Message:{self.message['message']}", 'info',
                         'Trinity')
 

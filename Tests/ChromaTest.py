@@ -123,11 +123,16 @@ class ChromaTest:
 
 
 if __name__ == '__main__':
+    print("Init test")
     test = ChromaTest()
-    collection_list = test.list_collections()
+    print("Test init")
+    # collection_list = test.list_collections()
+    #
+    # print(collection_list)
 
+    # test.db_size(collection_list)
+    # collection_list = test.get_records("scratchpad_log_databass")
+    collection_list = test.get_records("category_table")
     print(collection_list)
-
-    test.db_size(collection_list)
 
 
