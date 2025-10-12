@@ -49,9 +49,7 @@ Clone the repository and install the required dependencies:
 ```bash
 git clone https://github.com/YOUR_USERNAME/Dignity.git # Replace with your repo URL
 cd Dignity
-pip install -r requirements.txt # Ensure you have a requirements.txt, or use pip install agentforge chromadb
-# If you don't have a requirements.txt, you'll definitely need:
-pip install agentforge chromadb python-dotenv discord.py
+pip install agentforge
 ```
 
 ### 2. Configure Environment Variables
