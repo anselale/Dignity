@@ -70,6 +70,10 @@ prompts:
       The user has said:
       ---
       {new_messages}
+    KB: |+
+      ## Knowledge Base
+      (This is information from your knowledgebase. It may or may not be relevant to the current conversation. Only reference this if it's directly applicable to the current topic. However, treat this as factual ground truth.)
+      {kb}
 
     Instruction: |+
       ## Reflection Instructions

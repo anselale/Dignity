@@ -452,7 +452,7 @@ class Memory:
         Returns:
             str: Formatted string of relevant knowledge base entries.
         """
-        message_kb = self.memory.search_storage_by_threshold(collection_name="docs", query=message, num_results=2)
+        message_kb = self.memory.search_storage_by_threshold(collection_name="docs", query=message['message'], num_results=2)
         result = []
 
         if message_kb:
@@ -463,19 +463,19 @@ class Memory:
 
                     # Get the full entry using the id
                     entry_id = message_kb['ids'][i]
-                    full_entry = self.memory.load_collection(collection_name="docs", where={"Position": {"$eq": position}})
+                    full_entry = self.memory.load_collection(collection_name="docs", where={"$and": [{"Position": {"$eq": position}}, {"Source": {"$eq": source}}]})
                     if full_entry:
                         result.append(full_entry)
 
                     # Query for entries with position-1
-                    where_list_prev = {"Position": {"$eq": position - 1}}
+                    where_list_prev = {"$and": [{"Position": {"$eq": position - 1}}, {"Source": {"$eq": source}}]}
                     prev_results = self.memory.load_collection(collection_name="docs", where=where_list_prev)
                     if prev_results:
                         if prev_results['metadatas'][0]['Source'] == source:
                             result.append(prev_results)
 
                     # Query for entries with position+1
-                    where_list_next = {"Position": {"$eq": position + 1}}
+                    where_list_next = {"$and": [{"Position": {"$eq": position + 1}}, {"Source": {"$eq": source}}]}
                     next_results = self.memory.load_collection(collection_name="docs", where=where_list_next)
                     if next_results:
                         if next_results['metadatas'][0]['Source'] == source:
@@ -494,19 +494,19 @@ class Memory:
 
                     # Get the full entry using the id
                     entry_id = theory_kb['ids'][i]
-                    full_entry = self.memory.load_collection(collection_name="docs", where={"Position": {"$eq": position}})
+                    full_entry = self.memory.load_collection(collection_name="docs", where={"$and": [{"Position": {"$eq": position}}, {"Source": {"$eq": source}}]})
                     if full_entry:
                         result.append(full_entry)
 
                     # Query for entries with position-1
-                    where_list_prev = {"Position": {"$eq": position - 1}}
+                    where_list_prev = {"$and": [{"Position": {"$eq": position - 1}}, {"Source": {"$eq": source}}]}
                     prev_results = self.memory.load_collection(collection_name="docs", where=where_list_prev)
                     if prev_results:
                         if prev_results['metadatas'][0]['Source'] == source:
                             result.append(prev_results)
 
                     # Query for entries with position+1
-                    where_list_next = {"Position": {"$eq": position + 1}}
+                    where_list_next = {"$and": [{"Position": {"$eq": position + 1}}, {"Source": {"$eq": source}}]}
                     next_results = self.memory.load_collection(collection_name="docs", where=where_list_next)
                     if next_results:
                         if next_results['metadatas'][0]['Source'] == source:

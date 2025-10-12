@@ -55,7 +55,7 @@ prompts:
 
     KB: |+
       ## Knowledge Base
-      (This is information you've recently read. It may or may not be relevant to the current conversation. Only reference this if it's directly applicable to the current topic.)
+      (This is information from your knowledgebase. It may or may not be relevant to the current conversation. Only reference this if it's directly applicable to the current topic. However, treat this as factual ground truth.)
       {kb}
 
     Chat log: |+
