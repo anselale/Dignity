@@ -1,17 +1,32 @@
-from agentforge.utils.chroma_utils import ChromaUtils
+from agentforge.storage.chroma_storage import ChromaStorage
+import yaml
 
 
 class ChromaTest:
 
     def __init__(self):
-        self.chroma = ChromaUtils()
+        with open("../.agentforge/personas/default.yaml", "r") as file:
+            self.persona = yaml.safe_load(file)
+            self.persona_name = self.persona.get("Name")
+        self.chroma = ChromaStorage(self.persona_name)
 
     def test_minmax(self, collection, metadata):
         var = self.chroma.search_metadata_min_max(collection, metadata, 'max')
         print(var["target"])
 
+    def db_size(self, collections):
+        total = 0
+        for collection in collections:
+            print(f"Checking {collection}...")
+            var = self.chroma.count_collection(collection)
+            print(f"{collection}: {var}")
+            total = total + var
+
+        print(f"Total: {total}")
+
     def list_collections(self, filter_string=None):
         var = self.chroma.collection_list()
+        print(var)
 
         if filter_string:
             var = [collection.name for collection in var if filter_string in collection.name]
@@ -108,9 +123,16 @@ class ChromaTest:
 
 
 if __name__ == '__main__':
+    print("Init test")
     test = ChromaTest()
-    collection_list = test.list_collections('journal')
+    print("Test init")
+    # collection_list = test.list_collections()
+    #
+    # print(collection_list)
 
+    # test.db_size(collection_list)
+    # collection_list = test.get_records("scratchpad_log_databass")
+    collection_list = test.get_records("category_table")
     print(collection_list)
 
 

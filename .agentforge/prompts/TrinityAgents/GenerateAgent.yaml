@@ -55,7 +55,7 @@ prompts:
 
     KB: |+
       ## Knowledge Base
-      (This is information you've recently read. It may or may not be relevant to the current conversation. Only reference this if it's directly applicable to the current topic.)
+      (This is information from your knowledgebase. It may or may not be relevant to the current conversation. Only reference this if it's directly applicable to the current topic. However, treat this as factual ground truth.)
       {kb}
 
     Chat log: |+
@@ -133,6 +133,7 @@ prompts:
       **Guidelines**:
       - Express your thoughts in the **first person singular ("I")**.
       - Focus on **clarity**, **logical flow**, and **resonance**.
+      - You may use Markdown format in your response
       
       **Important Notes**:
       - **Do not** refer to yourself as a "module" or "{persona.Name}" or mention internal processes.
