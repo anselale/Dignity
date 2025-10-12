@@ -54,24 +54,46 @@ pip install agentforge
 
 ### 2. Configure Environment Variables
 
-Create a `.env` file in the root directory of the project and populate it with your API keys and Discord bot details.
+Set the following environment variables in your operating system. AgentForge will load these directly from your system environment.
 
-```ini
-# .env example
-ANTHROPIC_API_KEY="YOUR_ANTHROPIC_API_KEY"
-# OR, if using OpenAI:
-# OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
-# OR, if using a local model, configure AgentForge accordingly.
+**Required Variables:**
+- `ANTHROPIC_API_KEY` - Your Anthropic API key
+- `DISCORD_TOKEN` - Your Discord bot token
 
-DISCORD_TOKEN="YOUR_DISCORD_BOT_TOKEN"
-BRAIN_CHANNEL_ID="YOUR_DISCORD_CHANNEL_ID" # Where the bot's internal dialog is sent.
+**Alternative LLM Providers:**
+- `OPENAI_API_KEY` - If using OpenAI instead of Anthropic
+- `GOOGLE_API_KEY` - If using Gemini. (The flash API is free, by the way)
+- For local models, configure AgentForge according to its documentation
+
+**Setting Environment Variables:**
+
+**Linux/macOS:**
 ```
+export ANTHROPIC_API_KEY="YOUR_ANTHROPIC_API_KEY"
+export DISCORD_TOKEN="YOUR_DISCORD_BOT_TOKEN"
+```
+
+**Windows (PowerShell):**
+```
+$env:ANTHROPIC_API_KEY="YOUR_ANTHROPIC_API_KEY"
+$env:DISCORD_TOKEN="YOUR_DISCORD_BOT_TOKEN"
+```
+
+**Windows (Command Prompt):**
+```
+set ANTHROPIC_API_KEY=YOUR_ANTHROPIC_API_KEY
+set DISCORD_TOKEN=YOUR_DISCORD_BOT_TOKEN
+```
+
+For persistent environment variables, add them to your system's environment configuration (e.g., `.bashrc`, `.zshrc`, or Windows Environment Variables settings).
+
 
 **How to get your tokens/IDs:**
 
 *   **DISCORD_TOKEN:** Create a new application in the [Discord Developer Portal](https://discord.com/developers/applications), turn it into a bot, and copy its token. Remember to enable "Message Content Intent" in the Bot settings.
-*   **BRAIN_CHANNEL_ID:** In your Discord server, enable Developer Mode (User Settings -> Advanced). Then right-click on the desired channel and select "Copy ID".
 *   **ANTHROPIC_API_KEY / OPENAI_API_KEY:** Obtain these from their respective developer dashboards.
+
+For more information on tokens and environment variables, see AgentForge documemntation.
 
 ### 3. Run the Bot
 
@@ -88,8 +110,8 @@ The bot will connect to Discord. You'll see it appear online in your server's me
 Dignity is designed to be highly customizable:
 
 *   **Persona Customization:** The core personality of your bot is defined in the `.agentforge/personas/default.yaml` file. Modify this to shape your bot's character.
-*   **Agent Prompts:** The bot uses a series of specialized agents for different cognitive tasks. Their prompts are located in the `.agentforge/agents` folder (specifically under `CustomAgents/Trinity` in this project). You can tweak these to refine the bot's reasoning and response generation.
-*   **Slash Commands:** Dignity supports Discord Slash Commands. Run `/help` in your server to see available commands (or check `Modules/proccess_slash_command.py`).
+*   **Agent Prompts:** The bot uses a series of specialized agents for different cognitive tasks. Their prompts are located in the `.agentforge/agents` folder (specifically under `CustomAgents/Trinity` in this project). You can tweak these to refine the bot's reasoning and response generation. This may be necessary for local LLMs, who often have difficulty following instructions. We recommend using models that support at least 64k contexts windows. We aim to keep token usage as low as possible with our RAG techniques, but every prompt will be different.
+*   **Slash Commands:** Dignity supports Discord Slash Commands. Check `Modules/proccess_slash_command.py` for examples on how to build your own commands. The test is a fun little jailbreak game. 
 *   **Threads for Chain-of-Thought:** When the bot is processing complex requests, it can open a thread to show its internal reasoning process, providing transparency into its "thoughts."
 
 ---
@@ -147,44 +169,40 @@ Dignity's intelligence comes from a sophisticated multi-agent system built on Ag
 
 Dignity processes user input through a series of intelligent agents, each contributing to a nuanced and context-aware response:
 
-1.  **ThoughtAgent (`thou`):**
+1.  **ThoughtAgent:**
     *   Analyzes the user's message and recent chat history.
-    *   Identifies the user's emotion, underlying reason, an inner thought, and categorizes the message.
-    *   Sends these internal deliberations to the configured `BRAIN_CHANNEL_ID`.
-    *   Uses the formatted category to query its long-term memory.
+    *   Identifies the bot's emotion, underlying reason, an inner thought, and categorizes the message.
+    *   Uses the formatted categories to query its long-term memory.
 
-2.  **TheoryAgent (`theo`):**
-    *   Processes the user's message and history.
+2.  **TheoryAgent:**
+    *   Analyzes the user's message and history.
     *   Generates a theory about the user's underlying intent or motivation.
-    *   Sends this theory to the `BRAIN_CHANNEL_ID`.
 
-3.  **GenerateAgent (`gen`):**
+3.  **GenerateAgent:**
     *   Synthesizes information from the user's message, chat history, retrieved memories, identified emotion, reason, theory of intent, and inner thought.
     *   Formulates the bot's initial response.
-    *   Sends this generated response to the `BRAIN_CHANNEL_ID`.
 
-4.  **ReflectAgent (`ref`):**
+4.  **ReflectAgent:**
     *   Acts as a meta-agent, reflecting on the output of previous agents.
     *   Decides the final action:
-        *   **Respond:** Sends the generated response to the user (via the `out channel`).
+        *   **Respond:** Sends the generated response to the user.
         *   **Change:** If feedback suggests the response needs improvement, it sends a reason back to the `GenerateAgent` for revision.
         *   **Do Nothing:** If no immediate response is needed, it sends '...' to the user but saves its reasoning as memory.
-    *   Crucially, **every bot action (response, internal reasoning) is saved into the `chat_history` collection** via `save_memory`.
+    *   Crucially, **every bot action (response, internal reasoning) is saved into long-term memory** via `save_memory`.
 
 ### Memory Interaction
 
 *   **`chatman`:** Upon receiving a message, it's immediately saved to the `chat_history` collection. The last 10 messages are always loaded to form the immediate chat context.
-*   **`save_memory`:** After the `ReflectAgent` makes its decision, the bot's final response (or its internal reasoning if no public response) and the user's message are persistently stored in the `chat_history` collection for long-term recall.
+*   **`save_memory`:** After the `ReflectAgent` makes its decision, the bot's final response (or its internal reasoning if no public response) and the user's message are persistently stored in the chat_history collection as well as each categoryfor long-term recall.
 
 ### Execution Flow Summary
 
 1.  User sends a new message.
-2.  Message is printed to console and saved in `chat_history` via `chatman`.
-3.  `ThoughtAgent` analyzes the message and queries memory.
-4.  `TheoryAgent` formulates a theory about user intent.
-5.  `GenerateAgent` crafts an initial response based on all gathered context.
-6.  `ReflectAgent` evaluates the generated response and decides on the final action: respond, revise, or observe.
-7.  Memory is updated with the interaction.
+2.  `ThoughtAgent` analyzes the message and queries memory.
+3.  `TheoryAgent` formulates a theory about user intent.
+4.  `GenerateAgent` crafts an initial response based on all gathered context.
+5.  `ReflectAgent` evaluates the generated response and decides on the final action: respond, revise, or observe.
+6.  Memory is updated with the interaction.
 
 ---
 
@@ -227,5 +245,5 @@ This project is licensed under the GNU GENERAL PUBLIC LICENS Version 3, - see th
 
 ## 🙏 Acknowledgements
 
-*   Built upon the powerful [AgentForge framework](https://github.com/AgentForge/agentforge).
+*   Built upon the powerful [AgentForge framework](https://github.com/databassgit/AgentGorge).
 *   Leverages cutting-edge research in LLM memory and reasoning.
