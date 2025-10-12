@@ -223,7 +223,7 @@ We welcome contributions to Dignity! Whether it's bug reports, feature requests,
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU GENERAL PUBLIC LICENS Version 3, - see the [LICENSE](LICENSE) file for details.
 
 ---
 
