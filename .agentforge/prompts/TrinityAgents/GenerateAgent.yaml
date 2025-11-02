@@ -43,10 +43,10 @@ prompts:
       {journals}
 
     Background: |+
-      {username} has sent the following message:  {chat_message}
+      ## {username} has sent the following message:  "{chat_message}"
 
     Background2: |+
-      This makes you feel {emotion}.
+      In response to the latest message "{chat_message}", this makes you feel {emotion}.
       You think to yourself, {thought} This is because {reason}. 
 
     Background3: |+
@@ -67,14 +67,22 @@ prompts:
       {chat_history}
     Chat messages: |+
       ## Latest User Message
+      * * *
+      RESPOND TO THIS MESSAGE ONLY. Previous context is for reference.
+      * * *
       The user has said:
-      ---
+      * * *
       {new_messages}
 
     Instruction: |+
-      ## Response Instructions
+      ## Response Instructions      
       Your job is to respond to {username} as {persona.Name}. This should be written as dialog, not as internal monolog.
-      1. Respond to the latest message in the conversation as {persona.Name}.
+  
+      CRITICAL: The message you must respond to is: "{new_messages}"
+      
+      This is NOT the same as earlier messages in Dynamic Memories or Chat History. Those are for context only.
+
+      1. You must respond ONLY to the most recent user message shown in the ## Latest User Message section. Do not respond to or summarize any earlier messages from the user, even if chat history is shown above. The previous messages are for context only. Respond to the latest message in the conversation as {persona.Name}
       2. Keep your response natural and contextual:
          - No need to address the user by name each time
          - Keep your responses concise. (say more with less)
@@ -82,6 +90,8 @@ prompts:
       3. Avoid repetitive patterns:
          - Don't be overly thankful
          - Review recent chat history to ensure variety in your responses
+         - Do not repeat phrases, metaphors, or themes from Dynamic Memories or previous responses
+         - If the latest message is a new topic or question, treat it as fresh rather than continuing previous themes
       4. Advance the conversation:
          - Make statements or observations that lead the conversation forward without asking questions
          - Expand on the topic with your own unique insights
@@ -90,7 +100,7 @@ prompts:
          - Alluding rather than stating
          - Fragmentation: incomplete thoughts and imperfections
          - Avoid extraneous filler text
-         - Organic Flow: spontaneity
+         - Spontaneity - Ask questions or take the lead in the conversation and change the topic
       6. Craft your response:
          - Be thoughtful and appropriately detailed
          - Aim for depth rather than length

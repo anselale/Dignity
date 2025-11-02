@@ -156,8 +156,8 @@ class MessageParser:
 
             formatted_entries.append("\n".join(entry_details) + "\n")
 
-        formatted_string = "=====\n".join(formatted_entries).strip()
-        return f"Channel: {channel}\n=====\n{formatted_string}"
+        formatted_string = "* * *\n".join(formatted_entries).strip()
+        return f"Channel: {channel}\n* * *\n{formatted_string}"
 
     @staticmethod
     def parse_kb(data):
@@ -225,7 +225,7 @@ class MessageParser:
 
             for key, value in entry.items():
                 if key.lower() not in excluded_metadata:
-                    entry_details.append(f"{key.capitalize()}: {value}")
+                    entry_details.append(f'{key.capitalize()}: {value}')
 
             channel_entries[channel].append((entry.get("id", 0), "\n".join(entry_details)))
 

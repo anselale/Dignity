@@ -1,16 +1,41 @@
 # Default settings for all models unless overridden
 default_model:
-  api: gemini_api
-  model: gemini_flash_lite
+  api: lm_studio_api
+  model: lfm2_8b
+#  api: gemini_api
+#  model: gemini_flash_lite
 # Uncomment to use alternative default models
-#  api: lm_studio_api
-#  model: LMStudio
 #  api: openai_api
 #  model: omni_model
 #  model: o1_preview
 
 # Library of Models and Parameter Defaults Override
 model_library:
+  vllm_api:
+    VLLM:
+      models:
+        llama3_8b:
+          identifier: meta-llama/Llama-3.1-8B-Instruct
+          params:
+            host_url: http://localhost:8000/v1/chat/completions
+            max_tokens: 8000
+            temperature: 0.8
+            top_p: 0.9
+            top_k: 50  # vLLM-specific parameter
+
+        qwen2_7b:
+          identifier: Qwen/Qwen2.5-7B-Instruct
+          params:
+            host_url: http://localhost:8000/v1/chat/completions
+            max_tokens: 8000
+            temperature: 0.7
+
+      params: # Default parameters for VLLM models
+        max_tokens: 10000
+        stream: false
+        temperature: 0.8
+        top_p: 0.9
+
   openai_api:  # API script name
     O1Series:  # Class name for the API (Case Sensitive)
       models:  # List of model configurations
@@ -78,8 +103,8 @@ model_library:
   lm_studio_api:
     LMStudio:
       models:
-        llama3_8b:
-          identifier: lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF
+        lfm2_8b:
+          identifier: lfm2-8b-a1b_moe
 
       params:  # Default parameters for LMStudio models
         host_url: http://localhost:1234/v1/chat/completions
