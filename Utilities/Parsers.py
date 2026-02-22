@@ -125,6 +125,55 @@ class MessageParser:
         return "=====\n".join(formatted_entries).strip()
 
     @staticmethod
+    def format_reranked_history_entries(history):
+        """Format chat history with consistent order and clean structure for prompt injection."""
+        formatted_entries = []
+
+        # Fields to exclude from output
+        exclude_fields = {
+            "id", "isotimestamp", "unixtimestamp", "iso_timestamp",
+            "unix_timestamp", "Reason", "Emotion"
+        }
+
+        for i, metadata in enumerate(history.get('metadatas', [])):
+            entry_parts = []
+
+            # Get document text (the actual message)
+            message_text = history['documents'][i] if i < len(history.get('documents', [])) else 'N/A'
+
+            # Fixed order: User -> Message -> Inner Thought -> Response -> Other fields
+
+            # 1. User (always first)
+            entry_parts.append(f"User: {metadata.get('User', 'N/A')}")
+
+            # 2. Message (always second)
+            entry_parts.append(f"Message: {message_text}")
+
+            # 3. Inner Thought (if exists)
+            if 'InnerThought' in metadata and metadata['InnerThought']:
+                entry_parts.append(f"Inner Thought: {metadata['InnerThought']}")
+
+            # 4. Response (if exists and different from message)
+            if 'Response' in metadata and metadata['Response']:
+                entry_parts.append(f"Response: {metadata['Response']}")
+
+            # 5. Other relevant fields (alphabetically for consistency)
+            other_fields = []
+            for key in sorted(metadata.keys()):
+                if key not in exclude_fields and key not in ['User', 'InnerThought', 'Response']:
+                    value = metadata[key]
+                    if value:  # Only include non-empty values
+                        other_fields.append(f"{key}: {value}")
+
+            entry_parts.extend(other_fields)
+
+            # Join with newlines
+            formatted_entries.append("\n".join(entry_parts))
+
+        # Use * * * separator instead of --- to avoid markdown issues
+        return "\n\n* * *\n\n".join(formatted_entries).strip()
+
+    @staticmethod
     def format_general_history_entries(history):
         formatted_entries = []
         channel = ''

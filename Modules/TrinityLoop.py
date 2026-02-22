@@ -6,6 +6,7 @@ from agentforge.utils.logger import Logger
 from Utilities.Parsers import MessageParser
 from Utilities.KB.load_kb import LoadKB
 
+
 class Trinity:
     def __init__(self, memory_instance, discord_client):
         self.memory = memory_instance

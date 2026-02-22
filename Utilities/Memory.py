@@ -740,7 +740,7 @@ class Memory:
             num_results=num_results
         )
 
-        formatted_results = self.parser.format_user_specific_history_entries(reranked_results)
+        formatted_results = self.parser.format_reranked_history_entries(reranked_results)
 
         return formatted_results
 

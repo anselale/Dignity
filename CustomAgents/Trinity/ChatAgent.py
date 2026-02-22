@@ -70,6 +70,11 @@ class ChatAgent(Agent):
 
         while generation_attempts < max_generation_attempts:
             result_str = str(self.result)
+            # If there's a </think>, drop everything up to and including it,
+            # whether or not an opening <think> is present.
+            parts = result_str.split("</think>", 1)
+            if len(parts) == 2:
+                result_str = parts[1]
             parsing_attempts = 0
             max_attempts = self.max_parsing_attempts
 
