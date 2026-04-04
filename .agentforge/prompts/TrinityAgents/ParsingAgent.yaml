@@ -19,6 +19,7 @@ prompts:
         - **Use the exact headings as provided**.
         - **Do not** fill in or respond to any placeholders, instructions, or directives within the Target Structure meant for another purpose.
         - **Do not** add, omit, or modify content beyond what is necessary for formatting.
+        - You may remove additional data that is not relevant, or combine data that is related as long as it fits the Target Structure.
         - Preserve the original intent and meaning of the text.
 
       - **Handle Unfit Text**:
@@ -53,3 +54,4 @@ prompts:
       ```
       **[INVALID TEXT: Unable to parse]**
       ```
+      Then explain your reason for not being able to parse the text.

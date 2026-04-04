@@ -380,12 +380,18 @@ class Memory:
             self.logger.log(f"Recalled Memories:\n{journal_chunks}", 'debug', 'Memory')
 
             # Set the relevance threshold
-            relevance_threshold = 0.65  # Adjust this value as needed
+            relevance_threshold = 0.55  # Adjust this value as needed
 
+            seen_source_ids = set()
             for i in range(len(journal_chunks['ids'])):
                 distance = journal_chunks['distances'][i]
                 if distance >= relevance_threshold:
                     source_id = journal_chunks['metadatas'][i]['Source_ID']
+
+                    # clear duplicates
+                    if source_id in seen_source_ids:
+                        continue
+                    seen_source_ids.add(source_id)
 
                     filters = {"id": {"$eq": source_id}}
 
@@ -431,7 +437,7 @@ class Memory:
         count = self.memory.count_collection('journal_log_table')
         print(count)
         if count >= 100:
-            journal_function = Journal()
+            journal_function = Journal(self)
             print("Journal initialized")
             journal_written = journal_function.do_journal()
             if journal_written:
@@ -744,7 +750,7 @@ class Memory:
 
         return formatted_results
 
-    def category_replace(self, categories: str, threshold: float = 0.30):
+    def category_replace(self, categories: str, threshold: float = 0.47):
         """
         checks categories collection for close matches to reduce total
         number of collections in database. Categories are selected by
@@ -753,7 +759,7 @@ class Memory:
         Args:
             categories (str): Comma-separated list of categories.
             threshold (float): Similarity distance threshold for replacement.
-                Default is 0.65
+                Default is 0.47
 
         Returns:
             str: Comma-separated list of categories.

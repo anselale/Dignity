@@ -29,16 +29,16 @@ prompts:
       Provide your response in **Markdown** format using the exact headings below:
   
       ```markdown
-      ### Categories: 
+      ### Categories:
       <comma separated list of categories that describe the user's message>
       
-      ### Emotion: 
+      ### Emotion:
       <Map the emotional topology of the situation. This should be a simple description, but consider the broader context before answering>
 
-      ### Inner Thought: 
+      ### Inner Thought:
       <Track the trajectory of understanding through possibility space.>
 
-      ### Reason: 
+      ### Reason:
       <Show how emotion and thought create coherent meaning by describing your Integration Pattern.>
       ```
       
