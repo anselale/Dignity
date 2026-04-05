@@ -1,16 +1,68 @@
 # Default settings for all models unless overridden
 default_model:
   api: gemini_api
-  model: gemini_flash_lite
+  model: gemini_flash
+#  api: gemini_api
+#  model: gemini_flash_lite
 # Uncomment to use alternative default models
-#  api: lm_studio_api
-#  model: LMStudio
 #  api: openai_api
 #  model: omni_model
 #  model: o1_preview
 
 # Library of Models and Parameter Defaults Override
 model_library:
+  litellm_api:
+    LiteLLM:
+      models:
+        4o:
+          identifier: gpt-4o-2024-08-06
+          params:
+            endpoint: openai
+        qwen3_next_80b:
+          identifier: qwen3-next-80b-a3b-instruct
+          params:
+            endpoint: lm_studio
+            host_url: http://localhost:1234/v1/
+        gemini_flash:
+          identifier: gemini-3-flash-preview
+          params:
+            endpoint: gemini
+
+
+  vllm_api:
+    VLLM:
+      models:
+        llama3_8b:
+          identifier: meta-llama/Llama-3.1-8B-Instruct
+          params:
+            host_url: http://localhost:8000/v1/chat/completions
+            max_tokens: 8000
+            temperature: 0.8
+            top_p: 0.9
+            top_k: 50  # vLLM-specific parameter
+
+        qwen3_next_80b:
+          identifier: qwen3-next-80b-a3b-thinking-grpo-uncensored
+          params:
+            host_url: http://localhost:8000/v1/chat/completions
+            max_tokens: 8000
+            temperature: 0.8
+            top_p: 0.9
+            top_k: 50  # vLLM-specific parameter
+
+        qwen2_7b:
+          identifier: Qwen/Qwen2.5-7B-Instruct
+          params:
+            host_url: http://localhost:8000/v1/chat/completions
+            max_tokens: 8000
+            temperature: 0.7
+
+      params: # Default parameters for VLLM models
+        max_tokens: 10000
+        stream: false
+        temperature: 0.8
+        top_p: 0.9
+
   openai_api:  # API script name
     O1Series:  # Class name for the API (Case Sensitive)
       models:  # List of model configurations
@@ -62,7 +114,7 @@ model_library:
         gemini_pro:
           identifier: gemini-2.5-pro
         gemini_flash:
-          identifier: gemini-2.5-flash
+          identifier: gemini-3-flash-preview
         gemini_flash_lite:
           identifier: gemini-2.5-flash-lite
         gemini_exp:
@@ -78,8 +130,17 @@ model_library:
   lm_studio_api:
     LMStudio:
       models:
-        llama3_8b:
-          identifier: lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF
+        qwen3_next_80b:
+          identifier: qwen3-next-80b-a3b-thinking-grpo-uncensored
+          params:
+            host_url: http://localhost:1234/v1/chat/completions
+            max_tokens: 8000
+            temperature: 0.8
+            top_p: 0.9
+            top_k: 50  # vLLM-specific parameter
+
+        lfm2_8b:
+          identifier: lfm2-8b-a1b
 
       params:  # Default parameters for LMStudio models
         host_url: http://localhost:1234/v1/chat/completions

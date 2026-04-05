@@ -1,10 +1,10 @@
-from agentforge.storage.chroma_storage import ChromaStorage
 from CustomAgents.Trinity.JournalAgent import JournalAgent
 from CustomAgents.Trinity.JournalThoughtAgent import JournalThoughtAgent
 from Utilities.Parsers import MessageParser
 import os
 from datetime import datetime
 import agentforge.tools.semantic_chunk as Chunker
+from CustomAgents.Trinity.ChatAgent import parse_markdown_to_dict
 
 
 class Journal:
@@ -12,12 +12,12 @@ class Journal:
     Manages the creation, storage, and retrieval of journal entries.
     """
 
-    def __init__(self):
+    def __init__(self, memory):
         """
         Initialize the Journal with necessary components for storage, parsing, and agent interactions.
         """
         print("Journal initializing")
-        self.storage = ChromaStorage()
+        self.storage = memory.memory
         self.parser = MessageParser
         self.journal = JournalAgent()
         self.journalthought = JournalThoughtAgent()
@@ -68,7 +68,7 @@ class Journal:
             dict: Parsed thoughts about the journal entry.
         """
         thoughts = self.journalthought.run(journal_entry=self.results)
-        parsed_thoughts = self.parser.parse_lines(thoughts)
+        parsed_thoughts = parse_markdown_to_dict(thoughts)
         self.thoughts = parsed_thoughts
         return self.thoughts
 
@@ -112,11 +112,12 @@ class Journal:
         metadata = {
             "id": sourceid + 1,
             "Source": self.filepath,
-            "Categories": self.thoughts['Categories'],
-            "Inner Thought": self.thoughts['Inner Thought'],
-            "Reason": self.thoughts['Reason']
+            "Categories": self.thoughts['Categories:'],
+            "Emotions": self.thoughts['Emotion:'],
+            "Inner Thought": self.thoughts['Inner Thought:'],
+            "Reason": self.thoughts['Reason:']
         }
-        self.storage.save_memory(collection_name='whole_journal_entries', data=self.results, ids=source_id_string, metadata=[metadata])
+        self.storage.save_to_storage(collection_name='whole_journal_entries', data=self.results, ids=source_id_string, metadata=[metadata])
         print(f"Saved journal entry:\n\n{self.results}\nMetadata:\n{metadata}\n-----")
 
         # chunked for lookup
@@ -132,7 +133,7 @@ class Journal:
             }
             print(f"Saved chunk:\n\n{chunk.content}\nMetadata:\n{metadata}\n=====")
 
-            self.storage.save_memory(collection_name='journal_chunks_table', data=chunk.content, ids=memory_id, metadata=[metadata])
+            self.storage.save_to_storage(collection_name='journal_chunks_table', data=chunk.content, ids=memory_id, metadata=[metadata])
 
     def load_journals_from_backup(self, folder_path):
         """
