@@ -104,7 +104,7 @@ class Memory:
                                 metadata=[metadata])
         pass
 
-    def fetch_history(self, collection_name, prefix="a", query=None, is_user_specific=False, query_size: int = 20):
+    def fetch_history(self, collection_name, prefix="a", query=None, is_user_specific=False, query_size: int = 40):
         """
         Fetch and parse history for users and channels.
 
@@ -708,7 +708,7 @@ class Memory:
         self.logger.log(f"Scratchpad log count < 10, no update needed", 'debug', 'Memory')
         return None
 
-    def combine_and_rerank(self, query_results: list, rerank_query, num_results=5):
+    def combine_and_rerank(self, query_results: list, rerank_query, num_results=10):
         """
         Combine multiple query results, rerank them based on a new query, and return the top results.
 
@@ -750,7 +750,7 @@ class Memory:
 
         return formatted_results
 
-    def category_replace(self, categories: str, threshold: float = 0.47):
+    def category_replace(self, categories: str, threshold: float = 0.44):
         """
         checks categories collection for close matches to reduce total
         number of collections in database. Categories are selected by
@@ -759,7 +759,17 @@ class Memory:
         Args:
             categories (str): Comma-separated list of categories.
             threshold (float): Similarity distance threshold for replacement.
-                Default is 0.47
+                Default is 0.44
+                (This is highly subjective. Lower numbers mean more categories, but memories
+                are spread out in more categories. However, a higher threshold means each individual
+                category will be more full and may have less relevant data. For example,
+
+                Initial Category: correction, Closest existing category:  self-correction
+                Distance: 0.4587677000
+
+                These two categories you generally do not want to overlap. They mean very different
+                things. We are relying on the model to choose these categories, but this function
+                overrides those choices.)
 
         Returns:
             str: Comma-separated list of categories.
