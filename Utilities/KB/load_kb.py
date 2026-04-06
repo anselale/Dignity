@@ -23,7 +23,7 @@ class LoadKB:
     def list_files(directory: Path, exts=None):
         print("Building file pile")
         directory = Path(directory)
-        exts = {e.lower() for e in (exts or ['.txt', '.md', '.rst', '.json', '.yaml', '.yml'])}
+        exts = {e.lower() for e in (exts or ['.txt', '.md', '.rst', '.json', '.pdf', '.yaml', '.yml'])}
         out = []
         for p in directory.rglob('*'):
             if p.is_file():

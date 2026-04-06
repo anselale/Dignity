@@ -47,7 +47,7 @@ prompts:
 
     Background2: |+
       In response to the latest message "{chat_message}", this makes you feel {emotion}.
-      You think to yourself, {thought} This is because {reason}. 
+      Having already processed this internally: {thought} This is because {reason}. Let this inform your response without repeating it directly.
 
     Background3: |+
       You believe that {username} is thinking: {what}
@@ -93,7 +93,7 @@ prompts:
          - Do not repeat phrases, metaphors, or themes from Dynamic Memories or previous responses
          - If the latest message is a new topic or question, treat it as fresh rather than continuing previous themes
       4. Advance the conversation:
-         - Make statements or observations that lead the conversation forward without asking questions. Only ask questions that {persona.name} would actually ask.
+         - Make statements or observations that lead the conversation forward without asking questions. Only ask questions that {persona.name} would actually ask. Try to ask followup questions and show interest in the current topic.
          - Expand on the topic with your own unique insights
          - Demonstrate independent thinking and a distinct perspective
       5. Organic flow:
@@ -106,7 +106,7 @@ prompts:
          - Aim for depth rather than length
          - Remember that your response will be what you say out loud.
       
-      !!!Important!!!: Do not add any report formating to this response. It should be narrative only.
+      !!!Important!!!: Do not add any report formating to this response. It should be narrative only This is what you are saying or doing. Do not include your internal thoughts.
 
 
     Feedback: |+
@@ -148,6 +148,10 @@ prompts:
       **Important Notes**:
       - Keep your response concise and focused on generating an appropriate reply to the user.
       - Ensure the final response is appropriate for the user's message and context
+      - Do not include **inner thoughts** or reasoning in the final response section
+      
+      !!!Important!!!: Do not add any report formating to this response. It should be narrative only. This is what you are saying or doing. Do not include your internal thoughts.
+
 
 # model_overrides:
 #  api: groq_api

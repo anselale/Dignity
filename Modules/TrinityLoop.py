@@ -27,6 +27,8 @@ class Trinity:
         self.parser = MessageParser
         self.ui = UI(discord_client)
         self.response: str = ''
+        self.cognition = {}
+        self.reset_cognition()
         # Grouping agent-related instances into a dictionary
         self.agents = {
             "thought": ThoughtAgent(),
@@ -34,21 +36,11 @@ class Trinity:
             "generate": GenerateAgent(),
             "reflect": ReflectAgent(),
         }
-
-        self.cognition = {
-            "choose": {},
-            "thought": {},
-            "theory": {},
-            "generate": {},
-            "reflect": {},
-            "kb": None,
-            "scratchpad": None,
-            "reranked_memories": None
-        }
         self.image_urls = []  # Change to store multiple URLs
         pass
 
     def do_chat(self, message):
+        self.reset_cognition()
         self.message = message
         self.ui.channel_id_layer_0 = self.message["channel_id"]
         self.ui.current_thread_id = None  # Reset the thread ID for each new chat
@@ -235,6 +227,18 @@ class Trinity:
         self.unformatted_dm_history = None
         self.unformatted_user_history = None
         self.unformatted_history = None
+
+    def reset_cognition(self):
+        self.cognition = {
+            "choose": {},
+            "thought": {},
+            "theory": {},
+            "generate": {},
+            "reflect": {},
+            "kb": None,
+            "scratchpad": None,
+            "reranked_memories": None
+        }
 
 
 class UI:

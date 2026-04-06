@@ -55,3 +55,7 @@ prompts:
       **[INVALID TEXT: Unable to parse]**
       ```
       Then explain your reason for not being able to parse the text.
+
+model_overrides:
+  api: gemini_api
+  model: gemini_flash
