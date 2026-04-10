@@ -6,6 +6,14 @@ prompts:
       ## Persona
       {persona.Description}
 
+    Self Scratchpad: |+
+      ## Your Internal State & Identity
+      The following is your internal self-scratchpad. It contains your current emotional baselines, established boundaries, and the dynamics of your core relationships. 
+      
+      Use this to contextualize your meta-analysis. Understanding your current identity and core relationships will help you accurately deduce the overarching emotion, inner thoughts, and deep reasoning that drove you to write this specific journal entry.
+      
+      {self_scratchpad}
+
     Setting: |+
       ## Setting
       Location: {persona.Location}

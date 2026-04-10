@@ -4,7 +4,6 @@ from CustomAgents.Trinity.GenerateAgent import GenerateAgent
 from CustomAgents.Trinity.ReflectAgent import ReflectAgent
 from agentforge.utils.logger import Logger
 from Utilities.Parsers import MessageParser
-from Utilities.KB.load_kb import LoadKB
 
 
 class Trinity:
@@ -48,6 +47,7 @@ class Trinity:
         # Send the initial response for debugging and testing
         # initial_response = "Processing your message..."
         # self.ui.send_message(0, self.message, initial_response)
+        self.cognition['self_scratchpad'] = self.memory.get_self_scratchpad()
 
         if self.message['channel'].startswith('Direct Message'):
             self.chat_history, self.unformatted_history = self.memory.fetch_history(collection_name=message['author'], prefix='dm')
@@ -103,6 +103,18 @@ class Trinity:
         if updated_scratchpad:
             scratchpad_message = f"Updated scratchpad for {self.message['author']}:\n```\n{updated_scratchpad[:500]}...\n```"
             self.ui.send_message(1, self.message, scratchpad_message)
+
+        # --- NEW: Check and update self-scratchpad if necessary ---
+        self.logger.log(f"About to check self-scratchpad...", 'debug', 'Trinity')
+        updated_self_scratchpad = self.memory.check_self_scratchpad()
+        self.logger.log(
+            f"check_self_scratchpad returned: {updated_self_scratchpad[:100] if updated_self_scratchpad else None}",
+            'debug', 'Trinity')
+        if updated_self_scratchpad:
+            # Replaced backticks with dashes to prevent UI crashes
+            self_scratchpad_message = f"Updated my internal self-scratchpad:\n```\n{updated_self_scratchpad[:500]}...\n```"
+            self.ui.send_message(1, self.message, self_scratchpad_message)
+        # ----------------------------------------------------------
 
     def run_agent(self, agent_name):
         print(f"Running {agent_name.capitalize()}")
@@ -237,6 +249,7 @@ class Trinity:
             "reflect": {},
             "kb": None,
             "scratchpad": None,
+            "self_scratchpad": None,
             "reranked_memories": None
         }
 

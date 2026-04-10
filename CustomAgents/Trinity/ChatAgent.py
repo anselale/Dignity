@@ -61,6 +61,7 @@ class ChatAgent(Agent):
         self.template_data['choice'] = self.template_data['cognition']['reflect'].get("Choice")
         self.template_data['reflection_reason'] = self.template_data['cognition']['reflect'].get("Reason")
         self.template_data['feedback'] = self.template_data['cognition']['reflect'].get("Feedback")
+        self.template_data['self_scratchpad'] = self.template_data['cognition']['self_scratchpad']
         self.images = self.template_data.get('image_urls', [])
 
     def parse_result(self):

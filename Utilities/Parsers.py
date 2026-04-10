@@ -117,7 +117,7 @@ class MessageParser:
 
             # Add other fields
             for key, value in metadata.items():
-                if key not in ["User", "id", "isotimestamp", "unixtimestamp", "InnerThought", "Response"]:
+                if key not in ["User", "id", "unix_timestamp", "InnerThought", "Response"]:
                     entry_details.append(f"{key}: {value}")
 
             formatted_entries.append("\n".join(entry_details) + "\n")
@@ -130,10 +130,7 @@ class MessageParser:
         formatted_entries = []
 
         # Fields to exclude from output
-        exclude_fields = {
-            "id", "isotimestamp", "unixtimestamp", "iso_timestamp",
-            "unix_timestamp", "Reason", "Emotion"
-        }
+        exclude_fields = {"id", "unix_timestamp", "Reason", "Emotion"}
 
         for i, metadata in enumerate(history.get('metadatas', [])):
             entry_parts = []
@@ -185,7 +182,7 @@ class MessageParser:
             metadata = history['metadatas'][index]
 
             user = metadata.get('User', 'N/A')
-            date = metadata.get('isotimestamp', 'N/A')
+            date = metadata.get('iso_timestamp', 'N/A')
             message = history['documents'][index] if index < len(history.get('documents', [])) else 'N/A'
 
             # Start with User and Message
@@ -193,7 +190,7 @@ class MessageParser:
 
             excluded_metadata = [
                 "User", "id", "Response", "Reason", "Emotion", "InnerThought",
-                "Channel", "iso_timestamp", "unix_timestamp", "Categories"
+                "Channel", "unix_timestamp", "Categories"
             ]
 
             for key, value in metadata.items():
@@ -255,7 +252,7 @@ class MessageParser:
             str: Formatted general history entries.
         """
         channel_entries = {}
-        excluded_metadata = ["id", "response", "reason", "unixtimestamp", "mentions"]
+        excluded_metadata = ["id", "response", "reason", "unix_timestamp", "mentions"]
 
         # Group entries by channel
         for i, entry in enumerate(history.get('metadatas', []), start=1):
@@ -374,15 +371,21 @@ class MessageParser:
     @staticmethod
     def extract_updated_scratchpad(scratchpad_result: str) -> str:
         """
-        Extracts the updated scratchpad content from the ScratchpadAgent's output.
-
-        Parameters:
-        - scratchpad_result (str): The full output from the ScratchpadAgent.
-
-        Returns:
-        - str: The extracted updated scratchpad content.
+        Extract the text inside triple backtick code fences (```).
         """
-        return scratchpad_result
+        if not scratchpad_result:
+            return ""
+
+        import re
+        pattern = r"```(?:markdown|md)?\s*(.*?)\s*```"
+
+        match = re.search(pattern, scratchpad_result, re.DOTALL | re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+
+        # Fallback: remove stray backticks
+        return scratchpad_result.replace("```", "").strip()
+
 
     @staticmethod
     def parse_answer(text):

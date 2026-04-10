@@ -166,6 +166,7 @@ class Memory:
         self.save_channel_memory()
         self.save_bot_response()
         self.save_user_history()
+        self.save_self_scratchpad_log()
         self.save_scratchpad_log(self.user_message['author'], self.user_message['message'], self.response)
         self.logger.log(f"Saved all memories.", 'debug', 'Trinity')
 
@@ -841,3 +842,126 @@ class Memory:
         }
         self.memory.save_to_storage(collection_name=collection_name, data=[category], ids=memory_id, metadata=[metadata])
 
+    # ==========================================
+    # SELF-SCRATCHPAD ARCHITECTURE
+    # ==========================================
+
+    def get_self_scratchpad(self):
+        """Retrieve Dignity's own self-scratchpad."""
+        collection_name = self.parser.format_string("self_scratchpad")
+        result = self.memory.load_collection(collection_name=collection_name)
+        if result and result['documents']:
+            return result['documents'][0]
+        return "I am a growing and evolving AI. This scratchpad tracks my own personality, boundaries, and internal journey."
+
+    def get_self_scratchpad_log(self):
+        """Retrieve Dignity's self-scratchpad log, emphasizing her internal state."""
+        collection_name = self.parser.format_string("self_scratchpad_log")
+        results = self.memory.load_collection(collection_name=collection_name)
+
+        log: list[str] = []
+        if not results:
+            return log
+
+        docs = results.get("documents") or []
+        metas = results.get("metadatas") or []
+
+        for doc, meta in zip(docs, metas):
+            user = meta.get("User", "User")
+            thought = meta.get("InnerThought")
+            emotion = meta.get("Emotion")
+            resp = meta.get("Response")
+            name = self.persona_file.get("Name", "Dignity")
+
+            # 1st List Item: The User's Message
+            if isinstance(doc, str):
+                log.append(f"{user}: {doc}")
+            else:
+                log.append(f"{user}: {str(doc)}")
+
+            # 2nd List Item: Dignity's Cognitive Process and Response combined
+            bot_parts = []
+            if emotion:
+                bot_parts.append(f"Emotion: {emotion}")
+            if thought:
+                bot_parts.append(f"Inner Thought: {thought}")
+            if resp:
+                bot_parts.append(f"Response: {resp}")
+
+            if bot_parts:
+                bot_str = f"{name} -> " + " | ".join(bot_parts)
+                log.append(bot_str)
+
+        return log
+
+    def save_self_scratchpad(self, content):
+        """Save the crunched self-scratchpad."""
+        collection_name = self.parser.format_string("self_scratchpad")
+        if not content.strip():
+            content = "I am a growing and evolving AI. This scratchpad tracks my own personality, boundaries, and internal journey."
+        self.memory.save_to_storage(collection_name=collection_name, data=[content], ids=["1"])
+
+    def save_self_scratchpad_log(self):
+        """Save the current interaction to the self-scratchpad log."""
+        collection_name = self.parser.format_string("self_scratchpad_log")
+        collection_size = self.memory.count_collection(collection_name)
+        memory_id = [str(collection_size + 1)]
+
+        metadata = {
+            "id": collection_size + 1,
+            "Response": self.response,
+            "Emotion": self.cognition["thought"].get("Emotion"),
+            "InnerThought": self.cognition["thought"].get("Inner Thought"),
+            "Reason": self.cognition["reflect"].get("Reason"),
+            "User": self.user_message['author'],
+            "Channel": str(self.user_message["channel"]),
+            "Categories": str(self.cognition["thought"].get("Categories", ""))
+        }
+
+        content = self.user_message['message']
+        self.logger.log(f"Saving Self Scratchpad Log. ID: {memory_id}", 'debug', 'Memory')
+        self.memory.save_to_storage(collection_name=collection_name, data=[content], ids=memory_id, metadata=[metadata])
+
+    def check_self_scratchpad(self):
+        """Check if it's time to update the self-scratchpad (Threshold: 10 entries)."""
+        self.logger.log(f"Checking self-scratchpad...", 'debug', 'Memory')
+        scratchpad_log = self.get_self_scratchpad_log()
+        count = len(scratchpad_log)
+
+        if count >= 10:
+            self.logger.log(f"Self-scratchpad log >= 10, updating...", 'debug', 'Memory')
+            from CustomAgents.Trinity.SelfScratchpadAgent import SelfScratchpadAgent
+            self_scratchpad_agent = SelfScratchpadAgent()
+
+            current_scratchpad = self.get_self_scratchpad()
+            scratchpad_log_content = "\n".join(scratchpad_log)
+
+            agent_vars = {
+                "self_scratchpad_log": scratchpad_log_content,
+                "self_scratchpad": current_scratchpad
+            }
+
+            scratchpad_result = self_scratchpad_agent.run(**agent_vars)
+            updated_scratchpad = self.parser.extract_updated_scratchpad(scratchpad_result)
+
+            self.save_self_scratchpad(updated_scratchpad)
+
+            # --- NEW: DEDICATED IDENTITY EVOLUTION LOGGING ---
+            evolution_log = (
+                f"=== IDENTITY EVOLUTION EVENT ===\n\n"
+                f"--- OLD SCRATCHPAD ---\n{current_scratchpad}\n\n"
+                f"--- CATALYST LOGS ---\n{scratchpad_log_content}\n\n"
+                f"--- NEW SCRATCHPAD ---\n{updated_scratchpad}\n"
+                f"================================\n"
+            )
+            # Routing this to 'SelfScratchpad' creates a dedicated log file
+            self.logger.log(evolution_log, 'info', 'SelfScratchpad')
+            # -------------------------------------------------
+
+            # Clear the log after processing
+            collection_name = self.parser.format_string("self_scratchpad_log")
+            self.memory.delete_collection(collection_name)
+
+            return updated_scratchpad
+
+        return None

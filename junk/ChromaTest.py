@@ -134,5 +134,6 @@ if __name__ == '__main__':
     # collection_list = test.get_records("scratchpad_log_databass")
     collection_list = test.get_records("category_table")
     print(collection_list)
-
+    test.chroma.delete_collection('docs')
+    print("docs collection cleared")
 
