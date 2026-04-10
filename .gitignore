@@ -177,3 +177,7 @@ Utilities/Import/errors/
 Utilities/Import/historical_logs.yaml
 
 Utilities/Import/raw_logs/
+
+Utilities/Import/Clean/
+
+Utilities/Import/Dirty/
