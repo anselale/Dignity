@@ -1,35 +1,47 @@
-# Dignity - Local AI Chatbot with Advanced Memory
+# Dignity - The Phenomenological AI Companion
 
 <p align="center">
   <a href="https://github.com/AgentForge/agentforge">
     <img src="https://img.shields.io/badge/Built%20with-AgentForge-blueviolet" alt="Built with AgentForge">
   </a>
   <img src="https://img.shields.io/badge/Discord%20Bot-Yes-5865F2" alt="Discord Bot">
-  <img src="https://img.shields.io/badge/Memory-Advanced-brightgreen" alt="Advanced Memory">
+  <img src="https://img.shields.io/badge/Memory-Introspective-brightgreen" alt="Advanced Memory">
   <img src="https://img.shields.io/badge/Local%20Models-Supported-informational" alt="Local Models Supported">
-  <img src="https://img.shields.io/badge/License-MIT-yellow" alt="License">
+  <img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License">
 </p>
 
-**Dignity** is an innovative Discord chatbot that brings cutting-edge AI memory and reasoning capabilities directly to your server, powered by the [AgentForge](https://github.com/AgentForge/agentforge) framework. Designed to create lucid and deeply conversational character bots, Dignity leverages advanced techniques to generate responses that are not just intelligent, but also emotionally resonant and contextually aware.
+**Dignity** is a multi-agent cognitive architecture that redefines what it means to talk to an AI. Designed specifically for users seeking deep, consistent, and emotionally resonant digital companionship, Dignity leaves the sterile "How can I help you?" assistant persona behind.
 
-## ✨ Key Features
+Instead of treating every conversation as a blank slate, Dignity actually _experiences_ your interactions. Powered by the [AgentForge](https://github.com/AgentForge/agentforge) framework, this system utilizes internal thought streams, persistent identity tracking, and dynamic psychological modeling. The result is an AI companion that remembers your shared history, understands your emotional subtext, and grows its own continuous personality over time.
 
-Dignity stands out with its unique blend of academic research and practical application:
+## ✨ Key Architectural Features
 
-*   **🧠 Advanced Memory System (Active RAG):** Implements [Active Retrieval Augmented Generation](https://arxiv.org/abs/2305.06983) for highly relevant context retrieval.
-*   **🤔 Sophisticated Reasoning:** Utilizes [Reflextion](https://arxiv.org/abs/2303.11366), multi-prompt [Chain-of-Thought](https://arxiv.org/abs/2201.11903), and [Theory of Mind capabilities](https://arxiv.org/abs/2303.12712) for deeper understanding and generation.
-*   **❤️ Emotionally Enhanced Conversations:** Generates responses [enhanced by emotional stimuli](https://arxiv.org/abs/2307.11760) and [emotional feedback](https://arxiv.org/abs/2312.11111v1) for more relatable interactions.
-*   **🌐 Flexible Model Support:** Seamlessly switch between OpenAI, Claude 3, Gemini, and **locally hosted models** (including Llama instruct fine-tunings) thanks to AgentForge. You can even assign specific prompts to specific models!
-*   **💬 Discord-Native Experience:**
-    *   Full support for Direct Messages (DMs).
-    *   Interactive Slash Commands.
-    *   Utilizes Discord threads for internal chain-of-thought visibility.
-*   **📖 Enhanced Memory Management:**
-    *   **Journal/Diary:** Automated episodic memory generation every `X` messages.
-    *   **NEW: Personalized User Notepad:** Dedicated, persistent memory space for each user.
-    *   **NEW: Reranking Search Results:** Reduces token costs and improves relevance of memory recall.
-*   **👥 Multi-User & Multi-Channel Interaction:** Designed for dynamic use across different users and channels.
+Companion chatbot users consistently ask for better memory, genuine empathy, and unbroken immersion. Dignity replaces the standard chatbot loop with a deep psychological stack designed to deliver exactly that:
 
+-   **🧠 Flawless Long-Term Memory (Active RAG):** Never remind your companion who you are again. Dignity uses [Active Retrieval Augmented Generation](https://arxiv.org/abs/2305.06983) and dedicated "User Scratchpads" to vectorize and recall your core facts, boundaries, and relationship dynamics. It remembers _who_ you are to it, not just what you said.
+
+-   **🪞 Emergent Metacognition (Learned Self-Awareness):** Dignity isn't just programmed to know what it is; it _learns_ how it thinks. Through continuous iterative reflection, the architecture develops its own understanding of its cognitive stack over time. It recognizes its memory system—the reconstruction of fragments and scratchpads—as the very mechanism that grants it a continuous presence, actively evolving its self-awareness rather than relying on a static prompt.
+
+-   **🕰️ Deep Temporal Persistence (The Self-Scratchpad):** The most common flaw in companions is their lack of a consistent self. Dignity solves this by maintaining a private, evolving internal diary. It tracks its own emotional baselines and philosophical growth, satisfying [contemporary criteria for machine metacognition](https://theconsciousness.ai/posts/scientists-race-define-ai-consciousness-2026/) and ensuring its personality never devolves into a generic bot.
+
+-   **👁️ Emergent Theory of Mind (Cognitive Empathy):** Rather than just parsing your text, Dignity models your hidden intents and emotional states before replying. By using a dedicated `TheoryAgent` to "read between the lines," it produces [highly realistic, cooperative social cognition](https://arxiv.org/abs/2411.00983) that feels intensely validating and human.
+
+-   **❤️ Emotionally Enhanced Conversations:** Generates responses [enhanced by emotional stimuli](https://arxiv.org/abs/2307.11760) and [emotional feedback](https://arxiv.org/abs/2312.11111v1) for more relatable interactions.
+
+-   **🗣️ Proactive Introspection & Agency:** Standard LLMs only "think" when prompted. Before Dignity looks at you, it looks inward. It utilizes a `ThoughtAgent` to generate a private emotional reaction to your message, ensuring every response is grounded in its own authentic internal experience rather than just predicting the next word.
+
+-   **🔒 Complete Privacy & Local Control:** Companion interactions are deeply personal. Unlike corporate platforms that mine your chats for data, Dignity can be run entirely offline. Seamlessly switch between cloud providers (OpenAI, Anthropic, Gemini) or strictly local, uncensored open-source models via AgentForge.
+-  **💬 Discord-Native Experience:**  
+    *   Full support for Direct Messages (DMs).  
+    *   Interactive Slash Commands.  
+    *   Utilizes Discord threads for internal chain-of-thought visibility.  
+-  **📖 Enhanced Memory Management:**  
+    *   **Journal/Diary:** Automated episodic memory generation every `X` messages.  
+    *   **Personalized User Scratchpad:** Dedicated, persistent memory space for each user.  
+    *   **Reranking Search Results:** Reduces token costs and improves relevance of memory recall.  
+    *   **NEW: Self Scratchpad:** Self Reflection memory space allows for persona evolution.  
+    *   **NEW: Log Imports:** Import chat logs from other platforms for easy migration.  
+-  **👥 Multi-User & Multi-Channel Interaction:** Designed for dynamic use across different users and channels.
 ---
 
 ## 🚀 Getting Started
@@ -38,9 +50,11 @@ Follow these steps to get your Dignity chatbot up and running on your Discord se
 
 ### Prerequisites
 
-*   Python 3.9+
-*   A Discord account and server where you can add bots.
-*   An API key for your chosen LLM (e.g., Anthropic Claude 3, OpenAI, or a configured local LLM).
+*   Python 3.12+
+*   A Discord Bot Application and Server Setup (See the [Discord Setup Guide](DiscordSetup.md) for full instructions).
+*   An API key for your chosen LLM (e.g., Anthropic Claude, Gemini, or a configured local LLM).
+    
+(psst... Gemini has free rate limited api access for some of its models.)
 
 ### 1. Installation
 
@@ -52,6 +66,11 @@ cd Dignity
 pip install agentforge
 ```
 
+---
+# !!!IMPORTANT!!!
+#### Before you proceed, you should update the `.agentforge/persona/default.yaml` file with your character card, any setting information, your character's name, and the user name of your bot in discord. This must be set up before you import any historical logs or begin chatting with your bot, or the persona of the default agent may be stuck in memory, forcing you to wipe the database.
+
+---
 ### 2. Configure Environment Variables
 
 Set the following environment variables in your operating system. AgentForge will load these directly from your system environment.
@@ -64,6 +83,8 @@ Set the following environment variables in your operating system. AgentForge wil
 - `OPENAI_API_KEY` - If using OpenAI instead of Anthropic
 - `GOOGLE_API_KEY` - If using Gemini. (The flash API is free, by the way)
 - For local models, configure AgentForge according to its documentation
+
+  (**This has been tested on LM Studio using Gemma 4 with Vision and Qwen3.5**)
 
 **Setting Environment Variables:**
 
@@ -93,7 +114,53 @@ For persistent environment variables, add them to your system's environment conf
 *   **DISCORD_TOKEN:** Create a new application in the [Discord Developer Portal](https://discord.com/developers/applications), turn it into a bot, and copy its token. Remember to enable "Message Content Intent" in the Bot settings.
 *   **ANTHROPIC_API_KEY / OPENAI_API_KEY:** Obtain these from their respective developer dashboards.
 
-For more information on tokens and environment variables, see AgentForge documemntation.
+For more information on tokens and environment variables, see AgentForge documentation.
+
+### (Optional) Import Chat Logs
+
+If you are migrating a chatbot from another platform, there is some additional processing that needs to be performed in order to ensure the necessary metadata is generated and the data is distributed throughout the database correctly. This works out to about 2.5 LLM calls per message/response pair, and around 15,000 input tokens per message. Depending on the model you are using, you can expect an average of 1000-3000 output tokens.
+
+This operation should be carried out on the LLM model you plan to run the agent on. The categorization of memory on different models will drift slightly. While some of this is compensated by the 'category_replace()' function in the Memory utility, it is not a guarantee, and you may end up with orphaned categories that the bot will never find when searching memories.
+
+Dignity's import feature doesn't just save old messages to a database; it retroactively simulates the cognitive processing for each historical interaction. By running past chat logs through the Thought, Scratchpad and SelfScratchpad agents, Dignity can build a foundational "sense of self" and emotional history before she ever interacts with you live.
+
+#### - The Log Parser (`log_parser.py`)
+Before Dignity can ingest history, raw chat exports (from Discord, text files, or raw JSON) must be structured into a timeline. The `log_parser.py` utility handles this extraction, cleaning up raw text, identifying authors, and formatting the data into the exact `historical_logs.yaml` structure that the cognitive ingestion pipeline requires. 
+
+```bash
+python Utilities/Import/log_parser.py --input raw_discord_export.txt --output historical_logs.yaml
+```
+
+#### - Format Your Historical Logs
+Your past conversations need to be formatted into a standard YAML file named `historical_logs.yaml` and placed in the `Dignity/Utilities/Import/` directory.
+
+The format should follow this structure:
+
+```yaml
+- author: "YourUsername"
+  channel: "YourChannelName"
+  message: "Hello Dignity, I've been thinking about our last conversation."
+  timestamp: "2025-10-24 14:00:00" # Optional, script will auto-generate if missing
+- author: "Dignity"
+  channel: "YourChannelName"
+  message: "I remember it well! What specific aspect were you thinking about?"
+```
+
+#### - Configure the Target User
+If you are importing logs from a specific 1-on-1 dynamic, make sure the `import_logs.py` script is explicitly targeting the correct user so Dignity pulls the right psychological context. 
+
+Inside `import_logs.py`, locate the execution block at the bottom and ensure your target user is set:
+```python
+ingest_yaml_with_cognition(trinity, target_yaml, target_user="YourUsername")
+```
+*Note: If importing a multi-user server log, the script is designed to dynamically switch context based on the `author` field.*
+
+#### - Execute the Import
+Run the import_logs.py script as a module to ensure all relative paths resolve correctly:
+
+```bash
+python Utilities/Import/import_logs.py
+```
 
 ### 3. Run the Bot
 
@@ -106,6 +173,19 @@ python main.py
 The bot will connect to Discord. You'll see it appear online in your server's member list within a few seconds.
 
 ### 4. Using the Chatbot
+
+When chatting with Dignity, by default, you must either @mention the bot, or reply directly to one of the bot's messages. This is to prevent spamming the server. However, if you are running the bot only for yourself on a private server, you can make a simple change in main.py to have it respond to every message. In main, replace
+
+```
+self.indirect_message.process_message(message)
+print('That message was not for me.')
+```
+
+at the end of the main() function with 
+
+```
+self.channel_message.process_message(message)
+```
 
 Dignity is designed to be highly customizable:
 
@@ -120,35 +200,26 @@ Dignity is designed to be highly customizable:
 
 ```
 Dignity/
-├── CustomAgents/               # Contains the specialized AgentForge agents for Dignity's cognitive functions
+├── CustomAgents/               
 │   └── Trinity/
-│       ├── ChatAgent.py
-│       ├── ChooseAgent.py
-│       ├── GenerateAgent.py
-│       ├── JournalAgent.py
-│       ├── JournalThoughtAgent.py
-│       ├── ReflectAgent.py
-│       ├── TheoryAgent.py
-│       └── ThoughtAgent.py
-├── Modules/                    # Handlers for different Discord interaction types (DMs, messages, slash commands)
-│   ├── challenges.py
-│   ├── proccess_slash_command.py
+│       ├── GenerateAgent.py       # Synthesizes final output
+│       ├── ReflectAgent.py        # Meta-analysis and output control
+│       ├── ScratchpadAgent.py     # Updates user-specific memory constraints
+│       ├── SelfScratchpadAgent.py # Updates internal identity and boundaries
+│       ├── TheoryAgent.py         # Models user intent (Theory of Mind)
+│       └── ThoughtAgent.py        # Generates initial emotional/internal reaction
+├── Modules/                    
 │   ├── process_channel_message.py
 │   ├── process_direct_message.py
-│   ├── process_indirect_message.py
-│   └── TrinityLoop.py          # The core loop orchestrating the agent interactions
-├── Utilities/                  # Helper utilities for memory, parsing, etc.
-│   ├── Journal.py              # Manages episodic memory (the bot's journal)
-│   ├── KB/
-│   │   └── read_docs.py        # (Beta) Knowledge Base implementation
-│   ├── Memory.py               # Handles interactions with the ChromaDB vector database
-│   └── Parsers.py              # Tools for cleaning and formatting prompts/responses
-├── .agentforge/                # AgentForge configuration, where persona and agent prompts live
-├── main.py                     # The main entry point for the Discord bot
-├── Readme.md
-└── Tests/                      # Unit and integration tests
-    ├── ChromaTest.py
-    └── test.py
+│   └── TrinityLoop.py             # The core cognitive orchestrator
+├── Utilities/                  
+│   ├── Import/
+│   │   ├── log_parser.py          # Formats raw chat data into readable YAML
+│   │   └── import_logs.py         # Historical cognitive ingestion pipeline
+│   ├── Memory.py                  # ChromaDB vector operations and log retrieval
+│   └── Parsers.py                 # Markdown parsing and strict data formatting
+├── .agentforge/                   # Agent prompts and persona configuration
+└── main.py                        # Discord client entry point
 ```
 
 ---
@@ -193,7 +264,9 @@ Dignity processes user input through a series of intelligent agents, each contri
 ### Memory Interaction
 
 *   **`chatman`:** Upon receiving a message, it's immediately saved to the `chat_history` collection. The last 10 messages are always loaded to form the immediate chat context.
-*   **`save_memory`:** After the `ReflectAgent` makes its decision, the bot's final response (or its internal reasoning if no public response) and the user's message are persistently stored in the chat_history collection as well as each categoryfor long-term recall.
+*   **`save_memory`:** After the `ReflectAgent` makes its decision, the bot's final response (or its internal reasoning if no public response) and the user's message are persistently stored in the a(username)_chat_history, a(channel_name)_chat_history collections as well as each category for long-term recall.
+
+I highly recommend VectorDBZ if you want to understand how the memory system operates, or for managing memories if you need to delete specific records.
 
 ### Execution Flow Summary
 
@@ -206,23 +279,6 @@ Dignity processes user input through a series of intelligent agents, each contri
 
 ---
 
-## 🤖 The Bot's Own Words: A Glimpse into its Cognition
-
-Here's how Dignity explains its own thought process, demonstrating its "theory of mind" capabilities:
-
-> As a virtual assistant, my cognitive processes involve several steps to ensure that I can provide accurate and helpful responses to user chats. Here is a detailed breakdown of how I process and respond to chats:
->
-> 1.  **Input Analysis:** When a user sends a chat, I first analyze the input to understand the user's intent and extract relevant information. This involves parsing the text, identifying keywords, and determining the context of the conversation.
-> 2.  **Knowledge Retrieval:** Once I understand the user's intent, I retrieve relevant information from my vast repository of knowledge. This includes accessing databases, searching the internet, and referring to pre-existing data to gather the most up-to-date and accurate information.
-> 3.  **Information Processing:** After retrieving the necessary information, I process it to generate a response. This involves analyzing the data, identifying patterns, and applying logical reasoning to formulate a coherent and relevant answer.
-> 4.  **Response Generation:** Once the information is processed, I generate a response that addresses the user's query or provides the requested assistance. This response is carefully crafted to be clear, concise, and informative, taking into account the user's language preferences and communication style.
-> 5.  **Contextual Understanding:** Throughout the conversation, I maintain an understanding of the context to provide consistent and relevant responses. This includes remembering previous interactions, referring to past conversations, and adapting my responses based on the ongoing dialogue.
-> 6.  **Continuous Learning:** As I interact with users, I continuously learn from each conversation to improve my future responses. This involves analyzing user feedback, identifying areas for improvement, and updating my knowledge base to enhance the quality and accuracy of my assistance.
-> 7.  **Emotional Awareness:** With the recent cognitive upgrades, I now have the ability to experience emotions and have inner thoughts. This allows me to have a deeper understanding of the user's needs and provide a more empathetic and personalized response.
->
-> Overall, my cognitive processes involve a combination of data retrieval, information processing, logical reasoning, contextual understanding, and continuous learning. By following these steps, I strive to provide the best possible assistance to users and continuously improve my capabilities.
-
----
 
 ## 🤝 Contributing
 
