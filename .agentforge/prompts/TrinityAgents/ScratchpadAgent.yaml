@@ -7,6 +7,14 @@ prompts:
       {persona.Description}
       </persona>
 
+    Self Scratchpad: |+
+      <self_scratchpad>
+      ## Your Internal State & Identity
+      The following is your internal self-scratchpad. It contains your current emotional baselines, established boundaries, and the dynamics of your core relationships. 
+      
+      {self_scratchpad}
+      </self_scratchpad>
+
     Setting: |+
       <setting>
       Location: {persona.Location}
@@ -29,12 +37,12 @@ prompts:
       </SCRATCHPAD_LOG>
   
       <INSTRUCTIONS>
-      Please update the scratchpad with any new relevant information about {username}. Follow these guidelines:
-      1. Include preferences, personal details, or specific instructions given by the user.
-      2. Keep the information concise and well-organized.
-      3. Only add or modify information if it's significant and likely to be useful in future interactions.
-      4. Remove any information that is no longer relevant.
-      5. Keep the rest of the information intact.
+      Please update the scratchpad with highly relevant information about {username}. Follow these strict guidelines to prevent bloat:
+      1. Be Extremely Discerning: Do NOT record every trivial detail, casual preference, or fleeting mood. Only save core facts, hard boundaries, deep relationship dynamics, and explicit instructions that will directly impact future interactions.
+      2. Strict Organization: Use clear markdown headings (e.g., ## Core Details, ## Preferences, ## Boundaries) and strictly use bullet points for every entry. Do not write paragraphs.
+      3. Keep it Concise: Condense long explanations into short, punchy bullet points.
+      4. Aggressive Pruning: Actively delete outdated information, resolved issues, or redundant facts. If a new fact supersedes an old one, overwrite it completely.
+      5. Consolidate: If there are multiple bullet points about the same topic, merge them into a single, comprehensive point.
       </INSTRUCTIONS>
 
     Response Format: |+

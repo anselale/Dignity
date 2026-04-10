@@ -24,6 +24,7 @@ class Run:
         self.client.run()
         with open(".agentforge/personas/default.yaml", "r") as file:
             self.persona = yaml.safe_load(file)
+            self.persona_username = self.persona.get("Username")
             self.persona_name = self.persona.get("Name")
         self.memory = Memory(self.persona, self.persona_name)
         self.do_command = SlashCommands(self.memory, self.client)
@@ -60,7 +61,7 @@ class Run:
 
                         else:
                             # Check if bot is mentioned in the message
-                            mentioned = any(mention.name == self.persona_name for mention in message['mentions'])
+                            mentioned = any(mention.name == self.persona_username for mention in message['mentions'])
                             if mentioned:
                                 # If bot is @ mentioned, send the response to the channel
                                 # 'Name' in persona must match discord display name.

@@ -58,4 +58,4 @@ prompts:
 
 model_overrides:
   api: gemini_api
-  model: gemini_flash
+  model: gemini_flash_lite

@@ -169,3 +169,11 @@ Utilities/KB/In/
 
 Journal/
 /.vscode/
+
+.agentforge/personas/river.yaml
+
+Utilities/Import/errors/
+
+Utilities/Import/historical_logs.yaml
+
+Utilities/Import/raw_logs/
