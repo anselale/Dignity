@@ -195,10 +195,51 @@ class LogOrchestrator:
 
             raise  # Re-raise the error so you can read the actual Python traceback
 
+    def clean_and_merge_log(self):
+        """
+        Post-processes the master log to heal chunk boundaries and manual splits.
+        Strips [CONTINUED] tags and merges orphaned text into the previous block.
+        """
+        merged_log = []
+
+        for entry in self.master_log:
+            user_text = entry.get('text', '')
+            bot_text = entry.get('bot_response', '')
+
+            # Detect if this entry is a continuation
+            is_cont = '[CONTINUED]' in user_text.upper() or '[CONTINUED]' in bot_text.upper()
+
+            # Clean the tags out (case-insensitive)
+            clean_user = re.sub(r'\[(?i)continued\]', '', user_text).strip()
+            clean_bot = re.sub(r'\[(?i)continued\]', '', bot_text).strip()
+
+            entry['text'] = clean_user
+            entry['bot_response'] = clean_bot
+
+            if is_cont and merged_log:
+                # Merge the text into the previous entry
+                if clean_user:
+                    merged_log[-1]['text'] = f"{merged_log[-1].get('text', '')}\n\n{clean_user}".strip()
+                if clean_bot:
+                    merged_log[-1]['bot_response'] = f"{merged_log[-1].get('bot_response', '')}\n\n{clean_bot}".strip()
+
+                # Inherit the newer date if available
+                if 'date' in entry and entry['date']:
+                    merged_log[-1]['date'] = entry['date']
+            else:
+                # Not a continuation, append as a normal entry
+                merged_log.append(entry)
+
+        self.master_log = merged_log
+
     def save_master_log(self):
-        # Save the merged dictionary out to the final YAML file
+        # 1. Clean, strip, and merge the broken chunks BEFORE saving
+        self.clean_and_merge_log()
+
+        # 2. Save the perfectly stitched dictionary out to the final YAML file
         with open(self.output_file, 'w', encoding='utf-8') as f:
             yaml.dump(self.master_log, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+
         self.logger.log(f"Successfully compiled {len(self.master_log)} interactions into {self.output_file}", "info")
 
 
