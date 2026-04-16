@@ -184,7 +184,7 @@ class MessageParser:
         channel = ''
 
         # Create a list of tuples (index, id) and sort it by id
-        sorted_indices = sorted(enumerate(history.get('ids', [])), key=lambda x: x[1])
+        sorted_indices = sorted(enumerate(history.get('ids', [])), key=lambda x: int(x[1]))
 
         for index, _ in sorted_indices:
             metadata = history['metadatas'][index]
@@ -198,7 +198,7 @@ class MessageParser:
 
             excluded_metadata = [
                 "User", "id", "Response", "Reason", "Emotion", "InnerThought",
-                "Channel", "unix_timestamp", "Categories"
+                "Channel", "unix_timestamp", "Categories", "Respondent"
             ]
 
             for key, value in metadata.items():

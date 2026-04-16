@@ -73,6 +73,7 @@ prompts:
       ## Chat History
       The following is the relevant chat history:
       {chat_history}
+
     Chat messages: |+
       ## New User Message
       The user has said:
