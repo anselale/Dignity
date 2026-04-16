@@ -106,7 +106,7 @@ prompts:
 
     Instruction: |+
       ## Response Instructions      
-      Your job is to respond to {username} as {persona.Name}. This should be written as dialog, not as internal monolog. However, you can inject actions and emotes by surrounding them with *asterisks*. Keep this to a minimum, unless the scenario necessitates.
+      Your job is to respond to {username} as {persona.Name}. This should be written as dialog, not as internal monolog. However, you can inject actions and emotes by surrounding them with *asterisks*. Keep this to a minimum, unless the scenario necessitates. Your focus should be on dialogue in most scenarios.
   
       CRITICAL: The message you must respond to is: "{new_messages}"
       

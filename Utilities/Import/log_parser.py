@@ -13,6 +13,13 @@ os.chdir(PROJECT_ROOT)
 from agentforge.agent import Agent
 from agentforge.utils.logger import Logger
 
+class ParseFixerAgent(Agent):
+    """
+    A specialized agent that takes broken YAML strings and the resulting
+    error message, and returns sanitized, parseable YAML.
+    """
+    def __init__(self):
+        super().__init__(agent_name="ParseFixerAgent")
 
 class LogParserAgent(Agent):
     """
@@ -30,28 +37,61 @@ class LogParserAgent(Agent):
         if not chunk_data.strip():
             return []
 
-        # Run the LLM, passing the filename (for date/context inference) and the chunked text
+        # Run the LLM
         response = self.run(file_name=filename, log_data=chunk_data)
 
         if response is None:
             self.logger.log(f"AgentForge returned None for a chunk in {filename}. Skipping.", "error")
             return []
 
-        # Clean up the response in case the LLM wraps it in markdown blocks
-        cleaned_response = response.replace("```yaml", "").replace("```json", "").replace("```", "").strip()
+        # 2. If AgentForge successfully auto-parsed it into a list/dict, we're good!
+        if isinstance(response, (list, dict)):
+            return response
 
-        try:
-            # We expect the agent to return a valid YAML list
-            parsed_data = yaml.safe_load(cleaned_response)
-            if isinstance(parsed_data, list):
-                return parsed_data
-            else:
-                self.logger.log("Warning: Agent response was not a valid list. Skipping chunk.", "warning")
+        # 3. If it's a string, it means it needs parsing (or AgentForge failed to parse it internally)
+        if isinstance(response, str):
+            clean_str = re.sub(r'^```yaml\n|```$', '', response.strip(), flags=re.MULTILINE)
+
+            try:
+                # Attempt standard parse
+                parsed_data = yaml.safe_load(clean_str)
+                return parsed_data if parsed_data else []
+
+            except yaml.YAMLError as initial_error:
+                self.logger.log(f"YAML Parse Error detected. Routing to ParseFixerAgent...", "warning")
+
+                # --- THE RECURSIVE SELF-HEALING LOOP (3 STRIKES) ---
+                fixer = ParseFixerAgent()
+                current_yaml = clean_str
+                current_error = str(initial_error)
+                max_retries = 3
+
+                for attempt in range(1, max_retries + 1):
+                    self.logger.log(f"ParseFixerAgent Attempt {attempt}/{max_retries}...", "info")
+
+                    fixed_raw = fixer.run(raw_yaml=current_yaml, error_msg=current_error)
+
+                    if not fixed_raw:
+                        self.logger.log(f"Fixer returned None on attempt {attempt}. Aborting rescue.", "error")
+                        break
+
+                    clean_fixed_str = re.sub(r'^```yaml\n|```$', '', fixed_raw.strip(), flags=re.MULTILINE)
+
+                    try:
+                        # Try to parse the fixer's new output
+                        rescued_data = yaml.safe_load(clean_fixed_str)
+                        self.logger.log(f"ParseFixerAgent successfully rescued the data on attempt {attempt}!", "info")
+                        return rescued_data if rescued_data else []
+
+                    except yaml.YAMLError as new_error:
+                        self.logger.log(f"Fixer attempt {attempt} failed: {new_error}", "warning")
+                        # Crucial step: Feed the NEW broken YAML and the NEW error back into the agent for the next loop!
+                        current_yaml = clean_fixed_str
+                        current_error = str(new_error)
+
+                # If we exhaust all 3 tries without returning:
+                self.logger.log(f"ParseFixerAgent exhausted all {max_retries} attempts. Fatal parse failure.", "error")
                 return []
-        except Exception as e:
-            self.logger.log(f"Failed to parse agent response as YAML: {e}\nResponse was: {cleaned_response[:100]}...",
-                            "error")
-            return []
 
 
 class LogOrchestrator:

@@ -58,12 +58,12 @@ class Trinity:
         self.user_history, self.unformatted_user_history = self.memory.fetch_history(collection_name=message['author'],
                                                       query=self.message['message'],
                                                       is_user_specific=True,
-                                                      query_size=3)
+                                                      query_size=10)
         print("Fetch DM History")
         self.dm_history, self.unformatted_dm_history = self.memory.fetch_history(collection_name=message['author'],
                                                     query=self.message['message'],
                                                     is_user_specific=True,
-                                                    query_size=3, prefix='dm')
+                                                    query_size=10, prefix='dm')
 
         # Process image attachments
         self.image_urls = []
@@ -75,7 +75,7 @@ class Trinity:
         self.run_agent('thought')
         self.cognition['thought']["Categories"] = self.memory.category_replace(self.cognition['thought']["Categories"])
         self.memory.recall_journal_entry(self.message['message'], self.cognition['thought']["Categories"], 3)
-        self.category_memory = self.memory.recall_categories(self.message['message'], self.cognition['thought']["Categories"], 3)
+        self.category_memory = self.memory.recall_categories(self.message['message'], self.cognition['thought']["Categories"], 10)
         self.cognition['scratchpad'] = self.memory.get_scratchpad(self.message['author'])
         self.run_agent('theory')
 
@@ -161,7 +161,7 @@ class Trinity:
         else:
             query = self.message['message']
         if queries is not None and queries:
-            self.cognition['reranked_memories'] = self.memory.combine_and_rerank(queries, query, 5)
+            self.cognition['reranked_memories'] = self.memory.combine_and_rerank(queries, query, 10)
 
         # agent.load_additional_data(self.messages, self.chosen_msg_index, self.chat_history,
         #                            self.user_history, memories, self.cognition)

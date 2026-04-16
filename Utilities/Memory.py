@@ -185,7 +185,7 @@ class Memory:
         self.response = response
 
     def save_to_collection(self, collection_name: str, chat_message: dict, response_message: str,
-                                 metadata_extra=None):
+                                 metadata_extra=None, respondent=None):
         """
         Save a message to a specific collection in memory.
 
@@ -195,6 +195,7 @@ class Memory:
             response_message (str): The response message to save.
             metadata_extra (dict, optional): Additional metadata to include.
         """
+
         collection_size = self.memory.search_metadata_min_max(collection_name, 'id', 'max')
         if collection_size is None or "target" not in collection_size:
             memory_id = ["1"]
@@ -210,6 +211,7 @@ class Memory:
             "InnerThought": self.cognition["thought"].get("Inner Thought"),
             "Reason": self.cognition["reflect"].get("Reason"),
             "User": chat_message["author"],
+            "Respondent": respondent,
             # "Mentions": chat_message["mentions"],
             "Channel": str(chat_message["channel"]),
             "Categories": str(self.cognition["thought"]["Categories"])
@@ -237,7 +239,7 @@ class Memory:
             category_collection = self.parser.format_string(collection_name)
             self.logger.log(f"Saving Category to: {category_collection}\nMessage:\n{self.user_message}",
                             'debug', 'Memory')
-            self.save_to_collection(category_collection, self.user_message, self.response)
+            self.save_to_collection(category_collection, self.user_message, self.response, respondent=self.persona)
             self.update_category_table(category)
 
     def save_channel_memory(self):
@@ -251,8 +253,8 @@ class Memory:
         metadata_extra = {}
         bot_response = self.response
         self.logger.log(f"Saving Channel to: {collection_name}\nMessage:\n{message}", 'debug', 'Memory')
-        self.save_to_collection(collection_name, message, bot_response, metadata_extra)
-        self.save_to_collection('journal_log_table', message, bot_response, metadata_extra)
+        self.save_to_collection(collection_name, message, bot_response, metadata_extra, respondent=self.persona)
+        self.save_to_collection('journal_log_table', message, bot_response, metadata_extra, respondent=self.persona)
 
     def save_bot_response(self):
         """
@@ -261,12 +263,13 @@ class Memory:
         message = self.user_message.copy()
         message['message'] = self.response
         message['author'] = self.persona
+        human_author = self.user_message['author']
 
         collection_name = f"a{message['channel']}_chat_history"
         collection_name = self.parser.format_string(collection_name)
         self.logger.log(f"Saving Bot Response to: {collection_name}\nMessage:\n{message}", 'debug', 'Memory')
-        self.save_to_collection(collection_name, message, self.user_message['message'])
-        self.save_to_collection('journal_log_table', message, self.user_message['message'])
+        self.save_to_collection(collection_name, message, self.user_message['message'], respondent=human_author)
+        self.save_to_collection('journal_log_table', message, self.user_message['message'], respondent=human_author)
 
     def save_user_history(self):
         """
@@ -642,15 +645,15 @@ class Memory:
         self.logger.log(f"Saving Scratchpad Log to: {collection_name}\nMessage:\n{content}\nID: {memory_id}", 'debug', 'Memory')
         self.memory.save_to_storage(collection_name=collection_name, data=[content], ids=memory_id, metadata=[metadata])
 
-    def save_to_scratchpad_log(self, username, message):
-        scratchpad_log_name = f"scratchpad_log_{username}"
-        scratchpad_log_name = self.parser.format_string(scratchpad_log_name)
-
-        current_log = self.get_scratchpad_log(username)
-        updated_log = f"{current_log}\n{message}" if current_log else message
-
-        self.save_scratchpad_log(scratchpad_log_name, updated_log)
-        self.logger.log(f"Saved message to scratchpad log for user: {username}", 'debug', 'Memory')
+    # def save_to_scratchpad_log(self, username, message):
+    #     scratchpad_log_name = f"scratchpad_log_{username}"
+    #     scratchpad_log_name = self.parser.format_string(scratchpad_log_name)
+    #
+    #     current_log = self.get_scratchpad_log(username)
+    #     updated_log = f"{current_log}\n{message}" if current_log else message
+    #
+    #     self.save_scratchpad_log(scratchpad_log_name, updated_log)
+    #     self.logger.log(f"Saved message to scratchpad log for user: {username}", 'debug', 'Memory')
 
     def check_scratchpad(self, username):
         """
@@ -740,14 +743,19 @@ class Memory:
         # Combine all query results
         combined_query_results = self.memory.combine_query_results(*query_results)
 
-        reranked_results = self.memory.rerank_results(
+        reranked = self.memory.rerank_results(
             query_results=combined_query_results,
             query=rerank_query,
             temp_collection_name="temp_reranking_collection",
             num_results=num_results
         )
 
-        formatted_results = self.parser.format_reranked_history_entries(reranked_results)
+        if reranked and 'metadatas' in reranked:
+            zipped = list(zip(reranked['ids'], reranked['documents'], reranked['metadatas']))
+            zipped.sort(key=lambda x: x[2].get('unix_timestamp', 0))
+            reranked['ids'], reranked['documents'], reranked['metadatas'] = zip(*zipped)
+
+        formatted_results = self.parser.format_reranked_history_entries(reranked, bot_name=self.persona)
 
         return formatted_results
 

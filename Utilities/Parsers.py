@@ -125,49 +125,57 @@ class MessageParser:
         return "=====\n".join(formatted_entries).strip()
 
     @staticmethod
-    def format_reranked_history_entries(history):
+    def format_reranked_history_entries(history, bot_name="Bot"):
         """Format chat history with consistent order and clean structure for prompt injection."""
         formatted_entries = []
 
-        # Fields to exclude from output
-        exclude_fields = {"id", "unix_timestamp", "Reason", "Emotion"}
+        for i, meta in enumerate(history.get('metadatas', [])):
+            parts = []
+            author = meta.get('User', 'Unknown')
+            respondent = meta.get('Respondent', 'Unknown')
+            document = history['documents'][i] if i < len(history.get('documents', [])) else ''
+            response_meta = meta.get('Response', '')
 
-        for i, metadata in enumerate(history.get('metadatas', [])):
-            entry_parts = []
+            # Resolve the Mirror Perspective
+            if author == bot_name:
+                human_name = respondent
+                human_text = response_meta
+                bot_text = document
+            else:
+                human_name = author
+                human_text = document
+                bot_text = response_meta
 
-            # Get document text (the actual message)
-            message_text = history['documents'][i] if i < len(history.get('documents', [])) else 'N/A'
+            # 1. Human Author
+            parts.append(f"Human Author: {human_name}")
 
-            # Fixed order: User -> Message -> Inner Thought -> Response -> Other fields
+            # 2. Channel Name
+            if meta.get('Channel'):
+                parts.append(f"Channel Name: {meta['Channel']}")
 
-            # 1. User (always first)
-            entry_parts.append(f"User: {metadata.get('User', 'N/A')}")
+            # 3. Human Message
+            parts.append(f"Human Message: {human_text}")
 
-            # 2. Message (always second)
-            entry_parts.append(f"Message: {message_text}")
+            # 4. Bot Author
+            parts.append(f"Bot Author: {bot_name}")
 
-            # 3. Inner Thought (if exists)
-            if 'InnerThought' in metadata and metadata['InnerThought']:
-                entry_parts.append(f"Inner Thought: {metadata['InnerThought']}")
+            # 5. Inner Thought
+            if meta.get('InnerThought'):
+                parts.append(f"Inner Thought: {meta['InnerThought']}")
 
-            # 4. Response (if exists and different from message)
-            if 'Response' in metadata and metadata['Response']:
-                entry_parts.append(f"Response: {metadata['Response']}")
+            # 6. Emotion
+            if meta.get('Emotion'):
+                parts.append(f"Emotion: {meta['Emotion']}")
 
-            # 5. Other relevant fields (alphabetically for consistency)
-            other_fields = []
-            for key in sorted(metadata.keys()):
-                if key not in exclude_fields and key not in ['User', 'InnerThought', 'Response']:
-                    value = metadata[key]
-                    if value:  # Only include non-empty values
-                        other_fields.append(f"{key}: {value}")
+            # 7. Bot Message
+            parts.append(f"Bot Message: {bot_text}")
 
-            entry_parts.extend(other_fields)
+            # 8. Timestamp
+            if meta.get('iso_timestamp'):
+                parts.append(f"Timestamp: {meta['iso_timestamp']}")
 
-            # Join with newlines
-            formatted_entries.append("\n".join(entry_parts))
+            formatted_entries.append("\n".join(parts))
 
-        # Use * * * separator instead of --- to avoid markdown issues
         return "\n\n* * *\n\n".join(formatted_entries).strip()
 
     @staticmethod

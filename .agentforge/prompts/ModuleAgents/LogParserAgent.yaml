@@ -17,7 +17,7 @@ prompts:
     
     Formatting Rules:
     1. Handle multi-line strings properly using YAML literal blocks (|).
-    2. BEWARE OF FORMATTING: Speakers may be denoted by a name and colon (e.g., "User:"), OR they may simply be the words "user" and "assistant" on their own lines. 
+    2. BEWARE OF FORMATTING: Speakers may be denoted by a name and colon (e.g., "User:"), OR they may simply be the words "user" and "assistant" on their own lines. **There may even be no denotation at all.** Speakers may send multiple lines in their prompts as well. Use your best judgement.
     3. SEVERED CHUNKS (USER): If the chunk ends with a user's prompt but gets cut off before the bot's response, output the user's text and set `bot_response` exactly to: "[CONTINUED]"
     4. SEVERED CHUNKS (BOT): If the chunk begins in the middle of a bot's response with no preceding user prompt, set `text` exactly to: "[CONTINUED]" and output the bot's text.
     5. Ignore system messages or non-conversational noise.
@@ -28,6 +28,6 @@ prompts:
     Raw Log Data:
     {log_data}
 
-model_overrides:
-  api: gemini_api
-  model: gemini_flash_lite
+#model_overrides:
+#  api: gemini_api
+#  model: gemini_flash_lite

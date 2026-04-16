@@ -32,9 +32,35 @@ def ingest_yaml_with_cognition(trinity_instance, yaml_file_path, target_user="Us
         print(f"[!] Error: Could not find {yaml_file_path}")
         return
 
-    # 2. Load the YAML data
-    with open(yaml_file_path, 'r', encoding='utf-8') as file:
-        chat_logs = yaml.safe_load(file)
+    # 2. Load and Validate the YAML data
+    print(f"[*] Loading and validating {yaml_file_path}...")
+    try:
+        with open(yaml_file_path, 'r', encoding='utf-8') as f:
+            chat_logs = yaml.safe_load(f)
+    except yaml.YAMLError as e:
+        print(f"[!] CRITICAL: YAML syntax error detected. Aborting to save tokens.\n{e}")
+        return
+
+    if not chat_logs:
+        print("[!] Error: YAML file is empty.")
+        return
+
+    if not isinstance(chat_logs, list):
+        print(f"[!] CRITICAL: Expected a list of interactions, but got {type(chat_logs).__name__}.")
+        return
+
+    # Validate structure of each entry
+    for i, entry in enumerate(chat_logs):
+        if not isinstance(entry, dict):
+            print(f"[!] CRITICAL: Entry {i} is malformed (expected a dictionary block).")
+            return
+
+        # Ensure at least 'text' (user) or 'bot_response' (River) exists
+        if 'text' not in entry and 'bot_response' not in entry:
+            print(f"[!] CRITICAL: Entry {i} is missing both 'text' and 'bot_response'.")
+            return
+
+    print(f"[+] Validation passed! Found {len(chat_logs)} healthy interactions.")
 
     total_logs = len(chat_logs)
     print(f"\n" + "=" * 60)
@@ -45,7 +71,7 @@ def ingest_yaml_with_cognition(trinity_instance, yaml_file_path, target_user="Us
         for i, entry in enumerate(chat_logs):
             trinity_instance.reset_cognition()
 
-            # --- NEW: Extract and set the historical date ---
+            # --- Extract and set the historical date ---
             # Fallback to today's date if the YAML is missing it, just to prevent crashes
             historical_date = entry.get('date', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
@@ -88,9 +114,11 @@ def ingest_yaml_with_cognition(trinity_instance, yaml_file_path, target_user="Us
             trinity_instance.chat_history, trinity_instance.unformatted_history = trinity_instance.memory.fetch_history(
                 collection_name=mock_message['channel'])
             trinity_instance.user_history, trinity_instance.unformatted_user_history = trinity_instance.memory.fetch_history(
-                collection_name=mock_message['author'], query=mock_message['message'], is_user_specific=True, query_size=3)
+                collection_name=mock_message['author'], query=mock_message['message'], is_user_specific=True,
+                query_size=10)
             trinity_instance.dm_history, trinity_instance.unformatted_dm_history = trinity_instance.memory.fetch_history(
-                collection_name=mock_message['author'], query=mock_message['message'], is_user_specific=True, query_size=3,
+                collection_name=mock_message['author'], query=mock_message['message'], is_user_specific=True,
+                query_size=10,
                 prefix='dm')
 
             # 5. Run the Thought Agent
@@ -99,11 +127,12 @@ def ingest_yaml_with_cognition(trinity_instance, yaml_file_path, target_user="Us
             # 6. Execute Journal and Category memory operations
             if 'thought' in trinity_instance.cognition and 'Categories' in trinity_instance.cognition['thought']:
                 categories = trinity_instance.cognition['thought']["Categories"]
-                trinity_instance.cognition['thought']["Categories"] = trinity_instance.memory.category_replace(categories)
+                trinity_instance.cognition['thought']["Categories"] = trinity_instance.memory.category_replace(
+                    categories)
                 trinity_instance.memory.recall_journal_entry(trinity_instance.message['message'],
-                                                             trinity_instance.cognition['thought']["Categories"], 3)
+                                                             trinity_instance.cognition['thought']["Categories"], 2)
                 trinity_instance.category_memory = trinity_instance.memory.recall_categories(
-                    trinity_instance.message['message'], trinity_instance.cognition['thought']["Categories"], 3)
+                    trinity_instance.message['message'], trinity_instance.cognition['thought']["Categories"], 10)
 
             trinity_instance.cognition['scratchpad'] = trinity_instance.memory.get_scratchpad(
                 trinity_instance.message['author'])
@@ -127,7 +156,8 @@ def ingest_yaml_with_cognition(trinity_instance, yaml_file_path, target_user="Us
 
             # 2. Save the interaction to the journal log
             # (Note: save_channel_memory usually does this, so we must add it manually here)
-            trinity_instance.memory.save_to_collection('journal_log_table', mock_message, historical_response, {})
+            trinity_instance.memory.save_to_collection('journal_log_table', mock_message, historical_response, {},
+                respondent=trinity_instance.persona)
 
             # 3. Check and trigger the Agents if thresholds (10 or 100) are met
             trinity_instance.memory.check_scratchpad(mock_message['author'])
@@ -262,7 +292,7 @@ class HistoricalMemory(Memory):
                 metadata[i]['unix_timestamp'] = dt.timestamp()
 
             # Tick the clock forward so the next entry is 1 second later
-            self.time_offset_seconds += 1
+                self.time_offset_seconds += 1
 
             # 6. PASS THE NORMALIZED LISTS TO CHROMADB
             return self.original_save_method(

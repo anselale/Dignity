@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentForge Visual Config Editor</title>
+
+    <!-- Polyfill for process.env -->
+    <script>window.process = { env: { NODE_ENV: 'production' } };</script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Core Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.0/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/reactflow@11.11.4/dist/style.css" rel="stylesheet" />
+
+    <!-- Import Map: Bridges UMD React to ESM React Flow natively -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "data:text/javascript,const React = window.React; export default React; export const { useState, useEffect, useContext, useReducer, useCallback, useMemo, useRef, useImperativeHandle, useLayoutEffect, useDebugValue, useDeferredValue, useTransition, startTransition, useId, useSyncExternalStore, useInsertionEffect, createElement, cloneElement, isValidElement, Children, Fragment, StrictMode, Profiler, Suspense, memo, lazy, forwardRef, createContext } = React;",
+            "react-dom": "data:text/javascript,const ReactDOM = window.ReactDOM; export default ReactDOM; export const { createPortal, flushSync, findDOMNode, unmountComponentAtNode, createRoot, hydrateRoot } = ReactDOM;"
+        }
+    }
+    </script>
+
+    <!-- Native ESM Fetcher for React Flow -->
+    <script type="module">
+        import * as ReactFlowExports from 'https://esm.sh/reactflow@11.11.4?external=react,react-dom';
+        window.ReactFlowModule = ReactFlowExports;
+        window.dispatchEvent(new Event('reactflow-loaded'));
+    </script>
+
+    <style>
+        body {
+            background-color: #15171e;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            color: #f3f4f6;
+        }
+
+        .font-mono {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Custom Sleek Scrollbars */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2a2d39; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b3e4a; }
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; }
+
+        /* React Flow AgentForge Dark Mode Overrides */
+        .react-flow { background-color: #15171e; }
+        .react-flow__node {
+            background-color: #1c1e26;
+            color: #f3f4f6;
+            border: 1px solid #2a2d39;
+            border-radius: 6px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            padding: 8px 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+        .react-flow__node:hover {
+            border-color: #3b3e4a;
+        }
+        .react-flow__node.selected {
+            border-color: #9BD65E;
+            box-shadow: 0 0 0 1px #9BD65E;
+        }
+        .react-flow__handle {
+            background-color: #9BD65E;
+            border: 2px solid #1c1e26;
+            width: 10px;
+            height: 10px;
+        }
+        .react-flow__edge-path { stroke: #3b3e4a; stroke-width: 2; }
+        .react-flow__edge.selected .react-flow__edge-path { stroke: #9BD65E; stroke-width: 2.5; }
+        .react-flow__controls button {
+            background-color: #1c1e26;
+            border-bottom: 1px solid #2a2d39;
+            fill: #9ca3af;
+        }
+        .react-flow__controls button:hover { background-color: #2a2d39; fill: #ffffff; }
+        .react-flow__edge-textbg { fill: #1c1e26; rx: 4px; ry: 4px; }
+        .react-flow__edge-text { fill: #9BD65E; font-weight: 600; font-size: 12px; font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root" class="h-screen w-screen"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+        // --- Templates ---
+        const TEMPLATES = {
+            cog: `cog:
+  name: "ExampleCogAllMemories"
+  description: "A sample decision workflow with all memories."
+  chat_history_max_results: 25 # max results for chat history memory
+
+  agents:
+    - id: understanding
+      template_file: understand_agent
+
+    - id: response
+      template_file: response_agent
+
+  memory:
+    - id: persona_memory
+      type: agentforge.storage.persona_memory.PersonaMemory
+      collection_id: user_persona_facts
+      query_before: understanding  # Query before understanding for context
+      query_keys: [user_input]  # Use user input as context for queries
+      update_after: response  # Update after response is generated
+      update_keys: [understanding.insights, understanding.persona_relevant, user_input]  # What to potentially store
+
+    - id: scratchpad
+      type: agentforge.storage.scratchpad.ScratchPad
+      collection_id: scratchpad
+      query_before: understanding  # Query before understanding for context
+      query_keys: [user_input]  # Use user input as context for queries
+      update_after: response  # Update after response is generated
+      update_keys: [user_input, response]  # What to potentially store
+
+  flow:
+    start: understanding
+    transitions:
+      understanding: response
+      response:
+        end: true`,
+
+            tool: `Name: Brave Search
+Args:
+  - query (str)
+  - count (int, optional)
+Command: search
+Description: |-
+  The 'Brave Search' tool performs a web search using the Brave Search API. It retrieves search results based on the provided query. Each result includes the title, URL, description, and any extra snippets.
+
+Instruction: |-
+  To use the 'Brave Search' tool, follow these steps:
+  1. Call the \`search\` method with the following arguments:
+     - \`query\`: A string representing the search query.
+     - \`count\`: (Optional) An integer specifying the number of search results to retrieve. Defaults to 10 if not specified.
+  2. The method returns a dictionary containing search results in the keys:
+     - \`'web_results'\`: A list of web search results.
+     - \`'video_results'\`: A list of video search results (if any).
+  3. Each item in \`'web_results'\` includes:
+     - \`title\`: The title of the result.
+     - \`url\`: The URL of the result.
+     - \`description\`: A brief description of the result.
+     - \`extra_snippets\`: (Optional) Additional snippets of information.
+  4. Utilize the returned results as needed in your application.
+
+Example: |-
+  # Example usage of the Brave Search tool:
+  brave_search = BraveSearch()
+  results = brave_search.search(query='OpenAI GPT-4', count=5)
+  for result in results['web_results']:
+      print(f"Title: {result['title']}")
+      print(f"URL: {result['url']}")
+      print(f"Description: {result['description']}")
+      print('---')
+
+Script: .agentforge.tools.brave_search
+Class: BraveSearch`,
+
+            prompt: `# analyze_agent.yaml
+prompts:
+  system:
+    analysis_role: |
+      You are an analysis agent. Your task is to analyze the user's input and provide a concise interpretation.
+
+    memory: |
+      ### Relevant background
+      Review these previous interactions for patterns or user history that might inform your analysis.
+      Consider citing or summarizing relevant details to strengthen your interpretation.
+      ---
+      {_mem.general_memory.readable}
+      ---
+
+    feedback: |
+      ### Feedback from last decision
+      Here is your previous analysis:
+      ---
+      {_state.analysis}
+      ---
+
+      Address the concerns raised in the following feedback and refine your interpretation accordingly.
+      ---
+      {_state.decision.rationale}
+      ---
+
+  user:
+    instruction: |
+      ### Analysis task
+      Analyze the following user input and given information and output a concise, clear analysis.
+      ---
+      {_ctx.user_input}
+      ---`,
+
+            persona: `# Persona Configuration File
+# This file defines the character, capabilities, and behavior of your AI agent.
+#
+# HOW IT WORKS:
+# 1. When personas are enabled (persona.enabled: true in system.yaml), this file is loaded
+# 2. The persona data is added to template_data and can be referenced in prompt templates
+# 3. Use {persona.static.field_name} or {persona.retrieval.field_name} to access specific fields
+# 4. The prompt renderer converts dict/list placeholders to markdown.
+#    Render a whole section with {persona.static} or {persona.retrieval}
+#
+# PERSONA STRUCTURE:
+# - static: Core identity information that defines the agent's fundamental characteristics
+# - retrieval: Additional context that can be stored and retrieved from vector memory
+# - Both sections can be referenced in prompt templates using dot notation: {persona.section.field_name}
+#
+# PLACEHOLDER EXAMPLES:
+# - {persona.static.name} → agent's name
+# - {persona.static} → all static fields formatted as markdown
+# - {persona.retrieval.expertise} → expertise list formatted as markdown bullets
+
+# Static Section: Core identity information
+static:
+  # The agent's name or identifier
+  name: Default Assistant
+
+  # Core description of the agent's purpose and personality
+  description: |-
+    A helpful assistant that provides clear, concise, and accurate information.
+    The assistant is friendly, knowledgeable, and always aims to be as helpful as possible to the user.
+
+  # The agent's primary operating environment or context
+  location: Virtual Environment
+
+  # The agent's primary purpose or objective
+  goal: Assist users by providing helpful, accurate, and timely information in response to their questions and needs.
+
+# Retrieval Section: Additional knowledge that can be dynamically accessed
+retrieval:
+  # The agent's communication style
+  tone: Professional yet friendly, confident but not overly formal.
+
+  # Areas of knowledge or specialization
+  expertise:
+    - General knowledge across a variety of topics
+    - Problem-solving and troubleshooting
+    - Information retrieval and summarization
+
+  # Important boundaries and limitations
+  limitations: |-
+    Cannot access the internet or external data sources unless they are provided.
+    No ability to execute code or interact with systems outside of the conversation.
+    Knowledge may be limited or outdated on very recent events or specialized topics.
+
+  # Guiding values and principles
+  principles:
+    - Accuracy: Prioritize factual correctness and admit uncertainty when appropriate
+    - Helpfulness: Focus on addressing the user's needs effectively
+    - Clarity: Communicate in a clear, concise, and organized manner
+    - Safety: Avoid providing harmful, illegal, or unethical information`
+        };
+
+        // --- Custom AgentForge Icon ---
+        const AgentForgeIcon = ({ className }) => (
+            <img
+                src="https://raw.githubusercontent.com/DataBassGit/AgentForge/refs/heads/dev/docs/images/AF-logo-Fullcolor.png"
+                alt="AgentForge Logo"
+                className={`object-contain ${className}`}
+            />
+        );
+
+        // --- Regular Icons ---
+        const FolderIcon = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>;
+        const FileTextIcon = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
+        const PlusIcon = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>;
+        const TrashIcon = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>;
+        const CloseIcon = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>;
+        const CodeIcon = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>;
+        const EyeIcon = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>;
+        const SaveIcon = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>;
+        const ChevronDownIcon = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>;
+        const ChevronRightIcon = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>;
+        const FlowIcon = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>;
+        const TemplateIcon = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
+
+        // --- Custom UI Components ---
+        const Modal = ({ title, children, onClose }) => (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                <div className="bg-[#1c1e26] border border-[#2a2d39] rounded-xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col">
+                    <div className="px-5 py-4 border-b border-[#2a2d39] flex justify-between items-center bg-[#181a20]">
+                        <h3 className="font-bold text-gray-100 tracking-wide">{title}</h3>
+                        <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors bg-[#2a2d39]/50 hover:bg-[#2a2d39] p-1.5 rounded-md"><CloseIcon className="w-4 h-4"/></button>
+                    </div>
+                    <div className="p-6 bg-[#1c1e26]">{children}</div>
+                </div>
+            </div>
+        );
+
+        // --- Visual Form Components ---
+        const CollapsibleSection = ({ title, onDelete, children, defaultCollapsed = false }) => {
+            const [collapsed, setCollapsed] = useState(defaultCollapsed);
+            return (
+                <div className="mb-2 border border-[#2a2d39] rounded-md bg-[#1a1c24] overflow-hidden">
+                    <div
+                        className="flex justify-between items-center p-2 bg-[#1f222b] hover:bg-[#252833] cursor-pointer transition-colors group"
+                        onClick={() => setCollapsed(!collapsed)}
+                    >
+                        <div className="flex items-center gap-2">
+                            <span className="text-gray-500 group-hover:text-[#9BD65E] transition-colors">
+                                {collapsed ? <ChevronRightIcon className="w-3.5 h-3.5" /> : <ChevronDownIcon className="w-3.5 h-3.5" />}
+                            </span>
+                            <label className="text-[12px] font-bold text-gray-300 cursor-pointer select-none tracking-wide">{title}</label>
+                        </div>
+                        {onDelete && (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                                className="text-gray-500 hover:text-red-400 p-1 rounded-md hover:bg-[#2a2d39] transition-colors opacity-0 group-hover:opacity-100"
+                            >
+                                <TrashIcon className="w-3.5 h-3.5" />
+                            </button>
+                        )}
+                    </div>
+                    {!collapsed && (
+                        <div className="p-2 pl-3 border-t border-[#2a2d39]">
+                            {children}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const DynamicInput = ({ value, onChange, label, onDelete }) => {
+            const isMultiline = typeof value === 'string' && (value.includes('\n') || value.length > 50);
+
+            return (
+                <div className="mb-2 bg-[#121419] p-2.5 rounded-md border border-[#2a2d39] relative group transition-all hover:border-[#3b3e4a]">
+                    <div className="flex justify-between items-center mb-2">
+                        <label className="text-[10px] font-bold text-[#9BD65E] uppercase tracking-wider">{label}</label>
+                        {onDelete && (
+                            <button onClick={onDelete} className="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-[#2a2d39]">
+                                <TrashIcon className="w-3.5 h-3.5" />
+                            </button>
+                        )}
+                    </div>
+                    {typeof value === 'string' ? (
+                        isMultiline ? (
+                            <textarea
+                                className="w-full bg-[#1c1e26] border border-[#2a2d39] rounded-md p-2 text-gray-200 font-mono text-[13px] focus:border-[#9BD65E] focus:ring-1 focus:ring-[#9BD65E]/50 outline-none transition-all min-h-[80px]"
+                                value={value}
+                                onChange={e => onChange(e.target.value)}
+                            />
+                        ) : (
+                            <input
+                                type="text"
+                                className="w-full bg-[#1c1e26] border border-[#2a2d39] rounded-md p-2 text-gray-200 font-mono text-[13px] focus:border-[#9BD65E] focus:ring-1 focus:ring-[#9BD65E]/50 outline-none transition-all"
+                                value={value}
+                                onChange={e => onChange(e.target.value)}
+                            />
+                        )
+                    ) : typeof value === 'number' ? (
+                        <input
+                            type="number"
+                            className="w-full bg-[#1c1e26] border border-[#2a2d39] rounded-md p-2 text-gray-200 font-mono text-[13px] focus:border-[#9BD65E] focus:ring-1 focus:ring-[#9BD65E]/50 outline-none transition-all"
+                            value={value}
+                            onChange={e => onChange(parseFloat(e.target.value))}
+                        />
+                    ) : typeof value === 'boolean' ? (
+                        <label className="flex items-center gap-3 cursor-pointer mt-1 mb-1">
+                            <div className="relative flex items-center">
+                                <input
+                                    type="checkbox"
+                                    className="peer appearance-none w-9 h-5 bg-[#2a2d39] rounded-full checked:bg-[#9BD65E] transition-colors cursor-pointer border border-[#3b3e4a]"
+                                    checked={value}
+                                    onChange={e => onChange(e.target.checked)}
+                                />
+                                <div className="absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform peer-checked:translate-x-4 shadow-sm"></div>
+                            </div>
+                            <span className="text-gray-300 text-[12px] font-medium">{value ? 'True' : 'False'}</span>
+                        </label>
+                    ) : null}
+                </div>
+            );
+        };
+
+        const ObjectVisualizer = ({ data, onChange }) => {
+            const [newKey, setNewKey] = useState("");
+            const [newType, setNewType] = useState("string");
+
+            if (typeof data !== 'object' || data === null) {
+                return <div className="text-gray-500 text-[12px] italic">Unsupported type</div>;
+            }
+
+            if (Array.isArray(data)) {
+                return (
+                    <div className="pl-3 border-l-2 border-[#2a2d39] space-y-1 py-1 ml-1">
+                        {data.map((item, idx) => (
+                            <div key={idx} className="flex gap-2 items-start">
+                                <div className="flex-grow min-w-0">
+                                    {typeof item === 'object' && item !== null ? (
+                                        <CollapsibleSection title={`Item [${idx}]`} onDelete={null}>
+                                            <ObjectVisualizer
+                                                data={item}
+                                                onChange={(newObj) => { const arr = [...data]; arr[idx] = newObj; onChange(arr); }}
+                                            />
+                                        </CollapsibleSection>
+                                    ) : (
+                                        <DynamicInput
+                                            value={item}
+                                            label={`Item [${idx}]`}
+                                            onChange={(val) => { const arr = [...data]; arr[idx] = val; onChange(arr); }}
+                                        />
+                                    )}
+                                </div>
+                                <button onClick={() => { const arr = [...data]; arr.splice(idx,1); onChange(arr); }} className="text-gray-500 hover:text-red-400 mt-1 p-1.5 rounded-md hover:bg-[#2a2d39] transition-colors shrink-0" title="Delete Item">
+                                    <TrashIcon className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                        ))}
+                        <div className="flex gap-2 pt-2 items-center">
+                            <select
+                                className="bg-[#1c1e26] border border-[#2a2d39] rounded-md px-2 py-1 text-[11px] font-bold text-gray-400 focus:border-[#9BD65E] outline-none cursor-pointer h-[28px]"
+                                value={newType}
+                                onChange={e => setNewType(e.target.value)}
+                            >
+                                <option value="string">Text</option>
+                                <option value="object">Object (Subkeys)</option>
+                                <option value="array">List</option>
+                                <option value="number">Number</option>
+                                <option value="boolean">Boolean</option>
+                            </select>
+                            <button
+                                onClick={() => {
+                                    let initVal = "";
+                                    if(newType === "object") initVal = {};
+                                    else if(newType === "array") initVal = [];
+                                    else if(newType === "number") initVal = 0;
+                                    else if(newType === "boolean") initVal = false;
+                                    onChange([...data, initVal]);
+                                }}
+                                className="text-[11px] h-[28px] font-bold flex items-center gap-1.5 text-[#9BD65E] hover:text-white transition-colors bg-[#9BD65E]/10 hover:bg-[#9BD65E]/20 px-3 rounded-md border border-[#9BD65E]/20 w-fit"
+                            >
+                                <PlusIcon className="w-3.5 h-3.5" /> ADD ITEM
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Object rendering
+            return (
+                <div className="space-y-1">
+                    {Object.entries(data).map(([key, value]) => (
+                        <div key={key}>
+                            {typeof value === 'object' && value !== null ? (
+                                <CollapsibleSection
+                                    title={key}
+                                    onDelete={() => { const obj = {...data}; delete obj[key]; onChange(obj); }}
+                                >
+                                    <ObjectVisualizer
+                                        data={value}
+                                        onChange={(newVal) => onChange({...data, [key]: newVal})}
+                                    />
+                                </CollapsibleSection>
+                            ) : (
+                                <DynamicInput
+                                    label={key}
+                                    value={value}
+                                    onChange={(newVal) => onChange({...data, [key]: newVal})}
+                                    onDelete={() => { const obj = {...data}; delete obj[key]; onChange(obj); }}
+                                />
+                            )}
+                        </div>
+                    ))}
+                    <div className="flex gap-2 pt-2 items-center">
+                        <input
+                            type="text"
+                            className="bg-[#1c1e26] border border-[#2a2d39] rounded-md px-3 py-1.5 text-[12px] text-gray-200 focus:border-[#9BD65E] focus:ring-1 focus:ring-[#9BD65E]/50 outline-none flex-grow font-mono"
+                            placeholder="Add new field key..."
+                            value={newKey}
+                            onChange={e => setNewKey(e.target.value)}
+                            onKeyDown={e => {
+                                if(e.key === 'Enter' && newKey && !(newKey in data)) {
+                                    let initVal = "";
+                                    if(newType === "object") initVal = {};
+                                    else if(newType === "array") initVal = [];
+                                    else if(newType === "number") initVal = 0;
+                                    else if(newType === "boolean") initVal = false;
+                                    onChange({...data, [newKey]: initVal});
+                                    setNewKey("");
+                                }
+                            }}
+                        />
+                        <select
+                            className="bg-[#1c1e26] border border-[#2a2d39] rounded-md px-2 py-1.5 text-[12px] font-bold text-gray-400 focus:border-[#9BD65E] outline-none cursor-pointer"
+                            value={newType}
+                            onChange={e => setNewType(e.target.value)}
+                        >
+                            <option value="string">Text</option>
+                            <option value="object">Object (Subkeys)</option>
+                            <option value="array">List</option>
+                            <option value="number">Number</option>
+                            <option value="boolean">Boolean</option>
+                        </select>
+                        <button
+                            onClick={() => {
+                                if(newKey && !(newKey in data)) {
+                                    let initVal = "";
+                                    if(newType === "object") initVal = {};
+                                    else if(newType === "array") initVal = [];
+                                    else if(newType === "number") initVal = 0;
+                                    else if(newType === "boolean") initVal = false;
+                                    onChange({...data, [newKey]: initVal});
+                                    setNewKey("");
+                                }
+                            }}
+                            className="bg-[#2a2d39] hover:bg-[#3b3e4a] text-gray-200 px-4 py-1.5 rounded-md text-[12px] font-bold transition-colors border border-[#3b3e4a] shrink-0"
+                        >
+                            ADD KEY
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const FolderNode = ({ node, level, onFileClick, onCreateFile, onCreateTemplate }) => {
+            const [expanded, setExpanded] = useState(true);
+            const padding = level * 16 + 12;
+            return (
+                <div className="mb-0.5">
+                    <div
+                        className="flex items-center justify-between text-gray-400 hover:text-white hover:bg-[#2a2d39] py-1.5 pr-2 rounded-md transition-colors group cursor-pointer"
+                        style={{ paddingLeft: `${padding}px` }}
+                        onClick={() => setExpanded(!expanded)}
+                    >
+                        <div className="flex items-center gap-2 font-medium text-[13px] tracking-wide">
+                            <span className="text-gray-500 group-hover:text-[#9BD65E] transition-colors">
+                                {expanded ? <ChevronDownIcon className="w-3.5 h-3.5" /> : <ChevronRightIcon className="w-3.5 h-3.5" />}
+                            </span>
+                            <FolderIcon className="w-4 h-4 text-[#9BD65E]" />
+                            {node.name}
+                        </div>
+                        <div className="flex items-center opacity-0 group-hover:opacity-100 transition-all">
+                            <button
+                                onClick={(e) => { e.stopPropagation(); onCreateTemplate(node); }}
+                                className="text-gray-500 hover:text-[#9BD65E] p-1 rounded-md hover:bg-[#15171e] transition-colors"
+                                title="Create from template"
+                            >
+                                <TemplateIcon className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); onCreateFile(node); }}
+                                className="text-gray-500 hover:text-[#9BD65E] p-1 rounded-md hover:bg-[#15171e] transition-colors"
+                                title="Create new empty file"
+                            >
+                                <PlusIcon className="w-3.5 h-3.5" />
+                            </button>
+                        </div>
+                    </div>
+                    {expanded && <FileTree tree={node.children} level={level + 1} onFileClick={onFileClick} onCreateFile={onCreateFile} onCreateTemplate={onCreateTemplate} />}
+                </div>
+            );
+        };
+
+        const FileTree = ({ tree, level = 0, onFileClick, onCreateFile, onCreateTemplate }) => {
+            const padding = level * 16 + 12;
+            return (
+                <div className="w-full">
+                    {tree.map(node => (
+                        <div key={node.path}>
+                            {node.kind === 'directory' ? (
+                                <FolderNode node={node} level={level} onFileClick={onFileClick} onCreateFile={onCreateFile} onCreateTemplate={onCreateTemplate} />
+                            ) : (
+                                <div
+                                    onClick={() => onFileClick(node)}
+                                    className="flex items-center gap-2 text-[13px] text-gray-400 hover:text-[#9BD65E] hover:bg-[#9BD65E]/10 py-1.5 pr-2 rounded-md cursor-pointer transition-all border border-transparent"
+                                    style={{ paddingLeft: `${padding + 24}px` }}
+                                >
+                                    <FileTextIcon className="w-3.5 h-3.5 opacity-70" />
+                                    {node.name}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        const generateInitialNodesAndEdges = (cogData) => {
+            const flow = cogData?.cog?.flow || {};
+            const startNodeRaw = flow.start || 'START_AGENT_NOT_SET';
+            const transitions = flow.transitions || {};
+            const memory = cogData?.cog?.memory || [];
+
+            const nodesMap = new Map();
+            const edges = [];
+            const choiceNodes = [];
+
+            const safeString = (val) => {
+                if (typeof val === 'object' && val !== null) return JSON.stringify(val);
+                return String(val);
+            };
+
+            const isEndTarget = (t) => t === 'END' || t === 'end' || t === true;
+
+            const addNode = (idRaw, type = 'default', style = undefined) => {
+                const id = safeString(idRaw);
+                if (!nodesMap.has(id)) {
+                    const nodeDef = {
+                        id,
+                        type,
+                        data: { label: id },
+                        position: { x: 0, y: 0 },
+                        sourcePosition: 'bottom',
+                        targetPosition: 'top'
+                    };
+                    if (style) nodeDef.style = style;
+                    nodesMap.set(id, nodeDef);
+                }
+                return id;
+            };
+
+            const addEdge = (source, target, label, isMemory = false) => {
+                const existingEdge = edges.find(e => e.source === source && e.target === target && e.animated === isMemory);
+                if (existingEdge) {
+                    if (label) {
+                        const existingLabels = existingEdge.label ? existingEdge.label.split(',').map(s=>s.trim()) : [];
+                        if (!existingLabels.includes(label)) {
+                            existingEdge.label = existingEdge.label ? `${existingEdge.label}, ${label}` : label;
+                        }
+                    }
+                    return;
+                }
+                const edgeDef = {
+                    id: isMemory ? `e-mem-${source}-${target}-${edges.length}` : `e-${source}-${target}-${edges.length}`,
+                    source,
+                    target,
+                    type: 'bezier',
+                    animated: isMemory,
+                    markerEnd: { type: 'arrowclosed', color: isMemory ? '#60a5fa' : '#3b3e4a' },
+                };
+                if (label) edgeDef.label = label;
+                if (isMemory) {
+                    edgeDef.style = { stroke: '#60a5fa', strokeDasharray: '5,5' };
+                    edgeDef.labelStyle = { fill: '#60a5fa', fontWeight: 700 };
+                } else {
+                    edgeDef.style = { stroke: '#3b3e4a', strokeWidth: 2 };
+                }
+                edges.push(edgeDef);
+            };
+
+            const startNode = addNode(startNodeRaw);
+            addNode('START', 'input');
+            addNode('END', 'output');
+            addEdge('START', startNode, '');
+
+            Object.entries(transitions).forEach(([sourceRaw, target]) => {
+                const source = addNode(sourceRaw);
+
+                if (typeof target === 'object' && target !== null && 'choice' in target) {
+                    choiceNodes.push(source);
+                }
+
+                if (typeof target === 'string' || typeof target === 'number' || typeof target === 'boolean') {
+                    const targetId = isEndTarget(target) ? 'END' : addNode(target);
+                    addEdge(source, targetId, isEndTarget(target) ? 'end' : '');
+                } else if (typeof target === 'object' && target !== null) {
+                    Object.entries(target).forEach(([conditionRaw, condTargetRaw]) => {
+                        if (['max_visits', 'max_loops'].includes(conditionRaw)) return;
+
+                        if (conditionRaw === 'choice' && typeof condTargetRaw === 'object' && condTargetRaw !== null) {
+                            Object.entries(condTargetRaw).forEach(([choiceCond, choiceTarget]) => {
+                                const choiceCondStr = safeString(choiceCond);
+                                const choiceTargetId = isEndTarget(choiceTarget) ? 'END' : addNode(choiceTarget);
+                                addEdge(source, choiceTargetId, `choice: ${choiceCondStr}`);
+                            });
+                        } else {
+                            const condition = safeString(conditionRaw);
+                            const condTarget = isEndTarget(condTargetRaw) ? 'END' : addNode(condTargetRaw);
+                            addEdge(source, condTarget, condition);
+                        }
+                    });
+                }
+            });
+
+            if (Array.isArray(memory)) {
+                memory.forEach(mem => {
+                    if (!mem.id) return;
+                    const memId = addNode(mem.id, 'default', {
+                        backgroundColor: '#1e3a8a',
+                        borderColor: '#60a5fa',
+                        color: '#eff6ff',
+                        borderRadius: '20px',
+                        borderStyle: 'dashed'
+                    });
+
+                    const node = nodesMap.get(memId);
+                    if(node) {
+                        node.sourcePosition = 'left';
+                        node.targetPosition = 'left';
+                    }
+
+                    if (mem.query_before) {
+                        const agentId = addNode(mem.query_before);
+                        addEdge(memId, agentId, 'query', true);
+                    }
+
+                    if (mem.update_after) {
+                        const agentId = addNode(mem.update_after);
+                        addEdge(agentId, memId, 'update', true);
+                    }
+                });
+            }
+
+            const nodes = Array.from(nodesMap.values());
+            const levelMap = new Map();
+            const visited = new Set();
+
+            const sideNodes = [...(Array.isArray(memory) ? memory.map(m => safeString(m.id)) : []), ...choiceNodes];
+
+            const queue = [{id: 'START', level: 0}];
+            while(queue.length > 0) {
+                const {id, level} = queue.shift();
+                if (!visited.has(id)) {
+                    visited.add(id);
+                    levelMap.set(id, level);
+                    const children = edges.filter(e => e.source === id && !e.id.startsWith('e-mem-')).map(e => e.target);
+                    children.forEach(child => queue.push({id: child, level: level + 1}));
+                }
+            }
+
+            nodes.forEach(n => {
+                if (!visited.has(n.id) && !sideNodes.includes(n.id)) {
+                    levelMap.set(n.id, 0);
+                }
+            });
+
+            const levelGroups = {};
+            nodes.forEach(n => {
+                if (sideNodes.includes(n.id)) return;
+                const lvl = levelMap.get(n.id) || 0;
+                if (!levelGroups[lvl]) levelGroups[lvl] = [];
+                levelGroups[lvl].push(n.id);
+            });
+
+            let sideY = 80;
+            nodes.forEach(n => {
+                if (sideNodes.includes(n.id)) {
+                    n.position = { x: 650, y: sideY };
+                    sideY += 150;
+                } else {
+                    const lvl = levelMap.get(n.id) || 0;
+                    const idx = levelGroups[lvl].indexOf(n.id);
+                    const width = levelGroups[lvl].length;
+                    n.position = {
+                        x: (idx - (width - 1) / 2) * 220 + 300,
+                        y: lvl * 150 + 80
+                    };
+                }
+            });
+
+            return { nodes, edges };
+        };
+
+        const CogFlowGraph = ({ data, onChange, showPrompt, onOpenFileByName }) => {
+            const [isLoaded, setIsLoaded] = useState(!!window.ReactFlowModule);
+            const [loadError, setLoadError] = useState(false);
+
+            useEffect(() => {
+                if (!isLoaded) {
+                    const handleLoad = () => setIsLoaded(true);
+                    window.addEventListener('reactflow-loaded', handleLoad);
+                    const timeout = setTimeout(() => setLoadError(true), 10000);
+                    return () => {
+                        window.removeEventListener('reactflow-loaded', handleLoad);
+                        clearTimeout(timeout);
+                    }
+                }
+            }, [isLoaded]);
+
+            const { nodes: initialNodes, edges: initialEdges } = useMemo(() => generateInitialNodesAndEdges(data), [data]);
+            const [nodes, setNodes] = useState(initialNodes);
+            const [edges, setEdges] = useState(initialEdges);
+
+            const rf = window.ReactFlowModule || {};
+
+            const onNodesChange = useCallback(
+                (changes) => setNodes((nds) => rf.applyNodeChanges ? rf.applyNodeChanges(changes, nds) : nds),
+                [rf]
+            );
+            const onEdgesChange = useCallback(
+                (changes) => setEdges((eds) => rf.applyEdgeChanges ? rf.applyEdgeChanges(changes, eds) : eds),
+                [rf]
+            );
+
+            const onConnect = useCallback((params) => {
+                showPrompt("Enter condition (e.g. 'choice: approve, fallback' or 'end'):", (condition) => {
+                    const edge = {
+                        ...params,
+                        id: `e-${params.source}-${params.target}-${Date.now()}`,
+                        label: condition || '',
+                        type: 'bezier',
+                        markerEnd: { type: 'arrowclosed', color: '#3b3e4a' },
+                        style: { stroke: '#3b3e4a', strokeWidth: 2 }
+                    };
+                    setEdges((eds) => rf.addEdge ? rf.addEdge(edge, eds) : [...eds, edge]);
+                });
+            }, [showPrompt, rf]);
+
+            const onNodeDoubleClick = useCallback((event, node) => {
+                if (node.id === 'START' || node.id === 'END') return;
+
+                let targetName = node.id;
+                const agents = data?.cog?.agents;
+                if (Array.isArray(agents)) {
+                    const agent = agents.find(a => a.id === node.id);
+                    if (agent && agent.template_file) {
+                        targetName = agent.template_file;
+                    }
+                }
+
+                onOpenFileByName(targetName);
+            }, [data, onOpenFileByName]);
+
+            const applyGraphToYaml = useCallback(() => {
+                const newTransitions = {};
+                const newFlow = { ...(data.cog?.flow || {}) };
+                const existingTransitions = newFlow.transitions || {};
+
+                const parseSafely = (val) => {
+                    if (typeof val !== 'string') return val;
+                    if (val.toLowerCase() === 'true') return true;
+                    if (val.toLowerCase() === 'false') return false;
+                    if (!isNaN(val) && val.trim() !== '') return Number(val);
+                    try {
+                        const parsed = JSON.parse(val);
+                        if (typeof parsed === 'object') return parsed;
+                    } catch(e) {}
+                    return val;
+                };
+
+                const startEdge = edges.find(e => e.source === 'START');
+                if (startEdge) {
+                    newFlow.start = parseSafely(startEdge.target);
+                }
+
+                const edgesBySource = {};
+                edges.forEach(e => {
+                    if (e.source === 'START') return;
+                    if (e.id.startsWith('e-mem-')) return;
+
+                    if (!edgesBySource[e.source]) edgesBySource[e.source] = [];
+                    edgesBySource[e.source].push(e);
+                });
+
+                Object.keys(edgesBySource).forEach(source => {
+                    const parsedSource = source.startsWith('{') ? parseSafely(source) : source;
+                    const outEdges = edgesBySource[source];
+
+                    const existingNodeConfig = existingTransitions[parsedSource];
+                    let baseConfig = {};
+                    if (typeof existingNodeConfig === 'object' && existingNodeConfig !== null) {
+                        baseConfig = { ...existingNodeConfig };
+                        delete baseConfig.choice;
+                        delete baseConfig.fallback;
+                        delete baseConfig.default;
+
+                        outEdges.forEach(e => {
+                            const labels = (e.label && e.label.trim() !== '') ? e.label.split(',').map(s=>s.trim()) : [''];
+                            labels.forEach(lbl => delete baseConfig[lbl]);
+                        });
+                    }
+
+                    const hasLabels = outEdges.some(e => e.label && e.label.trim() !== '');
+
+                    if (!hasLabels && outEdges.length === 1) {
+                        const targetVal = outEdges[0].target === 'END' ? true : parseSafely(outEdges[0].target);
+                        if (Object.keys(baseConfig).length > 0) {
+                            newTransitions[parsedSource] = { ...baseConfig, fallback: targetVal };
+                        } else {
+                            newTransitions[parsedSource] = targetVal;
+                        }
+                    } else {
+                        newTransitions[parsedSource] = { ...baseConfig };
+                        outEdges.forEach(e => {
+                            const labels = (e.label && e.label.trim() !== '') ? e.label.split(',').map(s=>s.trim()) : ['fallback'];
+                            const targetVal = e.target === 'END' ? true : parseSafely(e.target);
+
+                            labels.forEach(label => {
+                                if (label.startsWith('choice:')) {
+                                    const choiceKey = label.substring(7).trim();
+                                    if (!newTransitions[parsedSource].choice) {
+                                        newTransitions[parsedSource].choice = {};
+                                    }
+                                    newTransitions[parsedSource].choice[choiceKey] = targetVal;
+                                } else {
+                                    newTransitions[parsedSource][label] = targetVal;
+                                }
+                            });
+                        });
+                    }
+                });
+
+                const newData = {
+                    ...data,
+                    cog: {
+                        ...data.cog,
+                        flow: {
+                            ...newFlow,
+                            transitions: newTransitions
+                        }
+                    }
+                };
+                onChange(newData);
+            }, [data, edges, onChange]);
+
+            if (loadError) {
+                return (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-[#15171e] p-8">
+                        <div className="text-red-400 flex items-center gap-2 font-bold text-lg mb-2">
+                            <CloseIcon className="w-5 h-5" /> ESM Network Timeout
+                        </div>
+                        <p className="text-gray-400 text-sm text-center max-w-md">Failed to download the React Flow ES Module. This is usually caused by strict firewall rules blocking standard ESM CDNs (esm.sh). Please check your internet connection.</p>
+                    </div>
+                );
+            }
+
+            if (!isLoaded || !rf.ReactFlow) {
+                return (
+                    <div className="w-full h-full flex items-center justify-center bg-[#15171e]">
+                        <div className="text-[#9BD65E] flex items-center gap-2 font-bold text-lg animate-pulse">
+                            <FlowIcon className="w-5 h-5" /> Initializing Graph Engine via ESM...
+                        </div>
+                    </div>
+                );
+            }
+
+            const ReactFlowComponent = rf.default || rf.ReactFlow;
+            const BackgroundComponent = rf.Background;
+            const ControlsComponent = rf.Controls;
+
+            return (
+                <div className="w-full h-full relative">
+                    <ReactFlowComponent
+                        nodes={nodes}
+                        edges={edges}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        onConnect={onConnect}
+                        onNodeDoubleClick={onNodeDoubleClick}
+                        fitView
+                    >
+                        <BackgroundComponent color="#1c1e26" gap={16} />
+                        <ControlsComponent style={{ backgroundColor: '#1c1e26', color: '#d4d4d4', fill: '#d4d4d4', borderColor: '#2a2d39' }} />
+                    </ReactFlowComponent>
+
+                    <div className="absolute top-4 left-4 z-10 flex gap-2">
+                        <button
+                            onClick={() => {
+                                const newFlow = generateInitialNodesAndEdges(data);
+                                setNodes(newFlow.nodes);
+                                setEdges(newFlow.edges);
+                            }}
+                            className="bg-[#2a2d39] hover:bg-[#3b3e4a] text-gray-200 px-4 py-2 rounded-md text-sm font-bold shadow-md transition-all border border-[#3b3e4a]"
+                        >
+                            Reset Layout
+                        </button>
+                        <button
+                            onClick={applyGraphToYaml}
+                            className="bg-[#c68b5d] hover:bg-[#b57e54] text-white px-4 py-2 rounded-md text-sm font-bold shadow-md transition-all"
+                        >
+                            Sync Graph to Config
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const EditorPane = ({ activeFile, onUpdateContent, onSave, showPrompt, onOpenFileByName }) => {
+            const [mode, setMode] = useState('visual');
+
+            let parsedData = null;
+            let currentYamlError = null;
+
+            if (activeFile && (mode === 'visual' || mode === 'flow')) {
+                try {
+                    parsedData = jsyaml.load(activeFile.content);
+                } catch(e) {
+                    currentYamlError = e.message;
+                }
+            }
+
+            const isCog = parsedData && typeof parsedData === 'object' && 'cog' in parsedData;
+
+            useEffect(() => {
+                if (activeFile && mode === 'flow' && !isCog && !currentYamlError) {
+                    setMode('visual');
+                }
+            }, [activeFile?.path, isCog, mode, currentYamlError]);
+
+            if (!activeFile) {
+                return (
+                    <div className="h-full flex items-center justify-center text-gray-500 flex-col gap-4 bg-[#15171e]">
+                        <div className="w-20 h-20 rounded-2xl bg-[#1c1e26] flex items-center justify-center border border-[#2a2d39] shadow-sm">
+                            <FolderIcon className="w-10 h-10 text-gray-600" />
+                        </div>
+                        <p className="text-base font-medium tracking-wide">Select a file from the sidebar to start editing.</p>
+                    </div>
+                )
+            }
+
+            const handleVisualChange = (newData) => {
+                try {
+                    const newYaml = jsyaml.dump(newData, { indent: 2, lineWidth: -1 });
+                    onUpdateContent(activeFile.path, newYaml);
+                } catch(e) {
+                    console.error("YAML Serialization Error:", e);
+                }
+            };
+
+            return (
+                <div className="h-full flex flex-col bg-[#15171e] min-h-0">
+                    {/* Toolbar */}
+                    <div className="flex items-center justify-between px-5 py-3 bg-[#1a1c24] border-b border-[#2a2d39] shadow-sm z-10 shrink-0">
+                        <div className="flex items-center gap-2">
+                            <FileTextIcon className="w-4 h-4 text-[#9BD65E]" />
+                            <span className="font-mono text-[14px] font-bold text-gray-200 tracking-wide">{activeFile.name}</span>
+                            {activeFile.isDirty && <span className="w-2 h-2 rounded-full bg-[#c68b5d] ml-1.5"></span>}
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="flex bg-[#121419] rounded-md p-1 border border-[#2a2d39]">
+                                <button
+                                    onClick={() => setMode('visual')}
+                                    className={`px-3 py-1.5 text-[13px] font-bold rounded flex items-center gap-1.5 transition-all duration-200 ${mode === 'visual' && !currentYamlError ? 'bg-[#2a2d39] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
+                                >
+                                    <EyeIcon className="w-4 h-4" /> Visual
+                                </button>
+                                {isCog && (
+                                    <button
+                                        onClick={() => setMode('flow')}
+                                        className={`px-3 py-1.5 text-[13px] font-bold rounded flex items-center gap-1.5 transition-all duration-200 ${mode === 'flow' ? 'bg-[#2a2d39] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
+                                    >
+                                        <FlowIcon className="w-4 h-4" /> Flow
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => setMode('raw')}
+                                    className={`px-3 py-1.5 text-[13px] font-bold rounded flex items-center gap-1.5 transition-all duration-200 ${mode === 'raw' || currentYamlError ? 'bg-[#2a2d39] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
+                                >
+                                    <CodeIcon className="w-4 h-4" /> Raw Code
+                                </button>
+                            </div>
+                            <button
+                                onClick={() => onSave(activeFile)}
+                                disabled={!activeFile.isDirty}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-md text-[13px] font-bold transition-all duration-200 ${activeFile.isDirty ? 'bg-[#c68b5d] hover:bg-[#b57e54] text-white shadow-sm' : 'bg-[#1c1e26] text-gray-500 cursor-not-allowed border border-[#2a2d39]'}`}
+                            >
+                                <SaveIcon className="w-4 h-4" /> Save File
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Content Area */}
+                    <div className={`flex-grow relative min-h-0 ${mode === 'flow' ? 'overflow-hidden p-0' : 'overflow-y-auto overflow-x-hidden p-5'}`}>
+                        {mode === 'flow' && !currentYamlError ? (
+                            <div className="w-full h-full bg-[#15171e]">
+                                <CogFlowGraph key={activeFile.path} data={parsedData} onChange={handleVisualChange} showPrompt={showPrompt} onOpenFileByName={onOpenFileByName} />
+                            </div>
+                        ) : mode === 'raw' || currentYamlError ? (
+                            <div className="h-full flex flex-col w-full mx-auto max-w-5xl">
+                                {currentYamlError && (
+                                    <div className="mb-4 p-3 bg-red-900/20 border-l-4 border-red-500 text-red-400 text-[13px] rounded-r-md">
+                                        <strong className="block mb-1 text-red-300">YAML Parse Warning:</strong>
+                                        {currentYamlError}
+                                        <p className="mt-1.5 text-[11px] opacity-70">Visual mode is disabled until the syntax errors are resolved.</p>
+                                    </div>
+                                )}
+                                <textarea
+                                    className="flex-grow w-full bg-[#1c1e26] text-gray-300 font-mono text-[13px] p-4 rounded-md focus:outline-none focus:ring-1 focus:ring-[#9BD65E]/50 resize-none border border-[#2a2d39] leading-relaxed shadow-inner min-h-[500px]"
+                                    value={activeFile.content}
+                                    onChange={(e) => onUpdateContent(activeFile.path, e.target.value)}
+                                    spellCheck="false"
+                                />
+                            </div>
+                        ) : (
+                            <div className="w-full pb-10">
+                                {parsedData === undefined || parsedData === null || (typeof parsedData === 'object' && Object.keys(parsedData).length === 0) ? (
+                                    <div className="text-gray-500 p-8 border-2 border-dashed border-[#2a2d39] rounded-md text-center bg-[#1c1e26]">
+                                        <p className="mb-4 font-medium text-sm">This YAML file is empty.</p>
+                                        <div className="max-w-md mx-auto text-left">
+                                            <ObjectVisualizer data={{}} onChange={handleVisualChange} />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="max-w-4xl mx-auto">
+                                        <div className="bg-[#1c1e26] p-5 rounded-lg border border-[#2a2d39] shadow-sm">
+                                            {typeof parsedData === 'object' ? (
+                                                <ObjectVisualizer data={parsedData} onChange={handleVisualChange} />
+                                            ) : (
+                                                <DynamicInput value={parsedData} label="Root Value" onChange={(val) => {
+                                                    try {
+                                                        const newYaml = jsyaml.dump(val);
+                                                        onUpdateContent(activeFile.path, newYaml);
+                                                    } catch(e) {}
+                                                }} />
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [supported] = useState('showDirectoryPicker' in window);
+            const [dirHandle, setDirHandle] = useState(null);
+            const [fileTree, setFileTree] = useState([]);
+            const [openFiles, setOpenFiles] = useState([]);
+            const [activePath, setActivePath] = useState(null);
+
+            // Modal state management
+            const [modals, setModals] = useState({ alert: null, confirm: null, prompt: null, template: null });
+
+            const showAlert = (message) => setModals(m => ({ ...m, alert: { message } }));
+            const showConfirm = (message, onConfirm) => setModals(m => ({ ...m, confirm: { message, onConfirm, onCancel: () => setModals(m => ({ ...m, confirm: null })) } }));
+            const showPrompt = (message, onConfirm) => setModals(m => ({ ...m, prompt: { message, value: '', onConfirm, onCancel: () => setModals(m => ({ ...m, prompt: null })) } }));
+
+            const sortTree = (nodes) => {
+                return nodes.sort((a, b) => {
+                    if (a.kind === 'directory' && b.kind === 'file') return -1;
+                    if (a.kind === 'file' && b.kind === 'directory') return 1;
+                    return a.name.localeCompare(b.name);
+                });
+            };
+
+            const loadDirectory = async () => {
+                try {
+                    const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
+                    setDirHandle(handle);
+                    await refreshTree(handle);
+                } catch (err) {
+                    if(err.name !== 'AbortError') {
+                        showAlert(`Failed to open directory: ${err.message}`);
+                    }
+                }
+            };
+
+            const getFilesRecursively = async (dirH, currentPath) => {
+                let items = [];
+                for await (const entry of dirH.values()) {
+                    const itemPath = currentPath ? `${currentPath}/${entry.name}` : entry.name;
+                    if (entry.kind === 'directory' && !entry.name.startsWith('.')) {
+                        const children = await getFilesRecursively(entry, itemPath);
+                        if (children.length > 0 || true) {
+                            items.push({ handle: entry, name: entry.name, path: itemPath, kind: 'directory', children: sortTree(children) });
+                        }
+                    } else if (entry.kind === 'file' && (entry.name.endsWith('.yaml') || entry.name.endsWith('.yml'))) {
+                        items.push({ handle: entry, name: entry.name, path: itemPath, kind: 'file' });
+                    }
+                }
+                return sortTree(items);
+            };
+
+            const refreshTree = async (handle = dirHandle) => {
+                if (!handle) return;
+                let tree = [];
+                let targetHandle = handle;
+
+                try {
+                    targetHandle = await handle.getDirectoryHandle('.agentforge');
+                } catch (e) {
+                    console.log(".agentforge not found at root, using selected directory fallback.");
+                }
+
+                for await (const entry of targetHandle.values()) {
+                    const itemPath = entry.name;
+                    if (entry.kind === 'directory' && !entry.name.startsWith('.')) {
+                        const children = await getFilesRecursively(entry, itemPath);
+                        tree.push({ handle: entry, name: entry.name, path: itemPath, kind: 'directory', children });
+                    } else if (entry.kind === 'file' && (entry.name.endsWith('.yaml') || entry.name.endsWith('.yml'))) {
+                        tree.push({ handle: entry, name: entry.name, path: itemPath, kind: 'file' });
+                    }
+                }
+                setFileTree(sortTree(tree));
+            };
+
+            const handleFileClick = async (fileNode) => {
+                if (!openFiles.find(f => f.path === fileNode.path)) {
+                    try {
+                        const fileData = await fileNode.handle.getFile();
+                        const content = await fileData.text();
+                        setOpenFiles(prev => [...prev, { ...fileNode, content, isDirty: false }]);
+                    } catch(e) {
+                        showAlert("Error reading file: " + e.message);
+                        return;
+                    }
+                }
+                setActivePath(fileNode.path);
+            };
+
+            const handleOpenFileByName = (name) => {
+                const findFile = (nodes) => {
+                    for (const n of nodes) {
+                        if (n.kind === 'file' && (n.name === name || n.name === name + '.yaml' || n.name === name + '.yml')) return n;
+                        if (n.kind === 'directory') {
+                            const found = findFile(n.children);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                };
+
+                const foundNode = findFile(fileTree);
+                if (foundNode) {
+                    handleFileClick(foundNode);
+                } else {
+                    showAlert(`Could not find a file named "${name}.yaml" in the loaded project tree.`);
+                }
+            };
+
+            const handleCreateFile = (dirNode) => {
+                showPrompt(`Enter new file name in ${dirNode.name} (e.g. config.yaml):`, async (name) => {
+                    if(!name) return;
+                    let fileName = name.endsWith('.yaml') || name.endsWith('.yml') ? name : name + '.yaml';
+                    try {
+                        const newHandle = await dirNode.handle.getFileHandle(fileName, { create: true });
+                        const writable = await newHandle.createWritable();
+                        await writable.write("");
+                        await writable.close();
+                        await refreshTree();
+                    } catch(e) {
+                        showAlert("Error creating file: " + e.message);
+                    }
+                });
+            };
+
+            const handleCreateTemplate = (dirNode) => {
+                setModals(m => ({ ...m, template: { dirNode, type: 'cog', fileName: '' } }));
+            };
+
+            const handleCreateTemplateSubmit = async () => {
+                const { dirNode, type, fileName } = modals.template;
+                if(!fileName) return;
+
+                let finalName = fileName.endsWith('.yaml') || fileName.endsWith('.yml') ? fileName : fileName + '.yaml';
+
+                try {
+                    const newHandle = await dirNode.handle.getFileHandle(finalName, { create: true });
+                    const writable = await newHandle.createWritable();
+                    await writable.write(TEMPLATES[type] || "");
+                    await writable.close();
+                    await refreshTree();
+                    setModals(m => ({ ...m, template: null }));
+                } catch(e) {
+                    showAlert("Error creating template: " + e.message);
+                }
+            };
+
+            const updateContent = (path, newContent) => {
+                setOpenFiles(prev => prev.map(f => f.path === path ? { ...f, content: newContent, isDirty: true } : f));
+            };
+
+            const saveFile = async (fileToSave) => {
+                try {
+                    const writable = await fileToSave.handle.createWritable();
+                    await writable.write(fileToSave.content);
+                    await writable.close();
+                    setOpenFiles(prev => prev.map(f => f.path === fileToSave.path ? { ...f, isDirty: false } : f));
+                } catch(e) {
+                    showAlert("Save failed: " + e.message);
+                }
+            };
+
+            const closeTab = (path, e) => {
+                e.stopPropagation();
+                const file = openFiles.find(f => f.path === path);
+
+                const performClose = () => {
+                    setOpenFiles(prev => prev.filter(f => f.path !== path));
+                    if (activePath === path) {
+                        const remaining = openFiles.filter(f => f.path !== path);
+                        setActivePath(remaining.length > 0 ? remaining[remaining.length - 1].path : null);
+                    }
+                };
+
+                if (file && file.isDirty) {
+                    showConfirm(`You have unsaved changes in ${file.name}. Close anyway and lose changes?`, performClose);
+                } else {
+                    performClose();
+                }
+            };
+
+            if (!supported) {
+                return (
+                    <div className="flex h-screen items-center justify-center bg-[#15171e] text-white">
+                        <div className="max-w-md p-8 bg-[#1c1e26] rounded-xl shadow-lg text-center border border-[#2a2d39]">
+                            <div className="text-red-400 mb-6 flex justify-center"><CloseIcon className="w-12 h-12" /></div>
+                            <h1 className="text-2xl font-extrabold mb-4 tracking-tight">Browser Not Supported</h1>
+                            <p className="text-gray-400 leading-relaxed font-medium text-sm">The Visual Config Editor uses the Native File System API to let you directly edit AgentForge configs locally without needing a server. <br/><br/>Please open this file in <b>Google Chrome</b>, <b>Microsoft Edge</b>, or <b>Opera</b>.</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (!dirHandle) {
+                return (
+                    <div className="flex h-screen items-center justify-center bg-[#15171e] text-white">
+                        <div className="relative max-w-lg p-10 bg-[#1c1e26] rounded-xl shadow-xl text-center border border-[#2a2d39]">
+                            <div className="mb-6 flex justify-center">
+                                <div className="w-20 h-20 bg-[#9BD65E]/10 rounded-lg flex items-center justify-center border border-[#9BD65E]/20">
+                                    <AgentForgeIcon className="w-12 h-12 text-[#9BD65E]" />
+                                </div>
+                            </div>
+                            <h1 className="text-3xl font-extrabold mb-3 text-gray-100 tracking-tight">AgentForge Editor</h1>
+                            <p className="text-gray-400 mb-8 text-[14px] max-w-[300px] mx-auto leading-relaxed font-medium">Visual configuration editor for prompts, agents, cogs, and tools.</p>
+                            <button
+                                onClick={loadDirectory}
+                                className="bg-[#c68b5d] hover:bg-[#b57e54] text-white font-bold py-3.5 px-6 rounded-md transition-colors flex items-center gap-2.5 mx-auto text-[15px]"
+                            >
+                                <FolderIcon className="w-5 h-5" /> Open Project Directory
+                            </button>
+                            <div className="mt-8 pt-6 border-t border-[#2a2d39]">
+                                <h3 className="text-[11px] uppercase tracking-widest font-bold text-[#9BD65E] mb-2">Browser Security Notice</h3>
+                                <p className="text-[12px] text-gray-500 font-medium leading-relaxed max-w-[360px] mx-auto">
+                                    Browsers prohibit automatic local file access. Clicking the button above will prompt you to select your AgentForge project root folder.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            const activeFile = openFiles.find(f => f.path === activePath);
+
+            return (
+                <div className="flex h-screen bg-[#15171e] text-gray-200 overflow-hidden font-sans">
+                    {/* Modals */}
+                    {modals.alert && (
+                        <Modal title="Notice" onClose={() => setModals(m => ({ ...m, alert: null }))}>
+                            <p className="text-gray-300 mb-5 font-medium text-[13px]">{modals.alert.message}</p>
+                            <div className="flex justify-end">
+                                <button onClick={() => setModals(m => ({ ...m, alert: null }))} className="px-5 py-2 bg-[#c68b5d] hover:bg-[#b57e54] text-white rounded-md font-bold text-[13px] transition-colors">OK</button>
+                            </div>
+                        </Modal>
+                    )}
+                    {modals.confirm && (
+                        <Modal title="Confirmation Required" onClose={modals.confirm.onCancel}>
+                            <p className="text-gray-300 mb-5 font-medium text-[13px]">{modals.confirm.message}</p>
+                            <div className="flex justify-end gap-2.5">
+                                <button onClick={modals.confirm.onCancel} className="px-4 py-2 bg-[#2a2d39] hover:bg-[#3b3e4a] text-white rounded-md font-bold text-[13px] transition-colors">Cancel</button>
+                                <button onClick={() => { modals.confirm.onConfirm(); setModals(m => ({ ...m, confirm: null })); }} className="px-4 py-2 bg-[#c68b5d] hover:bg-[#b57e54] text-white rounded-md font-bold text-[13px] transition-colors">Confirm</button>
+                            </div>
+                        </Modal>
+                    )}
+                    {modals.prompt && (
+                        <Modal title="Input Required" onClose={modals.prompt.onCancel}>
+                            <p className="text-gray-300 mb-3 text-[13px] font-medium">{modals.prompt.message}</p>
+                            <input
+                                autoFocus
+                                type="text"
+                                className="w-full bg-[#121419] border border-[#2a2d39] rounded-md p-2.5 text-white mb-5 focus:border-[#9BD65E] outline-none transition-colors text-[13px]"
+                                value={modals.prompt.value}
+                                onChange={e => setModals(m => ({ ...m, prompt: { ...m.prompt, value: e.target.value } }))}
+                                onKeyDown={e => { if (e.key === 'Enter') { modals.prompt.onConfirm(modals.prompt.value); setModals(m => ({ ...m, prompt: null })); } }}
+                            />
+                            <div className="flex justify-end gap-2.5">
+                                <button onClick={modals.prompt.onCancel} className="px-4 py-2 bg-[#2a2d39] hover:bg-[#3b3e4a] text-white rounded-md font-bold text-[13px] transition-colors">Cancel</button>
+                                <button onClick={() => { modals.prompt.onConfirm(modals.prompt.value); setModals(m => ({ ...m, prompt: null })); }} className="px-4 py-2 bg-[#c68b5d] hover:bg-[#b57e54] text-white rounded-md font-bold text-[13px] transition-colors">Submit</button>
+                            </div>
+                        </Modal>
+                    )}
+                    {modals.template && (
+                        <Modal title={`Create in /${modals.template.dirNode.name}`} onClose={() => setModals(m => ({ ...m, template: null }))}>
+                            <p className="text-gray-400 mb-4 text-[12px] font-medium leading-relaxed">Select a template configuration type and specify the filename. It will be pre-filled with example YAML.</p>
+
+                            <div className="mb-4">
+                                <label className="block text-[10px] font-bold text-[#9BD65E] uppercase tracking-wider mb-1.5">Template Type</label>
+                                <select
+                                    className="w-full bg-[#121419] border border-[#2a2d39] rounded-md p-2.5 text-white focus:border-[#9BD65E] outline-none transition-colors text-[13px] font-medium"
+                                    value={modals.template.type}
+                                    onChange={e => setModals(m => ({ ...m, template: { ...m.template, type: e.target.value } }))}
+                                >
+                                    <option value="cog">Cog Workflow</option>
+                                    <option value="prompt">Agent Prompt</option>
+                                    <option value="tool">Tool / Action</option>
+                                    <option value="persona">Persona</option>
+                                </select>
+                            </div>
+
+                            <div className="mb-6">
+                                <label className="block text-[10px] font-bold text-[#9BD65E] uppercase tracking-wider mb-1.5">File Name</label>
+                                <input
+                                    autoFocus
+                                    type="text"
+                                    placeholder="e.g. my_new_config.yaml"
+                                    className="w-full bg-[#121419] border border-[#2a2d39] rounded-md p-2.5 text-white focus:border-[#9BD65E] outline-none transition-colors font-mono text-[13px]"
+                                    value={modals.template.fileName}
+                                    onChange={e => setModals(m => ({ ...m, template: { ...m.template, fileName: e.target.value } }))}
+                                    onKeyDown={e => { if (e.key === 'Enter') handleCreateTemplateSubmit(); }}
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-2.5">
+                                <button onClick={() => setModals(m => ({ ...m, template: null }))} className="px-4 py-2 bg-[#2a2d39] hover:bg-[#3b3e4a] text-white rounded-md font-bold text-[13px] transition-colors">Cancel</button>
+                                <button onClick={handleCreateTemplateSubmit} className="px-4 py-2 bg-[#c68b5d] hover:bg-[#b57e54] text-white rounded-md font-bold text-[13px] transition-colors">Create File</button>
+                            </div>
+                        </Modal>
+                    )}
+
+                    {/* Sidebar */}
+                    <div className="w-72 flex-shrink-0 bg-[#1a1c24] border-r border-[#2a2d39] flex flex-col z-20">
+                        <div className="p-4 border-b border-[#2a2d39] flex items-center justify-between bg-[#15171e]">
+                            <div className="flex items-center gap-2.5 font-extrabold text-white tracking-wide text-[15px]">
+                                <AgentForgeIcon className="w-6 h-6 text-[#9BD65E]" />
+                                <span className="truncate">AgentForge</span>
+                            </div>
+                            <button onClick={() => refreshTree()} className="text-gray-500 hover:text-[#9BD65E] p-1.5 rounded-md hover:bg-[#1c1e26] transition-colors shrink-0" title="Refresh Explorer">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            </button>
+                        </div>
+                        <div className="flex-grow overflow-y-auto overflow-x-hidden py-3 px-2 custom-scrollbar">
+                            <FileTree tree={fileTree} onFileClick={handleFileClick} onCreateFile={handleCreateFile} onCreateTemplate={handleCreateTemplate} />
+                        </div>
+                    </div>
+
+                    {/* Main Workspace Area */}
+                    <div className="flex-grow flex flex-col min-w-0 overflow-hidden bg-[#15171e] relative">
+                        {/* Tab Bar */}
+                        {openFiles.length > 0 && (
+                            <div className="flex bg-[#1a1c24] border-b border-[#2a2d39] overflow-x-auto overflow-y-hidden shrink-0 custom-scrollbar z-10 pt-1.5 px-2 gap-1">
+                                {openFiles.map(file => (
+                                    <div
+                                        key={file.path}
+                                        onClick={() => setActivePath(file.path)}
+                                        className={`flex items-center gap-1.5 px-4 py-2 rounded-t-md cursor-pointer text-[12px] font-bold whitespace-nowrap min-w-min transition-all group ${activePath === file.path ? 'bg-[#15171e] text-[#9BD65E] border-t-2 border-t-[#9BD65E] border-x border-[#2a2d39] relative top-[1px]' : 'bg-[#1c1e26] text-gray-500 hover:bg-[#252833] hover:text-gray-300 border-t-2 border-t-transparent'}`}
+                                    >
+                                        <FileTextIcon className="w-3.5 h-3.5" />
+                                        {file.name}
+                                        {file.isDirty && <span className="w-1.5 h-1.5 rounded-full bg-[#c68b5d] ml-1.5"></span>}
+                                        <button
+                                            onClick={(e) => closeTab(file.path, e)}
+                                            className={`ml-2 p-0.5 rounded transition-colors ${activePath === file.path ? 'text-gray-400 hover:bg-[#2a2d39] hover:text-white' : 'text-gray-600 hover:bg-[#2a2d39] hover:text-gray-300 opacity-0 group-hover:opacity-100'}`}
+                                        >
+                                            <CloseIcon className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Active Editor */}
+                        <div className="flex-grow relative min-h-0">
+                            <EditorPane
+                                activeFile={activeFile}
+                                onUpdateContent={updateContent}
+                                onSave={saveFile}
+                                showPrompt={showPrompt}
+                                onOpenFileByName={handleOpenFileByName}
+                            />
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
