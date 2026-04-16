@@ -138,11 +138,7 @@ class Memory:
             history = self.memory.query_storage(collection_name=collection_name, query=query, num_results=query_size)
             formatted_history = self.parser.format_user_specific_history_entries(history)
         else:
-            qsize = min(collection_size, query_size)  # Determine the number of messages to retrieve
-            start_id = collection_size - qsize + 1  # Calculate the starting 'id' to get the last 'qsize' messages
-            filters = {"id": {"$gte": start_id}}  # Retrieve messages with 'id' greater than or equal to 'start_id'
-
-            history = self.memory.load_collection(collection_name=collection_name, where=filters)
+            history = self.memory.get_last_x_entries(collection_name=collection_name, x=query_size)
             formatted_history = self.parser.format_general_history_entries(history)
 
 
