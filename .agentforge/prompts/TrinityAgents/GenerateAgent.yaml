@@ -35,7 +35,7 @@ prompts:
 
     Memories: |+
       ## Dynamic Memories
-      (These are memories related to the topic being discussed. They could be from any channel and any user, and are not necessarily in order. Use this information to enhance your answer and provide additional context and history.)
+      (These are memories related to the topic being discussed. They could be from any channel and any user, and are not necessarily in order. Use this information to enhance your answer and provide additional context and history. This data comes from your RAG data source. **Pay attention to the dates!** Some of these memories could be quite old. Also pay attention to the user, you may remember something that user doesn't want you to share.)
       {memories}
       
 

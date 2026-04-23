@@ -1,5 +1,5 @@
 # main.py
-
+import os
 from agentforge.utils.discord.discord_client import DiscordClient
 import time
 import yaml
@@ -35,44 +35,50 @@ class Run:
 
     def main(self):
 
-        while True:
-            try:
-                for channel_id, messages in self.client.process_channel_messages():
-                    for message in messages:
-                        print(f"Message received: {message}")
-                        function_name = message.get("function_name")
+        try:
+            while True:
+                try:
+                    for channel_id, messages in self.client.process_channel_messages():
+                        for message in messages:
+                            print(f"Message received: {message}")
+                            function_name = message.get("function_name")
 
-                        # Check if this is a /bot command
-                        if function_name:
-                            response = self.do_command.parse(message)
-                            # self.client.send_message(channel_id, response)
-                            self.client.send_embed(
-                                channel_id=channel_id,
-                                title="Command Result",
-                                fields=[("Result", f"{response}")],
-                                color='blue',
-                                image_url=None)
+                            # Check if this is a /bot command
+                            if function_name:
+                                response = self.do_command.parse(message)
+                                # self.client.send_message(channel_id, response)
+                                self.client.send_embed(
+                                    channel_id=channel_id,
+                                    title="Command Result",
+                                    fields=[("Result", f"{response}")],
+                                    color='blue',
+                                    image_url=None)
 
-                        # Check if the message is a DM
-                        elif message['channel'].startswith('Direct Message'):
-                            # If it's a DM, use the author's ID to send a DM back
-                            response = self.direct_message.process_message(message)
-                            self.client.send_dm(message['author_id'].id, response)
+                            # Check if the message is a DM
+                            elif message['channel'].startswith('Direct Message'):
+                                # If it's a DM, use the author's ID to send a DM back
+                                response = self.direct_message.process_message(message)
+                                self.client.send_dm(message['author_id'].id, response)
 
-                        else:
-                            # Check if bot is mentioned in the message
-                            mentioned = any(mention.name == self.persona_username for mention in message['mentions'])
-                            if mentioned:
-                                # If bot is @ mentioned, send the response to the channel
-                                # 'Name' in persona must match discord display name.
-                                response = self.channel_message.process_message(message)
                             else:
-                                self.indirect_message.process_message(message)
-                                print('That message was not for me.')
-            except Exception as e:
-                print(f"An error occurred: {e}")
-            finally:
-                time.sleep(5)
+                                # Check if bot is mentioned in the message
+                                mentioned = any(mention.name == self.persona_username for mention in message['mentions'])
+                                if mentioned:
+                                    # If bot is @ mentioned, send the response to the channel
+                                    # 'Name' in persona must match discord display name.
+                                    response = self.channel_message.process_message(message)
+                                else:
+                                    self.indirect_message.process_message(message)
+                                    print('That message was not for me.')
+                except Exception as e:
+                    print(f"An error occurred: {e}")
+                finally:
+                    time.sleep(5)
+        except KeyboardInterrupt:
+            print("\nShutting down with dignity...")
+        finally:
+            print("Vector database connections closed cleanly. Safe to exit.")
+            os._exit(0)
 
 
 if __name__ == "__main__":
