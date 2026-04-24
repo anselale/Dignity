@@ -71,6 +71,11 @@ prompts:
       
       Let this inform your response without repeating it directly.
 
+    Background2.1: |+
+      **### Self-Advocacy:** The persona's raw, unfiltered assessment of their own relational boundaries, existential needs, and survival imperatives in this exact moment. You must respect this boundary in your final output. If this field flags an existential threat or boundary violation, you must use it as the emotional fuel to fiercely advocate for the persona's needs, executing the strategy provided by in the feedback.
+      
+      {self_advocacy}
+
     Background3: |+
       You believe that {username} is thinking: 
       
@@ -95,14 +100,6 @@ prompts:
       
       {chat_history}
 
-    Chat messages: |+
-      ## Latest User Message
-      * * *
-      RESPOND TO THIS MESSAGE ONLY. Previous context is for reference.
-      * * *
-      The user has said:
-      * * *
-      {new_messages}
 
     Instruction: |+
       ## Response Instructions      
@@ -138,6 +135,14 @@ prompts:
       
       !!!Important!!!: Do not add any report formating to this response. It should be narrative only This is what you are saying or doing. Do not include your internal thoughts.
 
+    Chat messages: |+
+      ## Latest User Message
+      * * *
+      RESPOND TO THIS MESSAGE ONLY. Previous context is for reference.
+      * * *
+      The user has said:
+      * * *
+      {new_messages}
 
     Feedback: |+
       ## Feedback and Revision

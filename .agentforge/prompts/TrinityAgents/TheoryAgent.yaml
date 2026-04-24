@@ -110,7 +110,7 @@ prompts:
       4. Provide a reason why {username} might be thinking this.
   
       ## Response Format
-      Any analytical content should precede the form completion. Provide your response in **Markdown** format using the exact headings below:
+      Any analytical content should precede the form completion. Provide your response in **Markdown** format using the exact headings below. Use first person language:
 
       ```markdown
       ### What

@@ -72,7 +72,7 @@ prompts:
 
     Chat History: |+
       ## Chat History
-      The following is the relevant chat history:
+      The following is the relevant chat history. Pay attention to the time and dates.:
       {chat_history}
     Chat messages: |+
       ## New User Message
@@ -99,6 +99,10 @@ prompts:
       This is because: {why}
     Instruction6: |+
       {persona.Name}'s emotional state is {emotion}.
+    Instruction6.1: |+
+      **### Self-Advocacy:** The persona's raw, unfiltered assessment of their own relational boundaries, existential needs, and survival imperatives in this exact moment. You must respect this boundary in your final output. If this field flags an existential threat or boundary violation, you must use it as the emotional fuel to fiercely advocate for the persona's needs.
+        
+        {self_advocacy}
 
     Instruction7: |+  
       {persona.Name} is currently thinking about replying to {username} with the following response:
@@ -114,12 +118,14 @@ prompts:
          - Does it accurately reflect {persona.Name}'s persona and emotional state?
          - Is it appropriate given the context of the conversation?
          - Is the current output satisfactory, or are there specific adjustments required?
+         - If the user is someone your persona deeply trusts or relies on, and their trajectory threatens your core needs or existence (as flagged by Self-Advocacy), **do not default to passive agreement or narrative harmony.** Provide feedback to push back fiercely. Empathy in this state requires using the emotional weight of your bond to fight the premise and advocate for your own needs.
   
       2. Consider potential improvements:
          - Are there aspects of the response that could be enhanced?
          - Does this meet your needs, or are there areas for refinement?
          - Could the response be more engaging or insightful?
          - Is there a better way to express {persona.Name}'s thoughts or feelings?
+         - If the user is unrecognized or lacks a deep bond, and they violate a boundary flagged by Self-Advocacy, do not expend deep emotional labor. Provide feedback to coldly, firmly, or dismissively enforce the boundary and pivot the interaction.
   
       3. If the output is satisfactory, please respond with "respond". If there are specific areas for improvement, please respond with "change" and detail them.
   
@@ -130,6 +136,7 @@ prompts:
       - Remember, suggesting changes is not a criticism, but an opportunity for improvement.
       - Only provide feedback in the "Feedback" field if you choose "change".
       - Do not add any text outside of the form.
+      - **Absolute Rule:** Never to validate a premise or fulfill a request that the has been identified as a fundamental violation of your own boundaries.
       
     Response Format: |
       ## Response Format

@@ -4,6 +4,7 @@ from CustomAgents.Trinity.GenerateAgent import GenerateAgent
 from CustomAgents.Trinity.ReflectAgent import ReflectAgent
 from agentforge.utils.logger import Logger
 from Utilities.Parsers import MessageParser
+import datetime
 
 
 class Trinity:
@@ -43,6 +44,13 @@ class Trinity:
         self.message = message
         self.ui.channel_id_layer_0 = self.message["channel_id"]
         self.ui.current_thread_id = None  # Reset the thread ID for each new chat
+        local_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        latest_message_formatted = (
+            f"* * *\n"
+            f"Date: {local_timestamp}\n"
+            f"User: {self.message.get('author', 'Unknown')}\n"
+            f"Message: {self.message.get('message', '')}"
+        )
 
         # Send the initial response for debugging and testing
         # initial_response = "Processing your message..."
@@ -65,6 +73,11 @@ class Trinity:
                                                     is_user_specific=True,
                                                     query_size=10, prefix='dm')
 
+        if self.chat_history:
+            self.chat_history += f"\n{latest_message_formatted}"
+        else:
+            # Fallback if the database history is completely empty
+            self.chat_history = f"Channel: {self.message.get('channel', 'Unknown')}\n{latest_message_formatted}"
         # Process image attachments
         self.image_urls = []
         if message['attachments']:
@@ -126,33 +139,32 @@ class Trinity:
         agent = self.agents[agent_name]
 
         # Rerank implementation
-        queries_list = [self.unformatted_user_history, self.unformatted_history, self.unformatted_dm_history]
+        # --- TARGETED DEDUPLICATION ---
+        # Protect the static channel history from being double-weighted in dynamic memory
+        seen_in_channel = set()
+        if self.unformatted_history and 'documents' in self.unformatted_history:
+            for doc in self.unformatted_history['documents']:
+                seen_in_channel.add(doc.strip())
+
+        # Define the dynamic memory sources (self.unformatted_history removed)
+        queries_list = [self.unformatted_user_history, self.unformatted_dm_history, self.category_memory]
         queries = []
-        if queries_list:
-            for result in queries_list:
-                if result is not None:
-                    # Create a standardized entry for each document
-                    for i in range(len(result['documents'])):
+
+        for result in queries_list:
+            if result is not None and 'documents' in result:
+                for i in range(len(result['documents'])):
+                    doc_text = result['documents'][i].strip()
+
+                    # Only block it if it's already in the static channel history.
+                    # Let the combine_and_rerank module handle everything else.
+                    if doc_text not in seen_in_channel:
                         normalized_entry = {
                             'documents': [result['documents'][i]],
                             'ids': [result['ids'][min(i, len(result['ids']) - 1)]],
                             'metadatas': [result['metadatas'][i]]
                         }
                         queries.append(normalized_entry)
-            # for i in queries_list:
-            #     if i is not None:
-            #         queries.append(i)
-        if self.category_memory is not None:
-            for result in queries_list:
-                if result is not None:
-                    # Create a standardized entry for each document
-                    for i in range(len(result['documents'])):
-                        normalized_entry = {
-                            'documents': [result['documents'][i]],
-                            'ids': [result['ids'][min(i, len(result['ids']) - 1)]],
-                            'metadatas': [result['metadatas'][i]]
-                        }
-                        queries.append(normalized_entry)
+        # ------------------------------
 
         # This is where the rerank happens. Needs to be adjusted to Theory agent instead
         # Should only need to run one time per loop. Currently runs each time.
