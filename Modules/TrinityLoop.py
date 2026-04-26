@@ -138,42 +138,42 @@ class Trinity:
         journals = self.memory.get_current_journals()
         agent = self.agents[agent_name]
 
-        # Rerank implementation
-        # --- TARGETED DEDUPLICATION ---
-        # Protect the static channel history from being double-weighted in dynamic memory
-        seen_in_channel = set()
-        if self.unformatted_history and 'documents' in self.unformatted_history:
-            for doc in self.unformatted_history['documents']:
-                seen_in_channel.add(doc.strip())
+        # --- DYNAMIC RERANKING ---
+        if agent_name in ['thought', 'theory']:
 
-        # Define the dynamic memory sources (self.unformatted_history removed)
-        queries_list = [self.unformatted_user_history, self.unformatted_dm_history, self.category_memory]
-        queries = []
+            # 1. Targeted Deduplication (Only build this list if we are reranking)
+            seen_in_channel = set()
+            if self.unformatted_history and 'documents' in self.unformatted_history:
+                for doc in self.unformatted_history['documents']:
+                    seen_in_channel.add(doc.strip())
 
-        for result in queries_list:
-            if result is not None and 'documents' in result:
-                for i in range(len(result['documents'])):
-                    doc_text = result['documents'][i].strip()
+            queries_list = [self.unformatted_user_history, self.unformatted_dm_history, self.category_memory]
+            queries = []
+            for result in queries_list:
+                if result is not None and 'documents' in result:
+                    for i in range(len(result['documents'])):
+                        doc_text = result['documents'][i].strip()
+                        if doc_text not in seen_in_channel:
+                            normalized_entry = {
+                                'documents': [result['documents'][i]],
+                                'ids': [result['ids'][min(i, len(result['ids']) - 1)]],
+                                'metadatas': [result['metadatas'][i]]
+                            }
+                            queries.append(normalized_entry)
 
-                    # Only block it if it's already in the static channel history.
-                    # Let the combine_and_rerank module handle everything else.
-                    if doc_text not in seen_in_channel:
-                        normalized_entry = {
-                            'documents': [result['documents'][i]],
-                            'ids': [result['ids'][min(i, len(result['ids']) - 1)]],
-                            'metadatas': [result['metadatas'][i]]
-                        }
-                        queries.append(normalized_entry)
-        # ------------------------------
+            # 2. Execute Rerank
+            if queries:
+                if agent_name == 'thought':
+                    query = self.message['message']
+                    self.cognition['reranked_memories'] = self.memory.combine_and_rerank(queries, query, 10)
 
-        # This is where the rerank happens. Needs to be adjusted to Theory agent instead
-        # Should only need to run one time per loop. Currently runs each time.
-        if self.cognition['thought']:
-            query = self.cognition['thought']['Inner Thought']
-        else:
-            query = self.message['message']
-        if queries is not None and queries:
-            self.cognition['reranked_memories'] = self.memory.combine_and_rerank(queries, query, 10)
+                elif agent_name == 'theory':
+                    # .get() prevents a fatal crash if the ThoughtAgent hallucinates its JSON output
+                    query = self.cognition['thought'].get('Inner Thought', self.message['message'])
+                    self.cognition['reranked_memories'] = self.memory.combine_and_rerank(queries, query, 10)
+            else:
+                self.cognition['reranked_memories'] = None
+        # -------------------------
 
         # agent.load_additional_data(self.messages, self.chosen_msg_index, self.chat_history,
         #                            self.user_history, memories, self.cognition)

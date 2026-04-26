@@ -52,6 +52,7 @@ class ChatAgent(Agent):
         # self.template_data['memories'] = memories
 
         self.template_data['emotion'] = self.template_data['cognition']['thought'].get('Emotion')
+        self.template_data['self_advocacy'] = self.template_data['cognition']['thought'].get('Self Advocacy')
         self.template_data['reason'] = self.template_data['cognition']['thought'].get('Reason')
         self.template_data['thought'] = self.template_data['cognition']['thought'].get('Inner Thought')
         self.template_data['what'] = self.template_data['cognition']['theory'].get("What", "Unknown.")
